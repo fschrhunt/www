@@ -34,7 +34,9 @@ while comparing builds. Stop the server or use a separate checkout.
 - Contact: test the visual viewport shrinking with a keyboard, including the
   latest message, composer, and review controls staying in view. Test on native
   mobile Safari when available; a simulated viewport is not a keyboard test.
-  Use fictional input, try invalid email and a multiline message,
+  Use fictional input, try a greeting as a name, a conversational introduction,
+  the name override, repeated small talk at different steps, name corrections,
+  back/start-over commands, invalid email, and a multiline message,
   inspect the draft's recipient and encoded body, and check Start over. Do not
   send the test email. Verify the clipboard fallback only when relevant.
 - Favicons: inspect alpha and small-size readability, then switch browser color
@@ -43,3 +45,6 @@ while comparing builds. Stop the server or use a separate checkout.
 Use focused regression tests where behavior warrants them. Copy changes do not
 need tests that assert their wording. Docs-only changes need link and format
 checks, not a production build. Report any verification limits.
+
+Contact name rules have focused regression coverage. Run
+`node --test scripts/contact-rules.test.mjs` on Node 22.18 or newer.

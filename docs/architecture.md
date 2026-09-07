@@ -97,3 +97,20 @@ the album and wrap at either end. The modal stays open and focus stays put while
 photos change. Its frame follows the photo aspect ratio, with Back centered above, navigation
 arrows beside the vertical midpoint, and the count centered below. On narrow
 screens the arrows sit inside the photo edges to leave more room for the image.
+
+Contact name recognition lives in `src/lib/contact-rules.ts`. It handles greetings,
+questions, addresses, and conversational introductions locally, without a model
+or network request. Name guesses are advisory: visitors can use the questioned
+answer anyway. Rejected replies appear in the conversation with normal typing
+pacing. International names and nicknames are accepted. Invalid email replies
+keep the flow on email; the final handoff still prepares a draft rather than
+sending it. Start over clears both the draft and the name override.
+
+Contact conversation memory counts small-talk topics for the current component
+session and varies repeated replies. Whole-reply matching avoids intercepting a
+longer message just because it contains a question. Every third aside returns to
+the pending prompt. Explicit name corrections update the draft in place; `back`
+restores the previous field for editing, and `start over` clears draft and memory.
+The review step has a Back control. If a message matches small talk, its override
+can use that exact reply as the message. No conversation memory is persisted or
+sent to a service.

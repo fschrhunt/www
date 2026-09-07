@@ -1,0 +1,60 @@
+type NameReply = { name: string; reply?: never } | { name?: never; reply: string };
+
+/** Recognize obvious non-name replies, without treating unusual names as invalid. */
+export function readContactName(answer: string): NameReply {
+  const name = answer.trim()
+    .replace(/^(?:(?:hi|hey|hello)[,!]?\s+)?(?:my name is|i['’]m|i am|call me|it['’]s)\s+/iu, "")
+    .trim();
+  if (/https?:\/\/|www\.|[^\s@]+@[^\s@]+\.[^\s@]+/iu.test(answer)) {
+    return { reply: "that's an address. I was hoping for the person who lives behind it. what should I call you?" };
+  }
+  const topic = contactAside(answer);
+  if (topic) return { reply: topic.replies[0] };
+  if (!/\p{L}/u.test(name) || /[?？]/u.test(name) ||
+    /^(?:can you|could you|would you|do you|what is|what's|why is|tell me|ignore (?:all|the|previous))\b/iu.test(name) ||
+    name.split(/\s+/u).length > 6) {
+    return { reply: "I had one job: ask your name. somehow I'm already off-script. what should I call you?" };
+  }
+  return { name };
+}
+
+export type ContactStep = "name" | "email" | "message" | "review";
+export type ChatMemory = Record<string, number>;
+
+const topics = [
+  { key: "day", pattern: /^(?:how(?:'s| is| was| has) your (?:day|morning|afternoon|evening|week|weekend)(?: been| going)?|how(?:'s| is) (?:the day|today) going)$/i,
+    replies: ["pretty quiet. someone just asked how my day was, so things are picking up.", "still sitting here. you've been here for most of it.", "no developments since the last report. I'll keep you posted."] },
+  { key: "activity", pattern: /^(?:what (?:did you do|have you (?:done|been doing)) today|what (?:are you|you) (?:doing|up to)|what(?:'ve| have) you been up to)$/i,
+    replies: ["sat here. moved three dots up and down. a full schedule.", "the dots remain my main responsibility."] },
+  { key: "wellbeing", pattern: /^(?:how are you(?: doing)?|how(?:'s| is) it going|how do you do|what(?:'s| is) up|how(?:'s| is) life|how have you been)$/i,
+    replies: ["a little boxed in, being a contact form. thanks for asking.", "holding up. the rectangle helps."] },
+  { key: "greeting", pattern: /^(?:hi|hey|hello|hiya|yo|good morning|good evening)$/i,
+    replies: ["hey :) nice of you to stop by.", "hello again. I haven't gone anywhere."] },
+  { key: "bot", pattern: /^(?:are you (?:an? )?(?:ai|bot|robot)|is this (?:ai|a bot)|are you chatgpt)$/i,
+    replies: ["just a form with a few prepared lines. the acting budget is zero.", "still a form. this is my entire range."] },
+  { key: "email-purpose", pattern: /^why (?:do you |would you )?(?:need|want|ask for|require) (?:my |an? )?email(?: address)?$/i,
+    replies: ["so Fischer can reply. this stays in your browser until you open and send the email draft.", "a return address, that's all. otherwise the reply has nowhere to go."] },
+];
+
+/** Match whole small-talk replies so a real message containing a question stays intact. */
+export function contactAside(answer: string) {
+  const normalized = answer.trim().replace(/[’]/g, "'").replace(/[?!.]+$/g, "").trim()
+    .replace(/^(?:hi|hey|hello)[,!]?\s+(?=how|what|why|are|is)/i, "");
+  return topics.find(topic => topic.pattern.test(normalized));
+}
+
+/** Vary repeated replies by topic and only occasionally return to the pending question. */
+export function replyToAside(topic: NonNullable<ReturnType<typeof contactAside>>, memory: ChatMemory, step: ContactStep) {
+  const count = memory[topic.key] ?? 0;
+  const turns = memory.turns ?? 0;
+  const prompts = { name: "what should I call you?", email: "what's a good email to reach you at?", message: "whenever you're ready, what's on your mind?", review: "your draft is ready when you are." };
+  return {
+    text: topic.replies[Math.min(count, topic.replies.length - 1)] + (turns % 3 === 0 ? ` ${prompts[step]}` : ""),
+    memory: { ...memory, [topic.key]: count + 1, turns: turns + 1 },
+  };
+}
+
+/** Recognize explicit corrections without interpreting ordinary message prose as a command. */
+export function correctedName(answer: string) {
+  return answer.trim().match(/^(?:actually[, ]+\s*)?(?:call me|my name is|change my name to)\s+(.+)$/iu)?.[1]?.trim();
+}

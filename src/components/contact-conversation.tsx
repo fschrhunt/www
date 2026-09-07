@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
-type Step = "name" | "email" | "message" | "review";
+import { readContactName, contactAside, correctedName, replyToAside, type ChatMemory, type ContactStep as Step } from "@/lib/contact-rules";
 type Message = { from: "fischer" | "visitor"; text: string };
 const welcome: Message = { from: "fischer", text: "hey, glad you’re here :)" };
 const introduction: Message[] = [
@@ -22,6 +22,9 @@ export function ContactConversation() {
   const [typing, setTyping] = useState(true);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [questionedName, setQuestionedName] = useState("");
+  const [asideMessage, setAsideMessage] = useState("");
+  const memory = useRef<ChatMemory>({});
   const timer = useRef<number | undefined>(undefined);
   const thread = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -88,22 +91,55 @@ export function ContactConversation() {
       setError(step === "message" ? "Write a little something first." : "Pop your answer in below.");
       return;
     }
-    if (step === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(answer)) {
-      setError("That email doesn’t look quite right. Try it again?");
-      return;
-    }
+    if (/^(?:start over|restart|reset)[.!]?$/i.test(answer)) { startOver(); return; }
     setError("");
+    setAsideMessage("");
     setMessages(current => [...current, { from: "visitor", text: answer }]);
     setValue("");
     setBusy(true);
     setTyping(true);
+    if (/^(?:back|go back)[.!]?$/i.test(answer)) {
+      goBack();
+      return;
+    }
+    const correction = correctedName(answer);
+    if (step !== "name" && correction) {
+      const result = readContactName(correction);
+      if (result.name !== undefined) {
+        setName(result.name);
+        queueReplies([{ from: "fischer", text: `got it, ${result.name}. name updated. everything else is still here.` }], step);
+      } else {
+        queueReplies([{ from: "fischer", text: "I didn't catch the new name. try 'call me Alex', with your name in place of Alex." }], step);
+      }
+      return;
+    }
+    const topic = contactAside(answer);
+    if (topic) {
+      const response = replyToAside(topic, memory.current, step);
+      memory.current = response.memory;
+      if (step === "name") setQuestionedName(answer);
+      if (step === "message") setAsideMessage(answer);
+      queueReplies([{ from: "fischer", text: response.text }], step);
+      return;
+    }
     let reply: string;
     let next: Step;
     if (step === "name") {
-      setName(answer);
-      reply = `nice to meet you, ${answer}. what’s a good email to reach you at?`;
+      const result = readContactName(answer);
+      if (result.reply !== undefined) {
+        setQuestionedName(answer);
+        queueReplies([{ from: "fischer", text: result.reply }], "name");
+        return;
+      }
+      setQuestionedName("");
+      setName(result.name);
+      reply = `nice to meet you, ${result.name}. what's a good email to reach you at?`;
       next = "email";
     } else if (step === "email") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(answer)) {
+        queueReplies([{ from: "fischer", text: "that email looks a little unfinished. try something like you@example.com. preferably yours." }], "email");
+        return;
+      }
       setEmail(answer);
       reply = "and what’s on your mind? take as much room as you need.";
       next = "message";
@@ -113,6 +149,41 @@ export function ContactConversation() {
       next = "review";
     }
     queueReplies([{ from: "fischer", text: reply }], next);
+  }
+
+  /** Revisit the previous answer, keeping the other draft fields intact. */
+  function goBack() {
+    const previous: Step = step === "review" ? "message" : step === "message" ? "email" : "name";
+    setQuestionedName("");
+    setAsideMessage("");
+    setCopied(false);
+    setError("");
+    setBusy(true);
+    setTyping(true);
+    setValue(previous === "name" ? name : previous === "email" ? email : note);
+    queueReplies([{ from: "fischer", text: step === "name" ? "this is the beginning. very economical tour. what should I call you?" : `sure. let's revisit your ${previous}.` }], previous);
+  }
+
+  /** Preserve a message that happened to match one of the small-talk rules. */
+  function useAsideAsMessage() {
+    if (busy || !asideMessage) return;
+    setNote(asideMessage);
+    setAsideMessage("");
+    setBusy(true);
+    setTyping(true);
+    queueReplies([{ from: "fischer", text: "got it. that's the note. ready for your email app." }], "review");
+  }
+
+  /** Let visitors overrule a name guess without repeating or defending their name. */
+  function useQuestionedName() {
+    if (busy || !questionedName || step !== "name") return;
+    setName(questionedName);
+    setQuestionedName("");
+    setValue("");
+    setError("");
+    setBusy(true);
+    setTyping(true);
+    queueReplies([{ from: "fischer", text: "fair enough. you know your name better than a form does. what's a good email to reach you at?" }], "email");
   }
 
   /** Enter sends a message; Shift+Enter keeps a newline, including during IME composition. */
@@ -136,6 +207,9 @@ export function ContactConversation() {
     setTyping(true);
     setError("");
     setCopied(false);
+    setQuestionedName("");
+    setAsideMessage("");
+    memory.current = {};
     queueReplies([welcome, ...introduction], "name", 900);
   }
 
@@ -166,13 +240,17 @@ export function ContactConversation() {
       {step === "review" ? <div className="contact-handoff">
         <p>Open your email app to review and send it.</p>
         <a href={draft} className="email-draft-button">Open email draft <span aria-hidden="true">↗</span></a>
-        <div className="handoff-options"><button onClick={copyNote} type="button">{copied ? "Copied" : "Copy note"}</button><button onClick={startOver} type="button">Start over</button></div>
+        <div className="handoff-options"><button onClick={copyNote} type="button">{copied ? "Copied" : "Copy note"}</button><button onClick={goBack} type="button">Back</button><button onClick={startOver} type="button">Start over</button></div>
         <span className="sr-only" role="status">{copied ? "Note copied to clipboard." : ""}</span>
       </div> : <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
         {step === "message" ? <textarea ref={textarea} aria-label="Your message" aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :
-          <input ref={input} aria-label={step === "name" ? "Your name" : "Your email"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type={step === "email" ? "email" : "text"} autoComplete={step === "email" ? "email" : "given-name"} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : 254} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
+          <input ref={input} aria-label={step === "name" ? "Your name" : "Your email"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type="text" inputMode="text" autoComplete={step === "email" ? "email" : "given-name"} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : 254} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
       </form>}
+      {step === "name" && questionedName && !busy && <div className="handoff-options">
+        <button type="button" onClick={useQuestionedName}>Use that as my name</button>
+      </div>}
+      {step === "message" && asideMessage && !busy && <div className="handoff-options"><button type="button" onClick={useAsideAsMessage}>Use that as my message</button></div>}
       {error && <p className="reply-error" id="reply-error" role="alert">{error}</p>}
     </div>
   </>;
