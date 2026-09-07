@@ -42,9 +42,9 @@ the accepted homepage. Read the agent kit for creative decisions.
   selecting the final section at the page end. After 100px of scroll, the article
   title fades into the rail and acts as a back-to-top button. Articles without
   subheadings show Index alone. The outline is hidden at 1080px and below.
-- `page-link.tsx` uses Next's navigation event to accelerate the current document
-  back to the top before changing routes. Reduced motion, modified clicks,
-  external links, and fragment links keep normal navigation behavior.
+- Page links use Next's normal navigation directly, without scrolling the old
+  page first. Only the article title's dedicated back-to-top button uses the
+  animated scroll helper.
 
 - `about-passage.tsx` opens an inline biography from an About button
   with a curved arrow leading from the label downward into the passage.
@@ -103,7 +103,7 @@ questions, addresses, and conversational introductions locally, without a model
 or network request. Name guesses are advisory: visitors can use the questioned
 answer anyway. Rejected replies appear in the conversation with normal typing
 pacing. International names and nicknames are accepted. Invalid email replies
-keep the flow on email; the final handoff still prepares a draft rather than
+keep the flow on email unless the visitor explicitly chooses the override; the final handoff still prepares a draft rather than
 sending it. Start over clears both the draft and the name override.
 
 Contact conversation memory counts small-talk topics for the current component
@@ -114,3 +114,9 @@ restores the previous field for editing, and `start over` clears draft and memor
 The review step has a Back control. If a message matches small talk, its override
 can use that exact reply as the message. No conversation memory is persisted or
 sent to a service.
+
+Contact overrides use the same handwriting as About with a pen-drawn square
+bracket. They attach to the questioned visitor message and scroll with it. On wide
+screens the annotation sits beside the message on one tilted line; on phones
+it wraps beneath the message within the thread.
+Name, email, and message overrides accept the questioned reply verbatim.

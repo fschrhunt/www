@@ -32,7 +32,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .text-link:focus-visible .link-label::after { transform: scaleX(1); }
 .link-label [data-scrambling] { color: transparent; }
 .link-scramble { position: absolute; top: 0; left: 0; width: max-content; pointer-events: none; white-space: pre; transform-origin: left center; }
-.text-link::after { content: ""; position: absolute; display: block; width: 11px; height: 11px; top: 4px; left: calc(100% + 5px); background: var(--ink); mask: url(/link-arrow.svg) center / contain no-repeat; opacity: 0; transform: translate(-3px,3px); transform-origin: center; pointer-events: none; transition: opacity 240ms, transform 420ms cubic-bezier(.22,1,.36,1); }
+.text-link::after { content: ""; position: absolute; display: block; width: 12px; height: 12px; top: 4px; left: calc(100% + 5px); background: var(--ink); mask: url(/link-arrow.svg) center / contain no-repeat; opacity: 0; transform: translate(-3px,3px); transform-origin: center; pointer-events: none; transition: opacity 240ms, transform 420ms cubic-bezier(.22,1,.36,1); }
 .text-link:focus-visible::after { opacity: .8; transform: translate(0); }
 .skip-link { position: fixed; top: 12px; left: 12px; z-index: 20; background: white; padding: 8px 14px; transform: translateY(-160%); }
 .skip-link:focus { transform: none; }
@@ -359,3 +359,22 @@ button.showcase-bar { min-height: 44px; }
   .bro-photo-frame .bro-photo-prev, .bro-photo-frame .bro-photo-next { color: white; text-shadow: 0 1px 5px #000, 0 0 12px #000; }
 }
 @keyframes photo-viewer-appear { from { opacity: 0; } to { opacity: 1; } }
+
+/* Attach the handwritten override to the questioned message, inside the scroll area. */
+.message-row[data-override="true"] { position: relative; }
+.contact-override { display: flex; align-items: center; gap: 11px; min-height: 44px; padding: 3px 8px; border: 0; background: none; color: #666; font-family: var(--font-contact-annotation), cursive; font-size: 21px; line-height: 1.1; font-feature-settings: "ss03" on; text-align: left; transform: rotate(-5deg); }
+.contact-override span { white-space: nowrap; }
+.contact-override svg { flex-shrink: 0; transform: rotate(5deg); }
+.contact-override path { stroke-dasharray: 1; animation: annotation-draw 450ms 100ms ease both; }
+.contact-override:hover { color: #262626; }
+.contact-override:focus-visible { outline: none; }
+.contact-override:focus-visible span { text-decoration: underline; text-underline-offset: 4px; }
+@media (min-width: 1100px) {
+  .conversation-page { width: 1056px; padding-inline: 308px; }
+  .conversation-thread { width: calc(100% + 286px); padding-right: 283px; }
+  .contact-override { position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%) rotate(-5deg); }
+}
+@media (max-width: 1099px) {
+  .message-row[data-override="true"] { flex-wrap: wrap; }
+  .contact-override { margin: 4px 0 8px auto; font-size: 19px; }
+}

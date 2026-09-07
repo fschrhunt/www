@@ -1,7 +1,7 @@
 import Image from "next/image";
 import siteUpdate from "@/site-updated.json";
 import { AboutPassage } from "@/components/about-passage";
-import { PageLink as Link } from "@/components/page-link";
+import Link from "next/link";
 import { SocialHub } from "@/components/social-hub";
 import { ScrambleLink } from "@/components/scramble-link";
 

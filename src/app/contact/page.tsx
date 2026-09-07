@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { PageLink as Link } from "@/components/page-link";
+import Link from "next/link";
 import { ReturnArrow } from "@/components/social-hub";
 import { ContactConversation } from "@/components/contact-conversation";
 import { ContactViewport } from "@/components/contact-viewport";

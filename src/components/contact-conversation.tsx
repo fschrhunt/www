@@ -1,8 +1,12 @@
 "use client";
 
+import localFont from "next/font/local";
+
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { readContactName, contactAside, correctedName, replyToAside, type ChatMemory, type ContactStep as Step } from "@/lib/contact-rules";
+const handwriting = localFont({ src: "../app/fonts/benji-script.woff", variable: "--font-contact-annotation", display: "swap" });
+
 type Message = { from: "fischer" | "visitor"; text: string };
 const welcome: Message = { from: "fischer", text: "hey, glad you’re here :)" };
 const introduction: Message[] = [
@@ -23,6 +27,7 @@ export function ContactConversation() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [questionedName, setQuestionedName] = useState("");
+  const [questionedEmail, setQuestionedEmail] = useState("");
   const [asideMessage, setAsideMessage] = useState("");
   const memory = useRef<ChatMemory>({});
   const timer = useRef<number | undefined>(undefined);
@@ -118,6 +123,7 @@ export function ContactConversation() {
       const response = replyToAside(topic, memory.current, step);
       memory.current = response.memory;
       if (step === "name") setQuestionedName(answer);
+      if (step === "email") setQuestionedEmail(answer);
       if (step === "message") setAsideMessage(answer);
       queueReplies([{ from: "fischer", text: response.text }], step);
       return;
@@ -137,9 +143,11 @@ export function ContactConversation() {
       next = "email";
     } else if (step === "email") {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(answer)) {
+        setQuestionedEmail(answer);
         queueReplies([{ from: "fischer", text: "that email looks a little unfinished. try something like you@example.com. preferably yours." }], "email");
         return;
       }
+      setQuestionedEmail("");
       setEmail(answer);
       reply = "and what’s on your mind? take as much room as you need.";
       next = "message";
@@ -155,6 +163,7 @@ export function ContactConversation() {
   function goBack() {
     const previous: Step = step === "review" ? "message" : step === "message" ? "email" : "name";
     setQuestionedName("");
+    setQuestionedEmail("");
     setAsideMessage("");
     setCopied(false);
     setError("");
@@ -186,6 +195,18 @@ export function ContactConversation() {
     queueReplies([{ from: "fischer", text: "fair enough. you know your name better than a form does. what's a good email to reach you at?" }], "email");
   }
 
+  /** Use the visitor's chosen address verbatim in the draft after an explicit override. */
+  function useQuestionedEmail() {
+    if (busy || !questionedEmail || step !== "email") return;
+    setEmail(questionedEmail);
+    setQuestionedEmail("");
+    setValue("");
+    setError("");
+    setBusy(true);
+    setTyping(true);
+    queueReplies([{ from: "fischer", text: "alright, I'll use it as written. what's on your mind?" }], "message");
+  }
+
   /** Enter sends a message; Shift+Enter keeps a newline, including during IME composition. */
   function messageKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -208,6 +229,7 @@ export function ContactConversation() {
     setError("");
     setCopied(false);
     setQuestionedName("");
+    setQuestionedEmail("");
     setAsideMessage("");
     memory.current = {};
     queueReplies([welcome, ...introduction], "name", 900);
@@ -228,15 +250,26 @@ export function ContactConversation() {
     }
   }
 
+  const overrideAnswer = step === "name" ? questionedName : step === "email" ? questionedEmail : step === "message" ? asideMessage : "";
+  const overrideIndex = !busy && overrideAnswer ? messages.findLastIndex(message => message.from === "visitor" && message.text === overrideAnswer) : -1;
+
   return <>
-    <div className="conversation-thread" ref={thread} role="log" aria-label="Your contact note" aria-live="polite" aria-relevant="additions">
-      {messages.map((message, index) => <div key={index} className={`message-row message-${message.from}`}>
+    <div className={`conversation-thread ${handwriting.variable}`} ref={thread} role="log" aria-label="Your contact note" aria-live="polite" aria-relevant="additions">
+      {messages.map((message, index) => <div key={index} className={`message-row message-${message.from}`} data-override={index === overrideIndex}>
         <div className="message-bubble"><span className="sr-only">{message.from === "visitor" ? "You: " : "Fischer’s contact form: "}</span>{message.text}</div>
+        {index === overrideIndex && <button
+        className="contact-override" type="button"
+        onClick={step === "name" ? useQuestionedName : step === "email" ? useQuestionedEmail : useAsideAsMessage}>
+        <svg width="12" height="34" viewBox="0 0 12 34" fill="none" aria-hidden="true">
+          <path pathLength="1" d="M10 2c-3 .5-5 .4-8 1 3 8-1 20 1 28 2 .7 4.5 .2 7 .4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span>use that as my {step}</span>
+      </button>}
       </div>)}
       {typing && <div className="typing-bubble" role="status" aria-label="Next question is coming"><i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" /></div>}
     </div>
 
-    <div className="conversation-bottom">
+    <div className={`conversation-bottom ${handwriting.variable}`}>
       {step === "review" ? <div className="contact-handoff">
         <p>Open your email app to review and send it.</p>
         <a href={draft} className="email-draft-button">Open email draft <span aria-hidden="true">↗</span></a>
@@ -247,10 +280,6 @@ export function ContactConversation() {
           <input ref={input} aria-label={step === "name" ? "Your name" : "Your email"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type="text" inputMode="text" autoComplete={step === "email" ? "email" : "given-name"} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : 254} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
       </form>}
-      {step === "name" && questionedName && !busy && <div className="handoff-options">
-        <button type="button" onClick={useQuestionedName}>Use that as my name</button>
-      </div>}
-      {step === "message" && asideMessage && !busy && <div className="handoff-options"><button type="button" onClick={useAsideAsMessage}>Use that as my message</button></div>}
       {error && <p className="reply-error" id="reply-error" role="alert">{error}</p>}
     </div>
   </>;
