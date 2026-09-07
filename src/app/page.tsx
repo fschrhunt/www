@@ -1,6 +1,7 @@
 import Image from "next/image";
+import siteUpdate from "@/site-updated.json";
 import { AboutPassage } from "@/components/about-passage";
-import Link from "next/link";
+import { PageLink as Link } from "@/components/page-link";
 import { SocialHub } from "@/components/social-hub";
 import { ScrambleLink } from "@/components/scramble-link";
 
@@ -18,7 +19,7 @@ function Portrait() {
   </Link>;
 }
 
-/** A personal letter with an inline About passage, products, notes, and contact hub. */
+/** A personal letter with an inline About passage, products, writings, and contact hub. */
 export default function Home() {
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
@@ -38,9 +39,15 @@ export default function Home() {
         </li>)}
       </ul>
     </section>
-    <section className="products notes" aria-labelledby="notes-heading">
-      <h2 id="notes-heading">Notes</h2>
+    <section className="products notes" aria-labelledby="writings-heading">
+      <h2 id="writings-heading">Writings</h2>
       <ul><li>
+        <ScrambleLink href="/notes/big-bro">big bro</ScrambleLink>
+        <span className="reading-time">2 min read</span>
+      </li><li>
+        <ScrambleLink href="/notes/five-lines">damn you, agents</ScrambleLink>
+        <span className="reading-time">5 min read</span>
+      </li><li>
         <ScrambleLink href="/notes/i-aquired-a-color">I aquired a color!</ScrambleLink>
         <span className="reading-time">1 min read</span>
       </li><li>
@@ -48,7 +55,7 @@ export default function Home() {
         <span className="reading-time">1 min read</span>
       </li></ul>
     </section>
-    <footer className="letter-footer"><a href="https://shedsgns.me/" aria-label="A nod to Shed for the design inspiration">a nod to shed</a><svg className="tiny-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v16M2 10h16M4.35 4.35l11.3 11.3M4.35 15.65l11.3-11.3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg></footer>
+    <footer className="letter-footer"><time dateTime={siteUpdate.updatedAt}>Updated {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(siteUpdate.updatedAt))}</time><svg className="tiny-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v16M2 10h16M4.35 4.35l11.3 11.3M4.35 15.65l11.3-11.3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg></footer>
   </main>
   <SocialHub />
   </>;

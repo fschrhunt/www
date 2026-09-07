@@ -169,12 +169,11 @@ export function ContactConversation() {
         <div className="handoff-options"><button onClick={copyNote} type="button">{copied ? "Copied" : "Copy note"}</button><button onClick={startOver} type="button">Start over</button></div>
         <span className="sr-only" role="status">{copied ? "Note copied to clipboard." : ""}</span>
       </div> : <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
-        {step === "message" ? <textarea ref={textarea} aria-label="Your message" aria-describedby={error ? "reply-error" : "reply-hint"} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :
+        {step === "message" ? <textarea ref={textarea} aria-label="Your message" aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :
           <input ref={input} aria-label={step === "name" ? "Your name" : "Your email"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type={step === "email" ? "email" : "text"} autoComplete={step === "email" ? "email" : "given-name"} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : 254} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
       </form>}
       {error && <p className="reply-error" id="reply-error" role="alert">{error}</p>}
-      <p className="conversation-footnote" id="reply-hint">{step === "message" ? "Enter to reply · Shift + Enter for a new line" : step === "review" ? "Nothing is sent until you send the email." : "A little conversation before the email."}{step !== "review" && <span className="focus-shortcut"> · / to focus</span>}</p>
     </div>
   </>;
 }

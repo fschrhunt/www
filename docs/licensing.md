@@ -16,6 +16,7 @@ license for the full terms.
 The following personal material is not licensed under the AGPL. All rights
 are reserved by Fischer Hunt, subject to applicable law:
 
+- The family photographs in `public/notes/big-bro/`.
 - `public/portrait.png` and its derived portrait artwork in `public/favicon*`
   and `public/safari-pinned-tab.svg`.
 - Fischer's personal prose displayed by `src/app/page.tsx`, the product pages
@@ -39,3 +40,8 @@ licenses. The curved link-arrow graphic in `public/link-arrow.svg` was sourced
 from https://shedsgns.me/assets/arrow.svg; no independent license grant for that
 third-party graphic is asserted here. The repository's AGPL grant covers only
 material Fischer Hunt has the right to license.
+
+The About annotation uses Benji Script, sourced from the font served by
+[benji.org](https://benji.org/family-values). This third-party font is excluded
+from the repository's AGPL grant; no redistribution license was supplied with
+the font file. The accompanying bracket is drawn locally.

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "site:stamp": "node scripts/site-update.mjs stamp",
+    "site:check": "node scripts/site-update.mjs check"
   },
   "dependencies": {
     "next": "16.3.4",
