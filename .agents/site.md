@@ -32,11 +32,6 @@ can use a different palette, large typography, a full-width composition, custom
 illustration, a playful interaction, or a different reading rhythm. Choose a
 coherent direction for the subject and develop it far enough to judge it.
 
-[Shed's Taste page](https://shedsgns.me/taste) is a useful example of this freedom:
-its oversized headline, pink-and-red palette, and pixel graphics depart from
-her quiet homepage. Treat that as permission to find a page's own expression,
-not a new pink template to repeat.
-
 The relationship between our pages can come from Fischer's voice, care with
 details, and a clear way home. It need not come from identical columns, fonts,
 or a floating hub on every route. Keep the accepted homepage intact unless the
@@ -71,8 +66,7 @@ Current interaction decisions:
   appears. Scramble symbols must fit inside the original label width.
 - Reduced motion keeps all content and controls usable.
 
-Shed is the primary reference for the existing link interaction. Benji is a
-reference for personal character and small details. References inform decisions;
+Benji is a reference for personal character and small details. References inform decisions;
 they do not replace our own art direction. Inspect the relevant live behavior when asked to
 match it; do not reconstruct it from memory. Keep third-party attribution in the licensing documentation.
 Borrow visual mechanisms without importing someone else's biography or prose.
