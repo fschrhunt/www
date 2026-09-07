@@ -8,7 +8,7 @@ server-side contact delivery, or required environment configuration.
 
 | Path | Responsibility |
 | --- | --- |
-| `src/app/page.tsx` | Introduction, product and note indexes, credit |
+| `src/app/page.tsx` | Introduction, expandable About passage, product and note indexes, credit |
 | `src/app/products/{e,flip,diffuse}/page.tsx` | Product descriptions and demos |
 | `src/app/notes/welcome-who-dis/page.tsx` | First note and its metadata |
 | `src/app/contact/page.tsx` | Contact layout and navigation |
@@ -23,6 +23,10 @@ the accepted homepage. Read the agent kit for creative decisions.
 
 ## Client behavior
 
+- `about-passage.tsx` opens an inline biography from an About button
+  with a curved arrow leading from the label downward into the passage.
+  The passage expands with a staggered text reveal. Collapsed content is inert;
+  reduced motion skips the transitions.
 - `scramble-link.tsx` preserves the accessible label and fits the temporary
   symbols within its measured width. CSS draws the underline and arrow mask.
 - `social-hub.tsx` contains the profile links and the shared return-arrow icon.
@@ -33,7 +37,9 @@ the accepted homepage. Read the agent kit for creative decisions.
   prepares a `mailto:` draft. Clipboard copy is the fallback. Nothing is sent
   by the app, and replies are not persisted. Pressing `/` outside an editable
   field focuses the current reply. The shortcut leaves typing, modifier-key
-  combinations, composition, loading, and the final review alone.
+  combinations, composition, loading, and the final review alone. Greetings
+  arrive separately with typing dots and reading pauses; reduced motion skips
+  delays and animation. Pending replies are canceled on unmount.
 - `flip-demo.tsx` toggles an illustrative window between its front and note.
 - `favicon-theme.tsx` selects a PNG from the browser's color preference.
 
@@ -44,7 +50,9 @@ traces its dark ink and exports transparent SVG, PNG, ICO, and Safari mask files
 Run it from the repository root if the portrait changes, then inspect the result
 at tab-icon size. `public/link-arrow.svg` supplies the hover mask.
 
-Inter and its separate OFL license are in `src/app/fonts/`. Retain that license.
+Inter and Caveat are locally hosted in `src/app/fonts/`, with their separate
+OFL licenses. Retain both licenses. Caveat is limited to the blue About marks;
+an inline SVG filter adds their crayon grain.
 Product illustrations are not real captures. Product dates are repository
 creation dates, and Diffuse's private repository is not linked publicly.
 
