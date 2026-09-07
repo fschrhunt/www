@@ -18,7 +18,7 @@ export default function ColorNote() {
         <div className="product-meta"><time dateTime="2026-08-30">August 30, 2026</time><span>1 min read</span></div>
         <p>this is my favorite blue.</p>
         <figure className="color-note-swatch">
-          <div role="img" aria-label="A swatch of Fischer blue, hex 3565C5"><span>fischer blue</span></div>
+          <div role="img" aria-label="A swatch of Fischer bleu, hex 3565C5"><span>fischer bleu</span></div>
           <figcaption><span>#3565C5</span><span>rgb 53, 101, 197</span></figcaption>
         </figure>
         <p>i wanted something to call it besides &quot;that blue.&quot; #3565C5 is precise, but it sounds like a replacement part.</p>

@@ -53,8 +53,11 @@ Keep the supplied portrait and its hover tilt unless asked to change them.
 The small serif pronunciation beside Fischer's name is intentional. The expanded
 About passage uses Inter with roomy spacing and readable body text. Its label
 and arrow are an intentional blue crayon exception, using local Caveat lettering
-and a grain texture. About blinks gently until its first opening, remembered in memory across
-internal navigation. A fresh visit or reload starts the blink again. Hover, keyboard focus, and reduced motion keep it steady. The footer shows the last site update date, with the
+and a grain texture. About has a handwritten invitation to its left on desktop, separated by a drawn
+bracket. On mobile it sits on the right with a pointed brace. Both markers draw
+once from top to bottom, with a static stroke for reduced motion.
+The invitation disappears after opening About, remembered in session storage across internal
+navigation and reloads in the same tab. A new browsing session shows it again. The footer shows the last site update date, with the
 turning mark opposite it. The floating hub belongs to
 the site, while Contact has its own conversation layout.
 
