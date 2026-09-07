@@ -64,14 +64,14 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .about-annotation { position: absolute; right: calc(100% + 16px); top: 50%; display: flex; align-items: center; gap: 14px; width: 145px; transform: translateY(-50%) rotate(-3deg); color: #666; font-family: var(--font-annotation), cursive; font-size: 21px; font-weight: 400; font-feature-settings: "ss03" on; line-height: 1.05; text-align: right; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 250ms, visibility 250ms; }
 .about-annotation[data-visible="true"] { opacity: 1; visibility: visible; }
 .about-annotation svg { flex-shrink: 0; }
-.annotation-point { display: none; }
+.annotation-mobile-bracket { display: none; }
 .about-annotation path { stroke-dasharray: 1; stroke-dashoffset: 0; }
 .about-annotation[data-visible="true"] path { animation: annotation-draw 450ms 100ms cubic-bezier(.4,0,.2,1) both; }
 @keyframes annotation-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @media (max-width: 900px) {
   .about-annotation { position: static; order: 2; flex-direction: row-reverse; width: auto; margin-left: 18px; gap: 12px; transform: rotate(-3deg); font-size: 19px; text-align: left; }
   .annotation-bracket { display: none; }
-  .annotation-point { display: block; }
+  .annotation-mobile-bracket { display: block; }
 }
 .about-reveal { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 550ms cubic-bezier(.22,1,.36,1), visibility 550ms; }
 .about-reveal[data-open="true"] { grid-template-rows: 1fr; visibility: visible; }

@@ -54,7 +54,7 @@ export function AboutPassage() {
         <span>click me</span>
         <svg width="14" height="46" viewBox="0 0 14 46" fill="none">
           <path className="annotation-bracket" pathLength="1" d="M2 3.5c3 .6 6 .1 9-.4-.6 13 .6 27-.1 40.5-3-.4-6-.3-9 .4" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" />
-          <path className="annotation-point" pathLength="1" d="M12 3c-6-.4-5 7-5.4 12.5C6.3 19 4.5 21.5 2 23c3 1.4 4.5 3.5 4.7 7.2C7 36 6 43 12 43" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" />
+          <path className="annotation-mobile-bracket" pathLength="1" d="M12 3.5c-3 .6-6 .1-9-.4.6 13-.6 27 .1 40.5 3-.4 6-.3 9 .4" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
       <button className="about-trigger" type="button" data-unopened={!hasOpened} aria-expanded={open} aria-controls="about-content" onClick={toggleAbout}>
