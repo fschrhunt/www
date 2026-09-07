@@ -9,7 +9,7 @@ LOCAL:
  npm ci
  npm run dev
 
- http://localhost:3000. No environment variables required.
+ http://localhost:3000. Email setup: docs/contact.md.
 
 CHECK:
  npm run lint
@@ -19,7 +19,9 @@ CHECK:
 ///
 
 MAP:
- src/app/        pages and writing
+ src/app/        pages
+ src/app/writings/  one folder per writing
+ public/writings/   media grouped by writing
  docs/           how things work
  AGENTS.md       where agents start
  .agents/        writing, design, and review skills

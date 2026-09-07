@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ReaderIndex } from "@/components/reader-index";
 import { SocialHub } from "@/components/social-hub";
-import { BroPhotos } from "@/components/bro-photos";
+import { PhotoAlbum } from "./_components/photo-album";
 
 export const metadata: Metadata = {
   title: "big bro · Fischer Hunt",
@@ -17,7 +17,7 @@ export default function BigBroNote() {
       <article className="product-note">
         <h1>big bro</h1>
         <div className="product-meta"><time dateTime="2026-09-07">September 7, 2026</time><span>2 min read</span></div>
-        <BroPhotos />
+        <PhotoAlbum />
         <p>my brother is pretty much my only consistent friend. he&apos;s also someone i can disagree with at considerable length. these facts have somehow coexisted for years.</p>
         <p>we&apos;ve had our ups and downs. arguments, debates, the occasional discovery that having an opinion and being able to defend it are two different things. i prefer making that discovery about him.</p>
         <p>i don&apos;t particularly enjoy being challenged. i would like to say something confidently and have that be the end of it. unfortunately, my brother has follow-up questions.</p>

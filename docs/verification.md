@@ -37,7 +37,7 @@ while comparing builds. Stop the server or use a separate checkout.
   Use fictional input, try a greeting as a name, a conversational introduction,
   the name override, repeated small talk at different steps, name corrections,
   back/start-over commands, invalid email, and a multiline message,
-  inspect the draft's recipient and encoded body, and check Start over. Do not
+  inspect the reviewed fields, verify failed sends preserve them, and check Start over. Do not
   send the test email. Verify the clipboard fallback only when relevant.
 - Favicons: inspect alpha and small-size readability, then switch browser color
   preference. Chromium emulation does not verify native Safari's tab behavior.

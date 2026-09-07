@@ -42,16 +42,16 @@ export default function Home() {
     <section className="products notes" aria-labelledby="writings-heading">
       <h2 id="writings-heading">Writings</h2>
       <ul><li>
-        <ScrambleLink href="/notes/big-bro">big bro</ScrambleLink>
+        <ScrambleLink href="/writings/big-bro">big bro</ScrambleLink>
         <span className="reading-time">2 min read</span>
       </li><li>
-        <ScrambleLink href="/notes/five-lines">damn you, agents</ScrambleLink>
+        <ScrambleLink href="/writings/damn-you-agents">damn you, agents</ScrambleLink>
         <span className="reading-time">5 min read</span>
       </li><li>
-        <ScrambleLink href="/notes/i-aquired-a-color">I aquired a color!</ScrambleLink>
+        <ScrambleLink href="/writings/i-aquired-a-color">I aquired a color!</ScrambleLink>
         <span className="reading-time">1 min read</span>
       </li><li>
-        <ScrambleLink href="/notes/welcome-who-dis">welcome who dis?</ScrambleLink>
+        <ScrambleLink href="/writings/welcome-who-dis">welcome who dis?</ScrambleLink>
         <span className="reading-time">1 min read</span>
       </li></ul>
     </section>

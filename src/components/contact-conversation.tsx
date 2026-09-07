@@ -1,6 +1,8 @@
 "use client";
 
 import localFont from "next/font/local";
+import { ContactReview } from "./contact-review";
+import { suggestContactSubject } from "@/lib/contact-subject";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
@@ -14,7 +16,7 @@ const introduction: Message[] = [
   { from: "fischer", text: "first, what should I call you?" },
 ];
 
-/** A guided contact form presented as a conversation, with an explicit email-draft handoff. */
+/** A guided contact conversation with a reviewed draft sent through the server. */
 export function ContactConversation() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [step, setStep] = useState<Step>("name");
@@ -22,33 +24,48 @@ export function ContactConversation() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
+  const [subject, setSubject] = useState("");
   const [busy, setBusy] = useState(true);
   const [typing, setTyping] = useState(true);
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
   const [questionedName, setQuestionedName] = useState("");
   const [questionedEmail, setQuestionedEmail] = useState("");
   const [asideMessage, setAsideMessage] = useState("");
   const memory = useRef<ChatMemory>({});
   const timer = useRef<number | undefined>(undefined);
+  const replyGeneration = useRef(0);
+  const busyRef = useRef(true);
+  const pendingReplies = useRef<{ replies: Message[]; next: Step } | null>({
+    replies: [welcome, ...introduction], next: "name",
+  });
   const thread = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const form = useRef<HTMLFormElement>(null);
 
-  /** Deliver each bubble after typing, with a short reading pause between replies. */
+  /** Deliver one cancellable reply sequence, recording unsent bubbles for effect restarts. */
   const queueReplies = useCallback((replies: Message[], next: Step, firstDelay = 650) => {
+    window.clearTimeout(timer.current);
+    const generation = ++replyGeneration.current;
+    pendingReplies.current = { replies, next };
+    busyRef.current = true;
+    setBusy(true);
+    setTyping(true);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function deliver(index: number) {
       timer.current = window.setTimeout(() => {
+        if (generation !== replyGeneration.current) return;
+        pendingReplies.current = index + 1 < replies.length ? { replies: replies.slice(index + 1), next } : null;
         setMessages(current => [...current, replies[index]]);
         setTyping(false);
         if (index === replies.length - 1) {
           setStep(next);
+          busyRef.current = false;
           setBusy(false);
           return;
         }
         timer.current = window.setTimeout(() => {
+          if (generation !== replyGeneration.current) return;
           setTyping(true);
           deliver(index + 1);
         }, reduced ? 0 : 350);
@@ -58,8 +75,14 @@ export function ContactConversation() {
   }, []);
 
   useEffect(() => {
-    queueReplies([welcome, ...introduction], "name", 900);
-    return () => window.clearTimeout(timer.current);
+    // Refresh may rerun effects while preserving the transcript; resume only unsent replies.
+    const generationCounter = replyGeneration;
+    const pending = pendingReplies.current;
+    if (pending) queueReplies(pending.replies, pending.next, 900);
+    return () => {
+      window.clearTimeout(timer.current);
+      generationCounter.current++;
+    };
   }, [queueReplies]);
 
   useEffect(() => {
@@ -90,13 +113,14 @@ export function ContactConversation() {
   /** Advance the form only after validating the current reply. */
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || step === "review") return;
+    if (busyRef.current || step === "review") return;
     const answer = value.trim();
     if (!answer) {
       setError(step === "message" ? "Write a little something first." : "Pop your answer in below.");
       return;
     }
     if (/^(?:start over|restart|reset)[.!]?$/i.test(answer)) { startOver(); return; }
+    busyRef.current = true;
     setError("");
     setAsideMessage("");
     setMessages(current => [...current, { from: "visitor", text: answer }]);
@@ -153,7 +177,8 @@ export function ContactConversation() {
       next = "message";
     } else {
       setNote(answer);
-      reply = "all set. your note is ready to go.";
+      setSubject(suggestContactSubject(answer));
+      reply = "please look this over and edit anything you need before sending.";
       next = "review";
     }
     queueReplies([{ from: "fischer", text: reply }], next);
@@ -165,7 +190,6 @@ export function ContactConversation() {
     setQuestionedName("");
     setQuestionedEmail("");
     setAsideMessage("");
-    setCopied(false);
     setError("");
     setBusy(true);
     setTyping(true);
@@ -175,17 +199,18 @@ export function ContactConversation() {
 
   /** Preserve a message that happened to match one of the small-talk rules. */
   function useAsideAsMessage() {
-    if (busy || !asideMessage) return;
+    if (busyRef.current || !asideMessage) return;
     setNote(asideMessage);
+    setSubject(suggestContactSubject(asideMessage));
     setAsideMessage("");
     setBusy(true);
     setTyping(true);
-    queueReplies([{ from: "fischer", text: "got it. that's the note. ready for your email app." }], "review");
+    queueReplies([{ from: "fischer", text: "please look this over and edit anything you need before sending." }], "review");
   }
 
   /** Let visitors overrule a name guess without repeating or defending their name. */
   function useQuestionedName() {
-    if (busy || !questionedName || step !== "name") return;
+    if (busyRef.current || !questionedName || step !== "name") return;
     setName(questionedName);
     setQuestionedName("");
     setValue("");
@@ -197,7 +222,7 @@ export function ContactConversation() {
 
   /** Use the visitor's chosen address verbatim in the draft after an explicit override. */
   function useQuestionedEmail() {
-    if (busy || !questionedEmail || step !== "email") return;
+    if (busyRef.current || !questionedEmail || step !== "email") return;
     setEmail(questionedEmail);
     setQuestionedEmail("");
     setValue("");
@@ -224,10 +249,10 @@ export function ContactConversation() {
     setName("");
     setEmail("");
     setNote("");
+    setSubject("");
     setBusy(true);
     setTyping(true);
     setError("");
-    setCopied(false);
     setQuestionedName("");
     setQuestionedEmail("");
     setAsideMessage("");
@@ -235,20 +260,7 @@ export function ContactConversation() {
     queueReplies([welcome, ...introduction], "name", 900);
   }
 
-  const body = `${note}\n\n${name}\n${email}`;
-  const draft = `mailto:fschrhunt@gmail.com?subject=${encodeURIComponent(`A note from ${name}`)}&body=${encodeURIComponent(body)}`;
   const placeholder = step === "name" ? "your name" : step === "email" ? "your email" : "your message";
-
-  /** Copy the complete note as a fallback when the visitor does not use a local mail app. */
-  async function copyNote() {
-    try {
-      await navigator.clipboard.writeText(`To: fschrhunt@gmail.com\nSubject: A note from ${name}\n\n${body}`);
-      setCopied(true);
-      setError("");
-    } catch {
-      setError("Couldn’t copy it. You can select your message above, or open the email draft.");
-    }
-  }
 
   const overrideAnswer = step === "name" ? questionedName : step === "email" ? questionedEmail : step === "message" ? asideMessage : "";
   const overrideIndex = !busy && overrideAnswer ? messages.findLastIndex(message => message.from === "visitor" && message.text === overrideAnswer) : -1;
@@ -270,12 +282,12 @@ export function ContactConversation() {
     </div>
 
     <div className={`conversation-bottom ${handwriting.variable}`}>
-      {step === "review" ? <div className="contact-handoff">
-        <p>Open your email app to review and send it.</p>
-        <a href={draft} className="email-draft-button">Open email draft <span aria-hidden="true">↗</span></a>
-        <div className="handoff-options"><button onClick={copyNote} type="button">{copied ? "Copied" : "Copy note"}</button><button onClick={goBack} type="button">Back</button><button onClick={startOver} type="button">Start over</button></div>
-        <span className="sr-only" role="status">{copied ? "Note copied to clipboard." : ""}</span>
-      </div> : <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
+      {overrideIndex !== -1 && <div className="contact-suggestions" aria-label="Suggested reply">
+        <button type="button" onClick={step === "name" ? useQuestionedName : step === "email" ? useQuestionedEmail : useAsideAsMessage}>Use that as my {step}<span aria-hidden="true">↗</span></button>
+      </div>}
+      {step === "review" ? <ContactReview name={name} email={email} subject={subject} note={note}
+        setName={setName} setEmail={setEmail} setSubject={setSubject} setNote={setNote}
+        startOver={startOver} /> : <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
         {step === "message" ? <textarea ref={textarea} aria-label="Your message" aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :
           <input ref={input} aria-label={step === "name" ? "Your name" : "Your email"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type="text" inputMode="text" autoComplete={step === "email" ? "email" : "given-name"} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : 254} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
