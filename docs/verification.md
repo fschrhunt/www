@@ -31,7 +31,10 @@ while comparing builds. Stop the server or use a separate checkout.
   pointer exit, and reduced motion.
 - Entrance: check direct load and internal navigation. Local state changes such
   as a Flip demo click must not replay the page entrance.
-- Contact: use fictional input, try invalid email and a multiline message,
+- Contact: test the visual viewport shrinking with a keyboard, including the
+  latest message, composer, and review controls staying in view. Test on native
+  mobile Safari when available; a simulated viewport is not a keyboard test.
+  Use fictional input, try invalid email and a multiline message,
   inspect the draft's recipient and encoded body, and check Start over. Do not
   send the test email. Verify the clipboard fallback only when relevant.
 - Favicons: inspect alpha and small-size readability, then switch browser color
