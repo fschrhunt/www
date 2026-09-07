@@ -53,9 +53,9 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .about-passage { margin-top: 17px; }
 .about-passage > h2 { display: flex; }
 .about-passage:has(.about-trigger[aria-expanded="false"]) + .products { margin-top: 17px; }
-.about-trigger { position: relative; display: inline-flex; align-items: center; gap: 3px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--muted); font-size: 14px; transition: color 180ms; }
+.about-trigger { position: relative; display: inline-flex; align-items: center; gap: 0; min-height: 44px; padding: 0; border: 0; background: none; color: var(--muted); font-size: 14px; transition: color 180ms; }
 .about-trigger:hover, .about-trigger[aria-expanded="true"] { color: #2854b4; }
-.about-arrow { display: block; flex-shrink: 0; }
+.about-arrow { display: block; flex-shrink: 0; margin-left: -2px; }
 /* Local handwriting and a fixed grain mask give the blue marks a crayon edge. */
 .crayon-definitions { position: absolute; pointer-events: none; }
 .about-trigger { color: #3565c5; font-family: var(--font-crayon), cursive; font-size: 25px; font-weight: 600; }

@@ -31,10 +31,9 @@ the accepted homepage. Read the agent kit for creative decisions.
   with a keyboard/touch button. On phones the open row scrolls horizontally.
   Full photo aspect ratios are preserved; reduced motion skips the transition.
 
-- `about-passage.tsx` remembers its first opening in local storage, retiring
-  the invitation blink across navigation and reloads. If storage is unavailable,
-  an in-memory fallback keeps it retired during client navigation.
-
+- `about-passage.tsx` remembers its first opening in memory for the current
+  document. Internal navigation preserves the stopped blink; a fresh visit or
+  reload resets it. No persistent browser storage controls the invitation.
 - `reader-index.tsx` follows benji.org's reading layout: fixed 80px from the
   desktop top and left, inline above the article at 1080px and below. Its outline
   lists article h2/h3 headings and tracks the current section at a 128px offset,

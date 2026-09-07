@@ -4,26 +4,18 @@ import { useState, useSyncExternalStore } from "react";
 import localFont from "next/font/local";
 
 const crayon = localFont({ src: "../app/fonts/caveat.ttf", variable: "--font-crayon", display: "swap", weight: "400 700" });
-const openedKey = "www:about-opened";
 let openedThisVisit = false;
 
-/** Read the remembered interaction, retaining a fallback when storage is unavailable. */
-function hasOpenedAbout() {
-  try { return openedThisVisit || localStorage.getItem(openedKey) === "true"; }
-  catch { return openedThisVisit; }
-}
+/** Remember About within this document, including client-side page navigation. */
+function hasOpenedAbout() { return openedThisVisit; }
 
-/** Keep the current page and other tabs in sync when About is first opened. */
+/** Notify mounted disclosures when About is opened during this visit. */
 function subscribeToAbout(callback: () => void) {
-  window.addEventListener("storage", callback);
   window.addEventListener("about-opened", callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener("about-opened", callback);
-  };
+  return () => window.removeEventListener("about-opened", callback);
 }
 
-/** Render without a blink until the browser has checked the saved preference. */
+/** Keep the invitation still until the client checks this visit's interaction. */
 function serverSnapshot() { return true; }
 
 /** An inline About disclosure that animates to the passage's natural height. */
@@ -31,11 +23,10 @@ export function AboutPassage() {
   const [open, setOpen] = useState(false);
   const hasOpened = useSyncExternalStore(subscribeToAbout, hasOpenedAbout, serverSnapshot);
 
-  /** Permanently retire the invitation on the first opening, independently of expanded state. */
+  /** Retire the invitation for this visit, independently of expanded state. */
   function toggleAbout() {
     if (!open && !hasOpened) {
       openedThisVisit = true;
-      try { localStorage.setItem(openedKey, "true"); } catch { /* The in-memory fallback still survives navigation. */ }
       window.dispatchEvent(new Event("about-opened"));
     }
     setOpen(!open);
