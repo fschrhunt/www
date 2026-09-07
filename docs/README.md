@@ -9,3 +9,5 @@
 | Choose a voice or page direction | [Agent kit](../.agents/README.md) |
 
 Start commands and a brief overview are in the root [README](../README).
+
+- [Contact email](contact.md): Resend setup, sending behavior, and Gmail labels.

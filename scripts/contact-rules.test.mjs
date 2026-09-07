@@ -56,3 +56,57 @@ test("explicit name corrections preserve the supplied name", () => {
   assert.equal(correctedName("change my name to 李明"), "李明");
   assert.equal(correctedName("My project is called Alex"), undefined);
 });
+
+test("casual spelling and punctuation do not turn small talk into a name", () => {
+  for (const answer of ["hey hows your day.", "hey, hows ur day", "  HEY   HOWS YOUR DAY... ", "how’s your day?", "hows your day going"]) {
+    assert.equal(contactAside(answer)?.key, "day", answer);
+    assert.equal(readContactName(answer).name, undefined, answer);
+  }
+  assert.equal(contactAside("how r u doing")?.key, "wellbeing");
+  assert.equal(contactAside("whats up")?.key, "wellbeing");
+  assert.equal(readContactName("Hows").name, "Hows");
+});
+
+test("greeting variants and casual day questions match without changing the stored input", () => {
+  for (const answer of ["hey hows your day.", "heyyy, hows ur day so far??", "hi! how is your day going today", "yo hows your day been going", "hello: hows your day…"]) {
+    assert.equal(contactAside(answer)?.key, "day", answer);
+    assert.equal(readContactName(answer).name, undefined, answer);
+  }
+  assert.equal(contactAside("hey how you doin.")?.key, "wellbeing");
+});
+
+test("unrecognized conversational questions cannot silently become names", () => {
+  for (const answer of ["hey how was your trip", "whats your favorite color", "how is the weather there", "could u help me", "yo where are you from"]) {
+    assert.equal(typeof readContactName(answer).reply, "string", answer);
+  }
+  for (const name of ["Howe", "Whatley", "Hows", "May", "Will", "Hiếu", "王小明"]) {
+    assert.equal(readContactName(name).name, name);
+  }
+});
+
+test("greetings with a person addressed are not silently accepted as names", () => {
+  for (const answer of ["Hello buddy", "hey friend", "hello, Fischer", "hey Alex", "good morning everyone", "heyyy stranger"]) {
+    assert.equal(readContactName(answer).name, undefined, answer);
+  }
+  assert.equal(contactAside("Hello buddy")?.key, "greeting");
+  assert.equal(contactAside("Hello buddy. I wanted to ask about your project."), undefined);
+  for (const [answer, name] of [["Buddy", "Buddy"], ["hello, I'm Alex", "Alex"], ["heyyy, my name is Buddy", "Buddy"], ["hi im José", "José"]]) {
+    assert.equal(readContactName(answer).name, name, answer);
+  }
+});
+
+test("ordinary sentence openings ask again while unfamiliar names remain valid", () => {
+  for (const answer of ["I need some help", "just checking this out", "thanks for asking", "please help me", "you look familiar"]) {
+    assert.equal(readContactName(answer).name, undefined, answer);
+  }
+  for (const name of ["Hope", "Summer", "Will Smith", "Jean-Luc Picard", "Nguyễn Minh Anh"]) {
+    assert.equal(readContactName(name).name, name);
+  }
+});
+
+test("greeting introductions save only the name, without sentence punctuation", () => {
+  for (const answer of ["hello, im buddy.", "Hello, I'm buddy.", "hey, i’m buddy!", "my name is buddy."]) {
+    assert.equal(readContactName(answer).name, "buddy", answer);
+    assert.equal(contactAside(answer), undefined, answer);
+  }
+});

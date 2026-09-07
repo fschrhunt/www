@@ -10,10 +10,10 @@ server-side contact delivery, or required environment configuration.
 | --- | --- |
 | `src/app/page.tsx` | Introduction, expandable About passage, product and note indexes, update date |
 | `src/app/products/{e,flip,diffuse}/page.tsx` | Product descriptions and demos |
-| `src/app/notes/welcome-who-dis/page.tsx` | First note and its metadata |
-| `src/app/notes/big-bro/page.tsx` | Thank-you to Fischer’s brother, with an interactive family photo album |
-| `src/app/notes/five-lines/page.tsx` | Long note on reviewing agent changes, with section anchors |
-| `src/app/notes/i-aquired-a-color/page.tsx` | Fischer blue note, color swatch, and metadata |
+| `src/app/writings/welcome-who-dis/page.tsx` | First note and its metadata |
+| `src/app/writings/big-bro/page.tsx` | Thank-you to Fischer’s brother, with an interactive family photo album |
+| `src/app/writings/damn-you-agents/page.tsx` | Long note on reviewing agent changes, with section anchors |
+| `src/app/writings/i-aquired-a-color/page.tsx` | Fischer blue note, color swatch, and metadata |
 | `src/app/contact/page.tsx` | Contact layout and navigation |
 | `src/app/layout.tsx` | Local font, document metadata, favicon links |
 | `src/app/template.tsx` | Route remount boundary for entrance effects |
@@ -27,7 +27,7 @@ the accepted homepage. Read the agent kit for creative decisions.
 
 ## Client behavior
 
-- `bro-photos.tsx` spreads a family photo pile on mouse hover, or pins it open
+- `src/app/writings/big-bro/_components/photo-album.tsx` spreads a family photo pile on mouse hover, or pins it open
   with a keyboard/touch button. On phones the open row scrolls horizontally.
   Full photo aspect ratios are preserved; reduced motion skips the transition.
 
@@ -59,8 +59,8 @@ the accepted homepage. Read the agent kit for creative decisions.
   mobile keyboards and keeps the latest message in view when already at the
   bottom. Pinch zoom is not disabled.
 - `contact-conversation.tsx` validates name, email, and message locally, then
-  prepares a `mailto:` draft. Clipboard copy is the fallback. Nothing is sent
-  by the app, and replies are not persisted. Pressing `/` outside an editable
+  opens an editable review and sends through `/api/contact` using Resend.
+  Conversation replies are not persisted. Pressing `/` outside an editable
   field focuses the current reply. The shortcut leaves typing, modifier-key
   combinations, composition, loading, and the final review alone. Greetings
   arrive separately with typing dots and reading pauses; reduced motion skips
@@ -75,7 +75,7 @@ traces its dark ink and exports transparent SVG, PNG, ICO, and Safari mask files
 Run it from the repository root if the portrait changes, then inspect the result
 at tab-icon size. `public/link-arrow.svg` supplies the hover mask.
 
-The seven family photos in `public/notes/big-bro/` are web-sized WebP copies of
+The seven family photos in `public/writings/big-bro/` are web-sized WebP copies of
 the supplied JPEGs, with orientation applied and metadata stripped.
 
 Inter and Caveat are locally hosted in `src/app/fonts/`, with their separate
@@ -103,20 +103,47 @@ questions, addresses, and conversational introductions locally, without a model
 or network request. Name guesses are advisory: visitors can use the questioned
 answer anyway. Rejected replies appear in the conversation with normal typing
 pacing. International names and nicknames are accepted. Invalid email replies
-keep the flow on email unless the visitor explicitly chooses the override; the final handoff still prepares a draft rather than
-sending it. Start over clears both the draft and the name override.
+keep the flow on email unless the visitor explicitly chooses the override; the server requires a valid reply email before sending. Start over clears both the draft and the name override.
 
 Contact conversation memory counts small-talk topics for the current component
 session and varies repeated replies. Whole-reply matching avoids intercepting a
 longer message just because it contains a question. Every third aside returns to
 the pending prompt. Explicit name corrections update the draft in place; `back`
 restores the previous field for editing, and `start over` clears draft and memory.
-The review step has a Back control. If a message matches small talk, its override
+The review modal closes with Escape or a click on the dimmed area. If a message matches small talk, its override
 can use that exact reply as the message. No conversation memory is persisted or
 sent to a service.
 
 Contact overrides use the same handwriting as About with a pen-drawn square
 bracket. They attach to the questioned visitor message and scroll with it. On wide
 screens the annotation sits beside the message on one tilted line; on phones
-it wraps beneath the message within the thread.
+a suggested-reply button appears above the composer instead, preserving message
+alignment and keeping the action within thumb reach.
 Name, email, and message overrides accept the questioned reply verbatim.
+
+The contact reply queue cancels superseded timers and records only unsent
+bubbles. Development effect restarts resume that queue without replaying the
+introduction or resetting the active question. A synchronous busy guard blocks
+duplicate submissions before React renders the disabled composer.
+
+## Writing folders
+
+Routes live in `src/app/writings/<slug>/page.tsx`. Components belonging to one
+writing stay in its `_components/` folder; shared navigation stays in
+`src/components/`. Static media mirrors the slug under `public/writings/`.
+Only writings with media need an asset folder. See
+[the writing guide](../src/app/writings/README.md) for adding a page.
+Legacy `/notes/` routes and image paths redirect to `/writings/`; the previous
+`five-lines` slug redirects to `damn-you-agents`.
+
+`contact-review.tsx` opens a native modal above the transcript, showing recipient,
+editable visitor details, subject, and complete message. The card scrolls
+independently of the final action. `src/lib/contact-subject.ts` suggests a bounded
+subject using product/topic matches or the first sentence. It never rewrites the
+message. The server uses the reviewed subject.
+The card begins with the recipient. A soft grey Fischer chat bubble sits above it, outside the card. Only the send arrow
+appears in the bottom row. Escape or clicking the dimmed area dismisses the modal. The card rises from the composer over a lightly dimmed, blurred background. Dismissal preserves edits and returns focus to the review control. The up arrow posts the reviewed fields to `/api/contact`. Only after Resend accepts
+the email does the card fly upward with an original synthesized swoosh. Reduced
+motion skips travel. Errors preserve edits and allow a retry with the same
+idempotency key. Acceptance does not guarantee inbox placement. See
+[contact setup](contact.md) for credentials, delivery, limits, and Gmail labeling.

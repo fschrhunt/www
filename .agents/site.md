@@ -79,8 +79,9 @@ links belong on those pages; Diffuse's source remains private. Repository
 creation dates are not launch dates. Reverify product claims if they may have
 changed. Illustrations must be distinguishable from real product captures.
 
-The contact page prepares an email draft. It does not send anything itself.
-Do not imply otherwise. Safari favicon behavior still needs native verification;
+The contact page sends reviewed notes through a server-only Resend integration.
+Only report success after the provider accepts the email. Never claim inbox
+delivery from API acceptance alone. See docs/contact.md for setup. Safari favicon behavior still needs native verification;
 a Chromium preference check does not establish Safari support.
 
 ## Update date

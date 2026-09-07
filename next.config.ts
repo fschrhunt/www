@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  /** Preserve shared writing and image URLs after the folder migration. */
+  async redirects() {
+    return [
+      { source: "/notes/five-lines", destination: "/writings/damn-you-agents", permanent: true },
+      { source: "/writings/five-lines", destination: "/writings/damn-you-agents", permanent: true },
+      { source: "/notes/:path*", destination: "/writings/:path*", permanent: true },
+    ];
+  },
   turbopack: { root: process.cwd() },
   // Let the dev server be reached from non-localhost origins (a phone on the
   // LAN, a Tailscale hostname). Next 16 otherwise blocks the cross-origin dev
