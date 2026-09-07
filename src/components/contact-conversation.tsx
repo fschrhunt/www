@@ -1,6 +1,8 @@
 "use client";
 
 import localFont from "next/font/local";
+import { ContactReview } from "./contact-review";
+import { suggestContactSubject } from "@/lib/contact-subject";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
@@ -14,7 +16,7 @@ const introduction: Message[] = [
   { from: "fischer", text: "first, what should I call you?" },
 ];
 
-/** A guided contact conversation with a local draft and explicit email-app handoff. */
+/** A guided contact conversation with a reviewed draft sent through the server. */
 export function ContactConversation() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [step, setStep] = useState<Step>("name");
@@ -22,10 +24,10 @@ export function ContactConversation() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
+  const [subject, setSubject] = useState("");
   const [busy, setBusy] = useState(true);
   const [typing, setTyping] = useState(true);
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
   const [questionedName, setQuestionedName] = useState("");
   const [questionedEmail, setQuestionedEmail] = useState("");
   const [asideMessage, setAsideMessage] = useState("");
@@ -175,7 +177,8 @@ export function ContactConversation() {
       next = "message";
     } else {
       setNote(answer);
-      reply = "all set. your note is ready to go.";
+      setSubject(suggestContactSubject(answer));
+      reply = "please look this over and edit anything you need before sending.";
       next = "review";
     }
     queueReplies([{ from: "fischer", text: reply }], next);
@@ -187,7 +190,6 @@ export function ContactConversation() {
     setQuestionedName("");
     setQuestionedEmail("");
     setAsideMessage("");
-    setCopied(false);
     setError("");
     setBusy(true);
     setTyping(true);
@@ -199,10 +201,11 @@ export function ContactConversation() {
   function useAsideAsMessage() {
     if (busyRef.current || !asideMessage) return;
     setNote(asideMessage);
+    setSubject(suggestContactSubject(asideMessage));
     setAsideMessage("");
     setBusy(true);
     setTyping(true);
-    queueReplies([{ from: "fischer", text: "got it. that's the note. ready for your email app." }], "review");
+    queueReplies([{ from: "fischer", text: "please look this over and edit anything you need before sending." }], "review");
   }
 
   /** Let visitors overrule a name guess without repeating or defending their name. */
@@ -246,10 +249,10 @@ export function ContactConversation() {
     setName("");
     setEmail("");
     setNote("");
+    setSubject("");
     setBusy(true);
     setTyping(true);
     setError("");
-    setCopied(false);
     setQuestionedName("");
     setQuestionedEmail("");
     setAsideMessage("");
@@ -257,20 +260,7 @@ export function ContactConversation() {
     queueReplies([welcome, ...introduction], "name", 900);
   }
 
-  const body = `${note}\n\n${name}\n${email}`;
-  const draft = `mailto:fschrhunt@gmail.com?subject=${encodeURIComponent(`A note from ${name}`)}&body=${encodeURIComponent(body)}`;
   const placeholder = step === "name" ? "your name" : step === "email" ? "your email" : "your message";
-
-  /** Copy the complete note as a fallback when the visitor does not use a local mail app. */
-  async function copyNote() {
-    try {
-      await navigator.clipboard.writeText(`To: fschrhunt@gmail.com\nSubject: A note from ${name}\n\n${body}`);
-      setCopied(true);
-      setError("");
-    } catch {
-      setError("Couldn’t copy it. You can select your message above, or open the email draft.");
-    }
-  }
 
   const overrideAnswer = step === "name" ? questionedName : step === "email" ? questionedEmail : step === "message" ? asideMessage : "";
   const overrideIndex = !busy && overrideAnswer ? messages.findLastIndex(message => message.from === "visitor" && message.text === overrideAnswer) : -1;
@@ -295,12 +285,9 @@ export function ContactConversation() {
       {overrideIndex !== -1 && <div className="contact-suggestions" aria-label="Suggested reply">
         <button type="button" onClick={step === "name" ? useQuestionedName : step === "email" ? useQuestionedEmail : useAsideAsMessage}>Use that as my {step}<span aria-hidden="true">↗</span></button>
       </div>}
-      {step === "review" ? <div className="contact-handoff">
-        <p>Open your email app to review and send it.</p>
-        <a href={draft} className="email-draft-button">Open email draft <span aria-hidden="true">↗</span></a>
-        <div className="handoff-options"><button onClick={copyNote} type="button">{copied ? "Copied" : "Copy note"}</button><button onClick={goBack} type="button">Back</button><button onClick={startOver} type="button">Start over</button></div>
-        <span className="sr-only" role="status">{copied ? "Note copied to clipboard." : ""}</span>
-      </div> : <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
+      {step === "review" ? <ContactReview name={name} email={email} subject={subject} note={note}
+        setName={setName} setEmail={setEmail} setSubject={setSubject} setNote={setNote}
+        startOver={startOver} /> : <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
         {step === "message" ? <textarea ref={textarea} aria-label="Your message" aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :
           <input ref={input} aria-label={step === "name" ? "Your name" : "Your email"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type="text" inputMode="text" autoComplete={step === "email" ? "email" : "given-name"} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : 254} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>

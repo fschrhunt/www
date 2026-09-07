@@ -15,7 +15,7 @@ const photos = [
 ];
 
 /** Spread family photos, then open an individual photo in a keyboard-accessible modal. */
-export function BroPhotos() {
+export function PhotoAlbum() {
   const [hovered, setHovered] = useState(false);
   const [pinned, setPinned] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
@@ -52,7 +52,7 @@ export function BroPhotos() {
               if (!expanded) setPinned(true);
               else { setPinned(true); setSelected(index); }
             }}>
-          <Image src={`/notes/big-bro/${photo.file}.webp`} width={photo.width} height={photo.height} alt={photo.alt} sizes="(max-width: 640px) 240px, 250px" />
+          <Image src={`/writings/big-bro/${photo.file}.webp`} width={photo.width} height={photo.height} alt={photo.alt} sizes="(max-width: 640px) 240px, 250px" />
           </button>
         </li>)}
       </ol>
@@ -95,7 +95,7 @@ export function BroPhotos() {
             if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) movePhoto(dx < 0 ? 1 : -1);
           }}>
           <button className="bro-photo-prev" type="button" onClick={() => movePhoto(-1)} aria-label="Previous photo"><span aria-hidden="true">←</span></button>
-          <Image key={photos[selected].file} src={`/notes/big-bro/${photos[selected].file}.webp`}
+          <Image key={photos[selected].file} src={`/writings/big-bro/${photos[selected].file}.webp`}
             width={photos[selected].width} height={photos[selected].height}
             alt={photos[selected].alt} sizes="(max-width: 640px) 90vw, 90vw" loading="eager" />
           <button className="bro-photo-next" type="button" onClick={() => movePhoto(1)} aria-label="Next photo"><span aria-hidden="true">→</span></button>

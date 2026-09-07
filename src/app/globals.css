@@ -386,3 +386,82 @@ button.showcase-bar { min-height: 44px; }
   .contact-suggestions button span { color: inherit; }
   .contact-suggestions button:active { background: #2854b4; border-color: #2854b4; }
 }
+
+/* The review reads like an email; long bodies scroll above the persistent final action. */
+.contact-review { padding-top: 2px; }
+.contact-review-intro { margin-bottom: 22px; color: #555; font-size: 14px; line-height: 23px; }
+.contact-letter { padding: 20px; border: 1px solid #e4e4e4; border-radius: 16px; background: #fff; }
+.contact-letter-address { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; margin-bottom: 12px; font-size: 12px; line-height: 20px; overflow-wrap: anywhere; }
+.contact-letter-address > span:first-child, .contact-letter-muted { color: #888; }
+.contact-subject { display: block; margin-top: 20px; padding-top: 18px; border-top: 1px solid #eee; }
+.contact-subject > span { display: block; color: #888; font-size: 12px; }
+.contact-subject input { width: 100%; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: #262626; font: inherit; font-size: 16px; }
+.contact-letter-body { margin-top: 12px; white-space: pre-wrap; overflow-wrap: anywhere; color: #484848; font-size: 14px; line-height: 24px; }
+.contact-handoff { padding-top: 0; border-top: 0; }
+.email-draft-button { min-height: 48px; background: #3565c5; border-radius: 16px; }
+.email-draft-button:hover { background: #2854b4; }
+.contact-handoff .handoff-options { margin-top: 4px; }
+
+.contact-review-sender { min-width: 0; }
+.contact-review-sender input { display: block; width: 100%; min-height: 36px; padding: 4px 0; border: 0; background: transparent; color: #484848; font: inherit; }
+.contact-review-sender input[type="email"] { color: #777; }
+textarea.contact-letter-body { display: block; width: 100%; min-height: 150px; padding: 0; border: 0; background: transparent; font-family: inherit; field-sizing: content; resize: vertical; }
+@media (max-width: 640px) {
+  .contact-review-sender input, textarea.contact-letter-body { font-size: 16px; }
+  .contact-review-sender input { min-height: 44px; }
+}
+
+/* The draft rises out of the composer while the conversation stays behind it. */
+.contact-review-modal { position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: 24px 16px; border: 0; background: transparent; overflow: hidden; color: #303030; }
+.contact-review-modal[open] { display: flex; align-items: center; justify-content: center; }
+.contact-review-modal::backdrop { background: rgb(30 30 30 / .16); backdrop-filter: blur(3px); animation: contact-dim 220ms ease-out; }
+.contact-review-modal[data-leaving="true"]::backdrop { background: transparent; backdrop-filter: blur(0); transition: background 440ms, backdrop-filter 440ms; }
+.contact-review-frame { display: flex; flex-direction: column; gap: 18px; width: 490px; max-width: 100%; max-height: 100%; }
+.contact-review-sheet { min-height: 0; display: flex; flex-direction: column; width: 490px; max-width: 100%; max-height: 100%; border: 1px solid rgb(0 0 0 / .06); border-radius: 22px; background: #fdfdfd; box-shadow: 0 24px 80px rgb(0 0 0 / .12), 0 2px 8px rgb(0 0 0 / .04); overflow: hidden; }
+.contact-review-heading { display: flex; align-items: center; gap: 20px; flex-shrink: 0; color: #555; font-size: 14px; transition: opacity 180ms; }
+.contact-review-heading .message-bubble { margin: 0; max-width: none; flex: 1; background: #ebebed; color: #303030; border-bottom-left-radius: 5px; }
+.contact-review-modal[data-leaving="true"] .contact-review-heading { opacity: 0; }
+.contact-review-scroll { padding: 26px 26px 20px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.contact-review-sheet .contact-subject { margin-top: 14px; }
+.contact-review-sheet .contact-subject input { font-weight: 500; }
+.contact-review-sheet textarea.contact-letter-body { min-height: 140px; resize: none; }
+.contact-review-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-shrink: 0; padding: 14px 22px; border-top: 1px solid #ededed; }
+.contact-review-actions .reply-send { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.contact-draft-return > button { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; padding: 10px 16px; border: 0; border-radius: 22px; background: #ebebed; color: #555; font: inherit; }
+.contact-draft-return > p { color: #777; font-size: 13px; margin-bottom: 12px; }
+.contact-draft-return > .contact-start-over { background: transparent; justify-content: center; font-size: 12px; }
+@keyframes contact-dim { from { background: transparent; backdrop-filter: blur(0); } }
+@media (max-width: 600px) {
+  .contact-review-modal { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); height: var(--conversation-height, 100dvh); top: var(--conversation-top, 0px); bottom: auto; }
+  .contact-review-scroll { padding: 22px 20px 20px; }
+  .contact-review-heading { gap: 12px; }
+  .contact-review-actions { padding: 10px 16px; gap: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-review-modal::backdrop { animation: none; transition: none; }
+}
+
+
+/* Keep address rows aligned and editing feedback close to each field. */
+.contact-review-sheet .contact-letter-address { align-items: center; }
+.contact-review-sender { display: flex; align-items: center; gap: 8px; }
+.contact-review-sender input { min-width: 0; min-height: 28px; padding: 3px 0; }
+.contact-review-sender input:first-child { flex: 0 1 38%; }
+.contact-review-sender input[type="email"] { flex: 1 1 62%; }
+.contact-review-sheet input:focus-visible,
+.contact-review-sheet textarea:focus-visible { outline-offset: -1px; border-radius: 22px; outline-color: #b3b3b3; }
+.contact-review-sheet .contact-subject input { min-height: 28px; padding: 2px 0; }
+@media (max-width: 640px) {
+  .contact-review-sender { gap: 6px; }
+  .contact-review-sender input { font-size: 16px; min-height: 36px; }
+}
+
+/* Leave room for text inside the rounded editing outline, focused or otherwise. */
+.contact-review-sheet .contact-subject input { min-height: 40px; padding: 8px 14px; }
+.contact-review-sheet textarea.contact-letter-body { padding: 12px 14px; }
+.contact-review-sheet .contact-review-sender input { min-height: 40px; padding: 8px 12px; }
+
+.contact-review-sheet .contact-subject { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 8px; }
+
+.contact-send-error { padding: 0 26px 12px; color: #a13939; font-size: 13px; }
+.contact-review-actions > span[role="status"] { margin-right: auto; color: #777; font-size: 12px; }

@@ -27,7 +27,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node --test scripts/site-update.test.mjs scripts/contact-rules.test.mjs
+      - run: node --test scripts/site-update.test.mjs scripts/contact-rules.test.mjs scripts/contact-subject.test.mjs scripts/contact-send.test.mjs
       - name: Require a site update timestamp
         if: github.event_name == 'pull_request'
         env:
