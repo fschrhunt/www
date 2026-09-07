@@ -66,6 +66,10 @@ export function ContactReview(props: Props) {
     return () => { animation.cancel(); modal.close(); };
   }, [open]);
 
+  useEffect(() => {
+    if (handedOff) trigger.current?.focus({ preventScroll: true });
+  }, [handedOff]);
+
   /** Close the sheet without discarding edits, then return focus to its composer control. */
   function dismiss() {
     if (handingOff.current) return;
@@ -92,7 +96,7 @@ export function ContactReview(props: Props) {
       const result = await response.json();
       if (!response.ok || result.sent !== true) throw new Error(result.error || "That didn't send. Please try again.");
     } catch (error) {
-      setError(error instanceof Error && error.name !== "TimeoutError" ? error.message : "I couldn't confirm the send. Please try again.");
+      setError(error instanceof Error && error.name === "Error" ? error.message : "I couldn't confirm the send. Your note is still here. Please try again.");
       void audio?.close();
       setSending(false);
       handingOff.current = false;
@@ -133,11 +137,11 @@ export function ContactReview(props: Props) {
         <div className="contact-review-scroll" inert={leaving || sending}>
           <div className="contact-letter-address"><span>To</span><span>Fischer <span className="contact-letter-muted">· fschrhunt@gmail.com</span></span></div>
           <div className="contact-letter-address"><span>From</span><div className="contact-review-sender">
-            <input aria-label="Your name for this email" autoComplete="name" value={props.name} maxLength={80} onChange={event => props.setName(event.target.value)} />
-            <input aria-label="Your reply email" autoComplete="email" type="email" value={props.email} maxLength={254} onChange={event => props.setEmail(event.target.value)} />
+            <textarea rows={1} aria-label="Your name for this email" autoComplete="name" value={props.name} maxLength={80} onChange={event => props.setName(event.target.value.replace(/[\r\n]/g, ""))} />
+            <textarea rows={1} aria-label="Your reply email" autoComplete="email" inputMode="email" value={props.email} maxLength={254} onChange={event => props.setEmail(event.target.value.replace(/[\r\n]/g, ""))} />
           </div></div>
           <label className="contact-subject"><span>Subject</span><input aria-label="Email subject" value={props.subject} maxLength={120} onChange={event => props.setSubject(event.target.value)} /></label>
-          <textarea className="contact-letter-body" aria-label="Email message" value={props.note} maxLength={2000} onChange={event => props.setNote(event.target.value)} />
+          <textarea className="contact-letter-body" aria-label="Email message" spellCheck value={props.note} maxLength={2000} onChange={event => props.setNote(event.target.value)} />
         </div>
         {error && <p className="contact-send-error" role="alert">{error}</p>}
         <footer className="contact-review-actions">

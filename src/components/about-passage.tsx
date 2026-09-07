@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import localFont from "next/font/local";
+import { ScrambleLink } from "./scramble-link";
 
 const crayon = localFont({ src: "../app/fonts/caveat.ttf", variable: "--font-crayon", display: "swap", weight: "400 700" });
 const handwriting = localFont({ src: "../app/fonts/benji-script.woff", variable: "--font-annotation", display: "swap" });
@@ -71,8 +72,8 @@ export function AboutPassage() {
           </div>
           <p>I run, cycle, and swim. I realized my entire life was tech and I didn&apos;t really have a hobby outside it. I missed playing sports, so I picked them back up. Now I also have Strava activities to post.</p>
           <p>I started coding pretty young, if writing Roblox scripts to cheat at games counts. Then I took a break from being a nerd to try being the guy everyone liked. In hindsight, a questionable use of my time.</p>
-          <p>OpenClaw got me back into coding. What happened to them btw? The idea of AGI, and how different life could be in five years, made me want to help build some part of it.</p>
-          <p>It&apos;s been hell ever since. Mostly reading a 400-line function an agent wrote for something that needed five.</p>
+          <p><ScrambleLink href="https://openclaw.ai" className="about-inline-link">OpenClaw</ScrambleLink> got me back into coding. What happened to them btw? The idea of AGI, and how different life could be in five years, made me want to help build some part of it.</p>
+          <p>It&apos;s been hell ever since. Mostly reading a <ScrambleLink href="/writings/damn-you-agents" className="about-inline-link">400-line function</ScrambleLink> an agent wrote for something that needed five.</p>
           <p className="about-postscript">My favorite color is the blue up there. That part of the website is finished.</p>
         </div>
       </div>

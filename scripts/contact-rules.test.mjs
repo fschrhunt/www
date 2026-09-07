@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readContactName, contactAside, correctedName, replyToAside } from "../src/lib/contact-rules.ts";
+import { suggestContactEmail, tidyContactEmail, readContactName, contactAside, correctedName, replyToAside } from "../src/lib/contact-rules.ts";
 
 test("messages, greetings and addresses invite another name reply", () => {
   for (const input of ["Hello, how are you doing", "hey!", "Are you an AI?", "https://example.com", "me@example.com", "Can you build a website?", "12345"]) {
@@ -109,4 +109,31 @@ test("greeting introductions save only the name, without sentence punctuation", 
     assert.equal(readContactName(answer).name, "buddy", answer);
     assert.equal(contactAside(answer), undefined, answer);
   }
+});
+
+
+test("repairs a held Shift key and extra name spaces without flattening name styles", () => {
+  assert.equal(readContactName("  Fischer   HUnt ").name, "Fischer Hunt");
+  for (const name of ["McDonald", "DeShawn", "AJ", "JOHN", "O’Connor", "van Gogh"]) assert.equal(readContactName(name).name, name);
+});
+
+test("email cleanup preserves mailbox identity while fixing separator spacing", () => {
+  assert.equal(tidyContactEmail("  Fischer @ GMAIL.COM  "), "Fischer@gmail.com");
+  assert.equal(tidyContactEmail("first last@gmial.com"), "first last@gmial.com");
+  assert.equal(tidyContactEmail("alex+work@example.com"), "alex+work@example.com");
+});
+
+
+test("domain suggestions correct known typos without guessing mailbox or custom domains", () => {
+  assert.equal(suggestContactEmail("Alex+work@GMIAL.COM"), "Alex+work@gmail.com");
+  assert.equal(suggestContactEmail("alex@outlok.com"), "alex@outlook.com");
+  assert.equal(suggestContactEmail("alex@gmail.ocm"), "alex@gmail.com");
+  for (const email of ["alex@gmail.com", "alex@company.com", "alex@gmail.co", "hello buddy", "a b@gmial.com"]) assert.equal(suggestContactEmail(email), undefined);
+});
+
+
+test("provider suggestions handle single edits and swaps without correcting real suffixes or custom domains", () => {
+  for (const typo of ["gmaill", "gmaol", "gmal", "gmial", "gamil"]) assert.equal(suggestContactEmail(`Alex+tag@${typo}.com`), "Alex+tag@gmail.com");
+  assert.equal(suggestContactEmail("alex@protonmial.com"), "alex@protonmail.com");
+  for (const domain of ["gmail.co", "gmail.net", "yahoo.co.uk", "my.gmail.com", "example.com", "gmaoll.com", "mail.com", "xn--gmail-test.com"]) assert.equal(suggestContactEmail(`alex@${domain}`), undefined, domain);
 });
