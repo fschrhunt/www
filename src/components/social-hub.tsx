@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { PageLink as Link } from "@/components/page-link";
 
 /** Curved return arrow used to enter Contact and return to the index. */
 export function ReturnArrow() {

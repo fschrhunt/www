@@ -31,6 +31,20 @@ GitHub settings are remote state, not enforced by this document. Verify them
 through the API when changing protections. Keep stronger existing controls;
 do not weaken them to match another repo's defaults.
 
+## Site update gate
+
+The required `Lint & typecheck` job also runs `npm run site:check` on PRs.
+Changes under `src/` or `public/`, or to Next configuration, TypeScript
+configuration, package.json, or package-lock.json require a newer timestamp in
+`src/site-updated.json` than the PR base has. Run `npm run site:stamp` after
+website changes and include the generated file. Dependency PRs need this too.
+Documentation-only PRs do not need a timestamp update.
+
+The footer formats the timestamp as a UTC date, such as `Updated Sep 7, 2026`.
+Same-day changes still require a newer timestamp, even when the visible date
+stays the same. This is a recorded website update, not a claim about deployment
+time. Check locally with `npm run site:check -- origin/main`.
+
 ## Deployment
 
 The Vercel project is `fschrhunt/fschrhunt`. Verified on September 7, 2026,

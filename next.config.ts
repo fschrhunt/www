@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   // requests, so the HTML loads but client components never hydrate.
   // Dev-only; ignored in production builds.
   allowedDevOrigins: [
-    "*.ts.net", // Tailscale MagicDNS hostnames
+    "**.ts.net", // MagicDNS includes both machine and tailnet subdomains
     "100.64.0.0/10", // Tailscale CGNAT range
     "192.168.0.0/16", // common LAN range
   ],

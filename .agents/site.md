@@ -53,8 +53,12 @@ Keep the supplied portrait and its hover tilt unless asked to change them.
 The small serif pronunciation beside Fischer's name is intentional. The expanded
 About passage uses Inter with roomy spacing and readable body text. Its label
 and arrow are an intentional blue crayon exception, using local Caveat lettering
-and a grain texture. The footer
-credit is quiet, with the turning mark opposite it. The floating hub belongs to
+and a grain texture. About has a handwritten invitation to its left on desktop, separated by a drawn
+bracket. On mobile it sits on the right with a square bracket. Both markers draw
+once from top to bottom, with a static stroke for reduced motion.
+The invitation disappears after opening About, remembered in session storage across internal
+navigation and reloads in the same tab. A new browsing session shows it again. The footer shows the last site update date, with the
+turning mark opposite it. The floating hub belongs to
 the site, while Contact has its own conversation layout.
 
 Current interaction decisions:
@@ -70,7 +74,7 @@ Current interaction decisions:
 Shed is the primary reference for the existing link interaction. Benji is a
 reference for personal character and small details. References inform decisions;
 they do not replace our own art direction. Inspect the relevant live behavior when asked to
-match it; do not reconstruct it from memory. Preserve the visible credit.
+match it; do not reconstruct it from memory. Keep third-party attribution in the licensing documentation.
 Borrow visual mechanisms without importing someone else's biography or prose.
 
 ## Truth and implementation
@@ -84,3 +88,10 @@ changed. Illustrations must be distinguishable from real product captures.
 The contact page prepares an email draft. It does not send anything itself.
 Do not imply otherwise. Safari favicon behavior still needs native verification;
 a Chromium preference check does not establish Safari support.
+
+## Update date
+
+After website, asset, or dependency changes, run `npm run site:stamp` and include
+`src/site-updated.json`. The required CI check rejects an unchanged timestamp.
+The full UTC timestamp distinguishes same-day updates; the footer shows its date.
+Documentation-only changes do not need a stamp.

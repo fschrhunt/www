@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ReturnArrow, SocialHub } from "@/components/social-hub";
+import { ReaderIndex } from "@/components/reader-index";
+import { SocialHub } from "@/components/social-hub";
 import { ScrambleLink } from "@/components/scramble-link";
 
 export const metadata: Metadata = {
@@ -12,11 +12,11 @@ export const metadata: Metadata = {
 export default function E() {
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
-    <main id="main" className="letter">
-      <Link className="back-to-index" href="/"><ReturnArrow /><span>Index</span></Link>
+    <main id="main" className="letter reader-page">
+      <ReaderIndex />
       <article className="product-note">
-        <div className="product-meta"><span>In development</span><time dateTime="2026-08-21" title="Repository created">August 2026</time></div>
         <h1>𝑒</h1>
+        <div className="product-meta"><span>In development</span><time dateTime="2026-08-21" title="Repository created">August 2026</time></div>
         <p>A small coding agent for the terminal.</p>
         <p>𝑒 is a tool I&apos;m building for working on code from the command line. Open it in a project, ask a question, and work from there.</p>
         <figure className="product-showcase">
