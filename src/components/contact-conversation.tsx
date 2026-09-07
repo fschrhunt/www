@@ -14,7 +14,7 @@ const introduction: Message[] = [
   { from: "fischer", text: "first, what should I call you?" },
 ];
 
-/** A guided contact form presented as a conversation, with an explicit email-draft handoff. */
+/** A guided contact conversation with a local draft and explicit email-app handoff. */
 export function ContactConversation() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [step, setStep] = useState<Step>("name");
@@ -31,24 +31,39 @@ export function ContactConversation() {
   const [asideMessage, setAsideMessage] = useState("");
   const memory = useRef<ChatMemory>({});
   const timer = useRef<number | undefined>(undefined);
+  const replyGeneration = useRef(0);
+  const busyRef = useRef(true);
+  const pendingReplies = useRef<{ replies: Message[]; next: Step } | null>({
+    replies: [welcome, ...introduction], next: "name",
+  });
   const thread = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const form = useRef<HTMLFormElement>(null);
 
-  /** Deliver each bubble after typing, with a short reading pause between replies. */
+  /** Deliver one cancellable reply sequence, recording unsent bubbles for effect restarts. */
   const queueReplies = useCallback((replies: Message[], next: Step, firstDelay = 650) => {
+    window.clearTimeout(timer.current);
+    const generation = ++replyGeneration.current;
+    pendingReplies.current = { replies, next };
+    busyRef.current = true;
+    setBusy(true);
+    setTyping(true);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function deliver(index: number) {
       timer.current = window.setTimeout(() => {
+        if (generation !== replyGeneration.current) return;
+        pendingReplies.current = index + 1 < replies.length ? { replies: replies.slice(index + 1), next } : null;
         setMessages(current => [...current, replies[index]]);
         setTyping(false);
         if (index === replies.length - 1) {
           setStep(next);
+          busyRef.current = false;
           setBusy(false);
           return;
         }
         timer.current = window.setTimeout(() => {
+          if (generation !== replyGeneration.current) return;
           setTyping(true);
           deliver(index + 1);
         }, reduced ? 0 : 350);
@@ -58,8 +73,14 @@ export function ContactConversation() {
   }, []);
 
   useEffect(() => {
-    queueReplies([welcome, ...introduction], "name", 900);
-    return () => window.clearTimeout(timer.current);
+    // Refresh may rerun effects while preserving the transcript; resume only unsent replies.
+    const generationCounter = replyGeneration;
+    const pending = pendingReplies.current;
+    if (pending) queueReplies(pending.replies, pending.next, 900);
+    return () => {
+      window.clearTimeout(timer.current);
+      generationCounter.current++;
+    };
   }, [queueReplies]);
 
   useEffect(() => {
@@ -90,13 +111,14 @@ export function ContactConversation() {
   /** Advance the form only after validating the current reply. */
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || step === "review") return;
+    if (busyRef.current || step === "review") return;
     const answer = value.trim();
     if (!answer) {
       setError(step === "message" ? "Write a little something first." : "Pop your answer in below.");
       return;
     }
     if (/^(?:start over|restart|reset)[.!]?$/i.test(answer)) { startOver(); return; }
+    busyRef.current = true;
     setError("");
     setAsideMessage("");
     setMessages(current => [...current, { from: "visitor", text: answer }]);
@@ -175,7 +197,7 @@ export function ContactConversation() {
 
   /** Preserve a message that happened to match one of the small-talk rules. */
   function useAsideAsMessage() {
-    if (busy || !asideMessage) return;
+    if (busyRef.current || !asideMessage) return;
     setNote(asideMessage);
     setAsideMessage("");
     setBusy(true);
@@ -185,7 +207,7 @@ export function ContactConversation() {
 
   /** Let visitors overrule a name guess without repeating or defending their name. */
   function useQuestionedName() {
-    if (busy || !questionedName || step !== "name") return;
+    if (busyRef.current || !questionedName || step !== "name") return;
     setName(questionedName);
     setQuestionedName("");
     setValue("");
@@ -197,7 +219,7 @@ export function ContactConversation() {
 
   /** Use the visitor's chosen address verbatim in the draft after an explicit override. */
   function useQuestionedEmail() {
-    if (busy || !questionedEmail || step !== "email") return;
+    if (busyRef.current || !questionedEmail || step !== "email") return;
     setEmail(questionedEmail);
     setQuestionedEmail("");
     setValue("");
@@ -270,6 +292,9 @@ export function ContactConversation() {
     </div>
 
     <div className={`conversation-bottom ${handwriting.variable}`}>
+      {overrideIndex !== -1 && <div className="contact-suggestions" aria-label="Suggested reply">
+        <button type="button" onClick={step === "name" ? useQuestionedName : step === "email" ? useQuestionedEmail : useAsideAsMessage}>Use that as my {step}<span aria-hidden="true">↗</span></button>
+      </div>}
       {step === "review" ? <div className="contact-handoff">
         <p>Open your email app to review and send it.</p>
         <a href={draft} className="email-draft-button">Open email draft <span aria-hidden="true">↗</span></a>

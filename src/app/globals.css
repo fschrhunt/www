@@ -375,6 +375,14 @@ button.showcase-bar { min-height: 44px; }
   .contact-override { position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%) rotate(-5deg); }
 }
 @media (max-width: 1099px) {
-  .message-row[data-override="true"] { flex-wrap: wrap; }
-  .contact-override { margin: 4px 0 8px auto; font-size: 19px; }
+  .contact-override { display: none; }
+}
+
+
+.contact-suggestions { display: none; }
+@media (max-width: 1099px) {
+  .contact-suggestions { display: flex; padding: 0 0 10px; }
+  .contact-suggestions button { display: inline-flex; align-items: center; gap: 14px; min-height: 44px; max-width: 100%; padding: 10px 14px; border: 1px solid #3565c5; border-radius: 14px; background: #3565c5; color: #fff; font: inherit; font-size: 13px; line-height: 20px; text-align: left; }
+  .contact-suggestions button span { color: inherit; }
+  .contact-suggestions button:active { background: #2854b4; border-color: #2854b4; }
 }

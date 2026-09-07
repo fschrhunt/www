@@ -118,5 +118,11 @@ sent to a service.
 Contact overrides use the same handwriting as About with a pen-drawn square
 bracket. They attach to the questioned visitor message and scroll with it. On wide
 screens the annotation sits beside the message on one tilted line; on phones
-it wraps beneath the message within the thread.
+a suggested-reply button appears above the composer instead, preserving message
+alignment and keeping the action within thumb reach.
 Name, email, and message overrides accept the questioned reply verbatim.
+
+The contact reply queue cancels superseded timers and records only unsent
+bubbles. Development effect restarts resume that queue without replaying the
+introduction or resetting the active question. A synchronous busy guard blocks
+duplicate submissions before React renders the disabled composer.
