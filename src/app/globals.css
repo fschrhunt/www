@@ -73,9 +73,9 @@ button { font: inherit; }
   .social-hub > a { width: 44px; height: 44px; }
 }
 
-/* A bounded conversation keeps the composer visible while longer notes scroll above it. */
+/* The conversation scrolls above its composer; side padding leaves room for the portrait tilt. */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.conversation-page { width: min(440px, calc(100% - 48px)); height: var(--conversation-height, 100dvh); max-height: 960px; margin: 0 auto; position: fixed; top: var(--conversation-top, 0px); left: 0; right: 0; padding-top: max(48px, env(safe-area-inset-top)); padding-bottom: max(22px, env(safe-area-inset-bottom)); overflow-y: auto; display: flex; flex-direction: column; }
+.conversation-page { width: min(456px, calc(100% - 32px)); padding-inline: 8px; height: var(--conversation-height, 100dvh); max-height: 960px; margin: 0 auto; position: fixed; top: var(--conversation-top, 0px); left: 0; right: 0; padding-top: max(48px, env(safe-area-inset-top)); padding-bottom: max(22px, env(safe-area-inset-bottom)); overflow-y: auto; display: flex; flex-direction: column; }
 .conversation-header { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; height: 44px; margin-bottom: 38px; }
 .contact-portrait { display: block; width: 44px; height: 44px; }
 .contact-portrait img { width: 58px; height: 58px; left: -13px; top: -10px; }
@@ -101,6 +101,10 @@ button { font: inherit; }
 .reply-send { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 0; background: #303030; color: white; cursor: pointer; transition: opacity 160ms; }
 .reply-send:disabled { opacity: .25; cursor: default; }
 .conversation-footnote { color: #969696; text-align: center; font-size: 10px; line-height: 18px; margin-top: 10px; }
+.conversation-bottom:has(input:focus, textarea:focus) .focus-shortcut { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .focus-shortcut { display: none; }
+}
 .reply-error { font-size: 12px; line-height: 19px; margin-top: 9px; color: #555; }
 .contact-handoff { padding: 15px 0 0; border-top: 1px solid #e8e8e8; }
 .contact-handoff > p { color: #777; font-size: 12px; margin-bottom: 13px; }
@@ -112,7 +116,7 @@ button { font: inherit; }
 @keyframes typing-dot { 0%, 60%, 100% { opacity: .4; } 30% { opacity: 1; } }
 @keyframes message-appear { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (max-width: 640px) {
-  .conversation-page { width: calc(100% - 40px); padding-top: max(24px, env(safe-area-inset-top)); }
+  .conversation-page { width: calc(100% - 24px); padding-top: max(24px, env(safe-area-inset-top)); }
   .conversation-header { margin-bottom: 28px; }
   .conversation-composer input, .conversation-composer textarea { font-size: 16px; }
 }

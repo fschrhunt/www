@@ -44,6 +44,23 @@ export function ContactConversation() {
     }
   }, [messages, busy, step]);
 
+  useEffect(() => {
+    /** Focus the current reply field without stealing slash input or browser shortcuts. */
+    function focusReply(event: globalThis.KeyboardEvent) {
+      if (event.key !== "/" || event.defaultPrevented || event.repeat || event.isComposing ||
+        event.ctrlKey || event.metaKey || event.altKey || busy || step === "review") return;
+      const active = document.activeElement;
+      if (active instanceof HTMLElement &&
+        (active.matches("input, textarea, select") || active.isContentEditable)) return;
+      const field = step === "message" ? textarea.current : input.current;
+      if (!field || field.disabled) return;
+      event.preventDefault();
+      field.focus();
+    }
+    window.addEventListener("keydown", focusReply);
+    return () => window.removeEventListener("keydown", focusReply);
+  }, [busy, step]);
+
   /** Advance the form only after validating the current reply. */
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -139,7 +156,7 @@ export function ContactConversation() {
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
       </form>}
       {error && <p className="reply-error" id="reply-error" role="alert">{error}</p>}
-      <p className="conversation-footnote" id="reply-hint">{step === "message" ? "Enter to reply · Shift + Enter for a new line" : step === "review" ? "Nothing is sent until you send the email." : "A little conversation before the email."}</p>
+      <p className="conversation-footnote" id="reply-hint">{step === "message" ? "Enter to reply · Shift + Enter for a new line" : step === "review" ? "Nothing is sent until you send the email." : "A little conversation before the email."}{step !== "review" && <span className="focus-shortcut"> · / to focus</span>}</p>
     </div>
   </>;
 }

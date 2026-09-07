@@ -31,7 +31,9 @@ the accepted homepage. Read the agent kit for creative decisions.
   bottom. Pinch zoom is not disabled.
 - `contact-conversation.tsx` validates name, email, and message locally, then
   prepares a `mailto:` draft. Clipboard copy is the fallback. Nothing is sent
-  by the app, and replies are not persisted.
+  by the app, and replies are not persisted. Pressing `/` outside an editable
+  field focuses the current reply. The shortcut leaves typing, modifier-key
+  combinations, composition, loading, and the final review alone.
 - `flip-demo.tsx` toggles an illustrative window between its front and note.
 - `favicon-theme.tsx` selects a PNG from the browser's color preference.
 
