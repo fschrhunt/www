@@ -6,7 +6,7 @@ import { suggestContactSubject } from "@/lib/contact-subject";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
-import { readContactName, contactAside, correctedName, replyToAside, type ChatMemory, type ContactStep as Step } from "@/lib/contact-rules";
+import { suggestContactEmail, tidyContactEmail, readContactName, contactAside, correctedName, replyToAside, type ChatMemory, type ContactStep as Step } from "@/lib/contact-rules";
 const handwriting = localFont({ src: "../app/fonts/benji-script.woff", variable: "--font-contact-annotation", display: "swap" });
 
 type Message = { from: "fischer" | "visitor"; text: string };
@@ -30,8 +30,10 @@ export function ContactConversation() {
   const [error, setError] = useState("");
   const [questionedName, setQuestionedName] = useState("");
   const [questionedEmail, setQuestionedEmail] = useState("");
+  const [suggestedEmail, setSuggestedEmail] = useState("");
   const [asideMessage, setAsideMessage] = useState("");
   const memory = useRef<ChatMemory>({});
+  const keptEmailDomains = useRef(new Set<string>());
   const timer = useRef<number | undefined>(undefined);
   const replyGeneration = useRef(0);
   const busyRef = useRef(true);
@@ -123,6 +125,7 @@ export function ContactConversation() {
     busyRef.current = true;
     setError("");
     setAsideMessage("");
+    setSuggestedEmail("");
     setMessages(current => [...current, { from: "visitor", text: answer }]);
     setValue("");
     setBusy(true);
@@ -166,13 +169,21 @@ export function ContactConversation() {
       reply = `nice to meet you, ${result.name}. what's a good email to reach you at?`;
       next = "email";
     } else if (step === "email") {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(answer)) {
+      const address = tidyContactEmail(answer);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
         setQuestionedEmail(answer);
         queueReplies([{ from: "fischer", text: "that email looks a little unfinished. try something like you@example.com. preferably yours." }], "email");
         return;
       }
+      const suggestion = suggestContactEmail(address);
+      if (suggestion && !keptEmailDomains.current.has(address.split("@")[1])) {
+        setQuestionedEmail(address);
+        setSuggestedEmail(suggestion);
+        queueReplies([{ from: "fischer", text: `did you mean ${suggestion}? that domain looks like it lost a small fight with the keyboard.` }], "email");
+        return;
+      }
       setQuestionedEmail("");
-      setEmail(answer);
+      setEmail(address);
       reply = "and what’s on your mind? take as much room as you need.";
       next = "message";
     } else {
@@ -190,6 +201,7 @@ export function ContactConversation() {
     setQuestionedName("");
     setQuestionedEmail("");
     setAsideMessage("");
+    setSuggestedEmail("");
     setError("");
     setBusy(true);
     setTyping(true);
@@ -203,6 +215,7 @@ export function ContactConversation() {
     setNote(asideMessage);
     setSubject(suggestContactSubject(asideMessage));
     setAsideMessage("");
+    setSuggestedEmail("");
     setBusy(true);
     setTyping(true);
     queueReplies([{ from: "fischer", text: "please look this over and edit anything you need before sending." }], "review");
@@ -220,10 +233,24 @@ export function ContactConversation() {
     queueReplies([{ from: "fischer", text: "fair enough. you know your name better than a form does. what's a good email to reach you at?" }], "email");
   }
 
+  /** Apply a domain correction only after the visitor chooses it. */
+  function useSuggestedEmail() {
+    if (busyRef.current || step !== "email" || !suggestedEmail) return;
+    setEmail(suggestedEmail);
+    setMessages(current => [...current, { from: "visitor", text: `Use ${suggestedEmail}` }]);
+    setSuggestedEmail("");
+    setQuestionedEmail("");
+    setValue("");
+    setError("");
+    queueReplies([{ from: "fischer", text: "fixed. what's on your mind?" }], "message");
+  }
+
   /** Use the visitor's chosen address verbatim in the draft after an explicit override. */
   function useQuestionedEmail() {
     if (busyRef.current || !questionedEmail || step !== "email") return;
+    if (suggestedEmail) keptEmailDomains.current.add(questionedEmail.split("@")[1]);
     setEmail(questionedEmail);
+    setSuggestedEmail("");
     setQuestionedEmail("");
     setValue("");
     setError("");
@@ -256,7 +283,9 @@ export function ContactConversation() {
     setQuestionedName("");
     setQuestionedEmail("");
     setAsideMessage("");
+    setSuggestedEmail("");
     memory.current = {};
+    keptEmailDomains.current.clear();
     queueReplies([welcome, ...introduction], "name", 900);
   }
 
@@ -269,7 +298,7 @@ export function ContactConversation() {
     <div className={`conversation-thread ${handwriting.variable}`} ref={thread} role="log" aria-label="Your contact note" aria-live="polite" aria-relevant="additions">
       {messages.map((message, index) => <div key={index} className={`message-row message-${message.from}`} data-override={index === overrideIndex}>
         <div className="message-bubble"><span className="sr-only">{message.from === "visitor" ? "You: " : "Fischer’s contact form: "}</span>{message.text}</div>
-        {index === overrideIndex && <button
+        {index === overrideIndex && !suggestedEmail && <button
         className="contact-override" type="button"
         onClick={step === "name" ? useQuestionedName : step === "email" ? useQuestionedEmail : useAsideAsMessage}>
         <svg width="12" height="34" viewBox="0 0 12 34" fill="none" aria-hidden="true">
@@ -282,13 +311,17 @@ export function ContactConversation() {
     </div>
 
     <div className={`conversation-bottom ${handwriting.variable}`}>
-      {overrideIndex !== -1 && <div className="contact-suggestions" aria-label="Suggested reply">
+      {suggestedEmail && step === "email" && !busy && <div className="contact-suggestions contact-email-suggestions" aria-label="Email correction">
+        <button type="button" onClick={useSuggestedEmail}>Use {suggestedEmail}</button>
+        <button type="button" onClick={useQuestionedEmail}>Keep what I typed</button>
+      </div>}
+      {overrideIndex !== -1 && !suggestedEmail && <div className="contact-suggestions" aria-label="Suggested reply">
         <button type="button" onClick={step === "name" ? useQuestionedName : step === "email" ? useQuestionedEmail : useAsideAsMessage}>Use that as my {step}<span aria-hidden="true">↗</span></button>
       </div>}
       {step === "review" ? <ContactReview name={name} email={email} subject={subject} note={note}
         setName={setName} setEmail={setEmail} setSubject={setSubject} setNote={setNote}
         startOver={startOver} /> : <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
-        {step === "message" ? <textarea ref={textarea} aria-label="Your message" aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :
+        {step === "message" ? <textarea ref={textarea} aria-label="Your message" spellCheck aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :
           <input ref={input} aria-label={step === "name" ? "Your name" : "Your email"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type="text" inputMode="text" autoComplete={step === "email" ? "email" : "given-name"} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : 254} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
       </form>}

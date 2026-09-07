@@ -1,3 +1,46 @@
+/** Fix a brief held Shift key and spacing, preserving initials and internal capitals. */
+export function tidyContactName(value: string) {
+  return value.trim().replace(/\s+/gu, " ").replace(/\b([A-Z])([A-Z])([a-z]{2,})\b/g, (_, first, second, rest) => first + second.toLowerCase() + rest);
+}
+
+/** Remove paste spacing around email separators; preserve the mailbox spelling and case. */
+export function tidyContactEmail(value: string) {
+  const compact = value.trim().replace(/\s*@\s*/g, "@");
+  const at = compact.lastIndexOf("@");
+  return at < 0 ? compact : compact.slice(0, at + 1) + compact.slice(at + 1).toLowerCase();
+}
+
+/** Match one insertion, deletion, replacement, or adjacent swap without broad fuzzy guessing. */
+function oneEmailTypo(a: string, b: string): boolean {
+  if (a === b || Math.abs(a.length - b.length) > 1) return false;
+  let i = 0;
+  while (a[i] === b[i] && i < Math.min(a.length, b.length)) i++;
+  if (a.length !== b.length) {
+    const [longer, shorter] = a.length > b.length ? [a, b] : [b, a];
+    return longer.slice(i + 1) === shorter.slice(i);
+  }
+  return a.slice(i + 1) === b.slice(i + 1) ||
+    (a[i] === b[i + 1] && a[i + 1] === b[i] && a.slice(i + 2) === b.slice(i + 2));
+}
+
+/** Offer a unique near-match to a common provider, preserving mailbox and legitimate suffixes. */
+export function suggestContactEmail(value: string): string | undefined {
+  const address = tidyContactEmail(value);
+  const match = address.match(/^([^\s@<>]+)@([a-z]+)\.([a-z]+)$/u);
+  if (!match) return;
+  const [, mailbox, provider, suffix] = match;
+  const providers = ["gmail", "hotmail", "outlook", "yahoo", "icloud", "protonmail", "proton", "fastmail"];
+  // Real country and alternative suffixes are not spelling mistakes.
+  const mistypedCom = ["con", "cmo", "ocm", "comn", "comm", "om", "vom", "xom"];
+  const otherProviders = ["mail", "ymail", "googlemail", "aol", "gmx", "live", "msn", "hey", "zoho", "rocketmail"];
+  if (providers.includes(provider) || otherProviders.includes(provider)) {
+    return mistypedCom.includes(suffix) ? `${mailbox}@${provider}.com` : undefined;
+  }
+  if (suffix !== "com" || provider.length < 4) return;
+  const candidates = providers.filter(candidate => oneEmailTypo(provider, candidate));
+  return candidates.length === 1 ? `${mailbox}@${candidates[0]}.com` : undefined;
+}
+
 type NameReply = { name: string; reply?: never } | { name?: never; reply: string };
 
 /** Recognize obvious non-name replies, without treating unusual names as invalid. */
@@ -22,7 +65,7 @@ export function readContactName(answer: string): NameReply {
     name.split(/\s+/u).length > 6) {
     return { reply: "I had one job: ask your name. somehow I'm already off-script. what should I call you?" };
   }
-  return { name };
+  return { name: tidyContactName(name) };
 }
 
 export type ContactStep = "name" | "email" | "message" | "review";
@@ -40,7 +83,7 @@ const topics = [
   { key: "bot", pattern: /^(?:are you (?:an? )?(?:ai|bot|robot)|is this (?:ai|a bot)|are you chatgpt)$/i,
     replies: ["just a form with a few prepared lines. the acting budget is zero.", "still a form. this is my entire range."] },
   { key: "email-purpose", pattern: /^why (?:do you |would you )?(?:need|want|ask for|require) (?:my |an? )?email(?: address)?$/i,
-    replies: ["so Fischer can reply. this stays in your browser until you open and send the email draft.", "a return address, that's all. otherwise the reply has nowhere to go."] },
+    replies: ["so Fischer can reply. this stays in your browser until you review your note and hit send.", "a return address, that's all. otherwise the reply has nowhere to go."] },
 ];
 
 /** Normalize only the matching copy; never rewrite the visitor's name or message. */
