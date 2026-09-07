@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ReturnArrow, SocialHub } from "@/components/social-hub";
+import { ReaderIndex } from "@/components/reader-index";
+import { SocialHub } from "@/components/social-hub";
 import { ScrambleLink } from "@/components/scramble-link";
 import { FlipDemo } from "@/components/flip-demo";
 
@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 export default function Flip() {
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
-    <main id="main" className="letter">
-      <Link className="back-to-index" href="/"><ReturnArrow /><span>Index</span></Link>
+    <main id="main" className="letter reader-page">
+      <ReaderIndex />
       <article className="product-note">
-        <div className="product-meta"><span>In development · macOS</span><time dateTime="2026-09-07" title="Repository created">September 2026</time></div>
         <h1>Flip</h1>
+        <div className="product-meta"><span>In development · macOS</span><time dateTime="2026-09-07" title="Repository created">September 2026</time></div>
         <p>Notes on the back of your windows.</p>
         <p>Flip gives your Mac apps somewhere to keep a note. Option-click an empty part of a window&apos;s title bar and the note opens on the other side.</p>
         <FlipDemo />

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ReturnArrow, SocialHub } from "@/components/social-hub";
+import { ReaderIndex } from "@/components/reader-index";
+import { SocialHub } from "@/components/social-hub";
 import { ScrambleLink } from "@/components/scramble-link";
 
 export const metadata: Metadata = {
@@ -12,11 +12,11 @@ export const metadata: Metadata = {
 export default function WelcomeNote() {
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
-    <main id="main" className="letter">
-      <Link className="back-to-index" href="/"><ReturnArrow /><span>Index</span></Link>
+    <main id="main" className="letter reader-page">
+      <ReaderIndex />
       <article className="product-note">
-        <div className="product-meta"><time dateTime="2026-09-07">September 7, 2026</time><span>1 min read</span></div>
         <h1>welcome who dis?</h1>
+        <div className="product-meta"><time dateTime="2026-09-07">September 7, 2026</time><span>1 min read</span></div>
         <p>this was supposed to be a quick personal website.</p>
         <p>then the font was wrong. then the hover was wrong. then the hover was almost right, which is much worse because now you know it can be right.</p>
         <p>at one point, the scrambled text was running into the little arrow beside it. even the letters were trying to leave.</p>

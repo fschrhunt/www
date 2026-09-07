@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type AnchorHTMLAttributes } from "react";
-import Link from "next/link";
+import { PageLink as Link } from "@/components/page-link";
 
 type ScrambleLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "children" | "href"> & {
   children: string;

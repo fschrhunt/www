@@ -109,7 +109,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 
 /* The conversation scrolls above its composer; side padding leaves room for the portrait tilt. */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.conversation-page { width: min(456px, calc(100% - 32px)); padding-inline: 8px; height: var(--conversation-height, 100dvh); max-height: 960px; margin: 0 auto; position: fixed; top: var(--conversation-top, 0px); left: 0; right: 0; padding-top: max(48px, env(safe-area-inset-top)); padding-bottom: max(22px, env(safe-area-inset-bottom)); overflow-y: auto; display: flex; flex-direction: column; }
+.conversation-page { width: min(456px, calc(100% - 32px)); padding-inline: 8px; height: var(--conversation-height, 100dvh); margin: 0 auto; position: fixed; top: var(--conversation-top, 0px); left: 0; right: 0; padding-top: max(48px, env(safe-area-inset-top)); padding-bottom: max(22px, env(safe-area-inset-bottom)); overflow-y: auto; display: flex; flex-direction: column; }
 .conversation-header { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; height: 44px; margin-bottom: 38px; }
 .contact-portrait { display: block; width: 44px; height: 44px; }
 .contact-portrait img { width: 58px; height: 58px; left: -13px; top: -10px; }
@@ -133,13 +133,8 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .conversation-composer input:focus, .conversation-composer textarea:focus { background: #e6e6e8; border-color: #d2d2d4; }
 .conversation-composer [aria-invalid="true"] { border-color: #777; }
 .conversation-composer :disabled { opacity: .6; }
-.reply-send { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 0; background: #303030; color: white; cursor: pointer; transition: opacity 160ms; }
-.reply-send:disabled { opacity: .25; cursor: default; }
-.conversation-footnote { color: #969696; text-align: center; font-size: 10px; line-height: 18px; margin-top: 10px; }
-.conversation-bottom:has(input:focus, textarea:focus) .focus-shortcut { display: none; }
-@media (hover: none) and (pointer: coarse) {
-  .focus-shortcut { display: none; }
-}
+.reply-send { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 0; background: #3565c5; color: white; cursor: pointer; transition: background-color 160ms, opacity 160ms; }
+.reply-send:disabled { background: #303030; opacity: .25; cursor: default; }
 .reply-error { font-size: 12px; line-height: 19px; margin-top: 9px; color: #555; }
 .contact-handoff { padding: 15px 0 0; border-top: 1px solid #e8e8e8; }
 .contact-handoff > p { color: #777; font-size: 12px; margin-bottom: 13px; }
@@ -224,7 +219,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 
 /* Touch gets room to tap without turning a first tap into a hover preview. */
 a, button { touch-action: manipulation; }
-.letter-footer > a { display: inline-flex; align-items: center; min-height: 44px; }
+.letter-footer > time { display: inline-flex; align-items: center; min-height: 44px; }
 button.showcase-bar { min-height: 44px; }
 @media (hover: hover) and (pointer: fine) and (min-width: 641px) {
   .text-link:hover .link-label::after { transform: scaleX(1); }
@@ -253,7 +248,38 @@ button.showcase-bar { min-height: 44px; }
 }
 .conversation-page[data-compact] { padding-top: max(12px, env(safe-area-inset-top)); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
 .conversation-page[data-compact] .conversation-header { margin-bottom: 8px; }
-.conversation-page[data-compact] .conversation-footnote { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .portrait:hover img, .tiny-mark:hover { transform: none; }
+}
+
+/* Benji's reading geometry: an 80px desktop rail, inline Index at 1080px and below. */
+.letter.reader-page { padding-top: 80px; }
+.reader-page .product-note { margin-top: 0; }
+.reader-index { position: fixed; z-index: 12; top: 80px; left: 80px; }
+.reader-index .back-to-index { position: relative; display: flex; width: fit-content; min-height: 28px; padding: 4px 0; gap: 4px; font-size: 14px; line-height: 20px; color: #999; }
+.reader-index .back-to-index::before { content: ""; position: absolute; inset: -8px; }
+.reader-index .back-to-index svg { width: 14px; height: 14px; }
+.reader-index .back-to-index:hover { color: var(--ink); }
+.reader-outline { padding-top: 30px; width: 160px; max-height: calc(100dvh - 120px); overflow-y: auto; scrollbar-width: thin; font-size: 13px; line-height: 1.2; }
+.reader-current-title { display: block; width: 100%; padding: 0 0 16px; border: 0; background: none; color: #999; text-align: left; font: inherit; opacity: 0; visibility: hidden; transition: opacity 400ms ease, visibility 400ms, color 100ms; }
+.reader-outline[data-scrolled="true"] .reader-current-title { opacity: 1; visibility: visible; }
+.reader-current-title:hover, .reader-current-title[data-active="true"] { color: var(--ink); }
+.reader-outline ul { display: flex; flex-direction: column; gap: 8px; }
+.reader-outline a { display: block; color: #999; transition: color 100ms; }
+.reader-outline [data-level="3"] { padding-left: 12px; }
+.reader-outline a:hover, .reader-outline a[aria-current] { color: var(--ink); }
+.reader-outline :focus-visible { outline-offset: 2px; }
+.reader-page article :is(h2, h3) { scroll-margin-top: 64px; }
+.reader-page .product-note > h2 { margin-top: 28px; font-size: 16px; line-height: 25px; }
+.reader-page .product-note > h3 { margin-top: 12px; font-size: 14px; line-height: 23px; }
+.reader-prompt { margin: 0; padding: 17px 20px; border-left: 2px solid #d9d9d9; color: #555; background: #f5f5f5; font-size: 13px; line-height: 23px; }
+@media (max-width: 1080px) {
+  .reader-index { position: static; padding-bottom: 32px; }
+  .reader-outline { display: none; }
+}
+@media (max-width: 768px) {
+  .letter.reader-page { width: auto; max-width: 540px; margin-inline: auto; padding: max(32px, env(safe-area-inset-top)) 24px calc(120px + env(safe-area-inset-bottom)); box-sizing: content-box; }
+}
+@media (max-width: 588px) {
+  .letter.reader-page { margin-inline: 0; }
 }
