@@ -47,3 +47,18 @@ provider and send no mail. A real end-to-end check requires the API key and a
 verified domain. Send a clearly labeled test only when authorized, then check
 Resend's delivery status and the Gmail label. Local changes must be deployed
 before they change the public contact page.
+
+Name recognition repairs a two-letter leading capital run followed by lowercase
+letters, such as HUnt, and collapses extra spaces. This is a heuristic; the review
+remains editable. Email entry trims outside whitespace and spaces around @ and
+lowercases the domain, preserving the mailbox. A unique single-letter edit or adjacent swap in a common .com provider, or a
+listed .com suffix typo, prompts “did you mean?” with buttons to use the suggestion
+or keep the original. Custom suffixes, subdomains, and mailbox spelling are preserved. Suggestions are
+heuristics, not domain ownership checks. Keeping the original suppresses another
+prompt for that domain until Start over.
+Starting over, going back, or submitting another answer clears the suggestion. Message fields use browser spellcheck without rewriting the message.
+
+The review keeps sender fields on one row when they fit and wraps them on narrow
+screens. Long names and addresses wrap within their editable fields. While sending,
+the draft is locked and repeat clicks are ignored. Failure preserves all fields;
+success moves keyboard focus to Start over.
