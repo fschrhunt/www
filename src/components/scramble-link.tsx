@@ -55,8 +55,9 @@ export function ScrambleLink({ children, className = "", ...props }: ScrambleLin
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
   return (
-    <Link {...props} className={`text-link ${className}`} onPointerEnter={animate}
-      onPointerLeave={reset} onFocus={animate} onBlur={reset}>
+    <Link {...props} className={`text-link ${className}`}
+      onPointerEnter={event => { if (event.pointerType === "mouse") animate(); }}
+      onPointerLeave={reset} onFocus={event => { if (event.currentTarget.matches(":focus-visible")) animate(); }} onBlur={reset}>
       <span className="link-label">
         <span ref={label}>{children}</span>
         <span className="link-scramble" ref={overlay} aria-hidden="true" />
