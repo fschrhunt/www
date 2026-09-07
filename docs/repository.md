@@ -29,9 +29,10 @@ do not weaken them to match another repo's defaults.
 
 ## Deployment
 
-The existing Vercel project is `fschrhunt/fschrhunt`. On inspection on September
-7, 2026, it had no Git repository connection and its Vercel-hosted aliases were
-protected. Do not assume that observation remains current.
+The Vercel project is `fschrhunt/fschrhunt`. Verified on September 7, 2026,
+it is connected to `fschrhunt/www` with `main` as its production branch. A PR
+push triggered a preview deployment. Deployment protection was still set to
+`all_except_custom_domains`; verify public access on the intended domain.
 
 Before publishing, verify the Git connection to `fschrhunt/www`, production
 branch `main`, domain, and deployment protection. Once connected, changes to
