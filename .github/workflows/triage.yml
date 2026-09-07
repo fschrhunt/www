@@ -1,0 +1,48 @@
+name: Triage
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  paths:
+    name: Label changed areas
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Read filenames through GitHub's API. Never check out or run PR code here.
+      - name: Apply maintained path labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -eu
+          files=$(gh api "repos/$REPO/pulls/$PR/files" --paginate --jq '.[].filename')
+          add_label() {
+            name=$1 color=$2 description=$3
+            gh label create "$name" --repo "$REPO" --color "$color" \
+              --description "$description" --force
+            gh pr edit "$PR" --repo "$REPO" --add-label "$name"
+          }
+          # A non-match skips the label; API failures must still fail the job.
+          if printf '%s\n' "$files" | grep -Eq '^(src/|public/)'; then
+            add_label area:ui 5319e7 'Pages, styling, interaction, and visual assets'
+          fi
+          if printf '%s\n' "$files" | grep -Eq '^(docs/|README$|AGENTS.md$|\.agents/)'; then
+            add_label documentation 0075ca 'Documentation and agent guidance'
+          fi
+          if printf '%s\n' "$files" | grep -Eq '^(\.github/|scripts/|next.config.ts$|package(-lock)?\.json$)'; then
+            add_label area:infra 6f42c1 'Build, CI, release, or repository automation'
+          fi
+          if printf '%s\n' "$files" | grep -Eq '^(package(-lock)?\.json$|\.github/dependabot.yml$)'; then
+            add_label dependencies 0366d6 'Dependency or toolchain changes'
+          fi
+          if printf '%s\n' "$files" | grep -Eq '^(src/components/contact-conversation.tsx$|next.config.ts$|scripts/|\.github/(CODEOWNERS$|workflows/))'; then
+            add_label security-surface b60205 'Contact handling, build execution, or repository permissions'
+          fi

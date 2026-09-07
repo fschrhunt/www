@@ -1,0 +1,91 @@
+FSCHRHUNT █
+PROJECT: www
+
+///
+
+STATUS: PERSONAL
+
+///
+
+OVERVIEW:
+ - Things I make, notes I leave, and a way to say hello.
+ - Originally called blog. Renamed before the first post.
+ - The scope has since expanded to include a second font.
+
+///
+
+REQUIRES:
+ - Node.js 22 or newer and npm.
+ - No environment variables. A rare opportunity to just run the thing.
+
+///
+
+START:
+ npm ci
+ npm run dev
+
+ http://localhost:3000
+
+///
+
+CONTENTS:
+ src/app/page.tsx              a brief introduction
+ src/app/products/             e, Flip, and Diffuse
+ src/app/notes/                evidence of a thought
+ src/app/contact/              a conversation before the email
+ src/app/globals.css           where the gaps are negotiated
+ public/portrait.png           me, approximately
+
+ Product dates are repository creation dates, not release dates.
+ Flip's demo is an illustration. Diffuse's source is private.
+ Contact prepares an email draft. You still have to send it.
+
+///
+
+MAINTENANCE:
+ npm run lint
+ npm run build
+ npm run typecheck
+ npm start
+
+ Next.js, React, TypeScript. Inter is hosted locally; its license lives
+ in src/app/fonts/OFL.txt. Motion respects reduced-motion preferences.
+
+ To regenerate the transparent portrait icons:
+ node scripts/generate-favicons.mjs
+
+ Light and dark browser themes get separate PNGs. Safari gets its own
+ pinned-tab mask. Native Safari's live theme switching is still unverified.
+ There is, unfortunately, a browser-specific paragraph in this README.
+
+///
+
+FUTURE WORK:
+ docs/README.md                a map of the moving parts
+ AGENTS.md                     instructions for agents working here
+ .agents/site.md               taste, subject to further taste
+ .agents/skills/               writing, design, and review
+ .agents/prompts/              somewhere to start
+
+ Pages can have their own art direction. The homepage is not a zoning law.
+
+///
+
+DEPLOY:
+ Vercel, Next.js preset, production branch main.
+ Connect the Git repository and configure public access in Vercel.
+ A merged PR is not a deployment until that wiring exists.
+
+///
+
+A NOD TO:
+ https://shedsgns.me/
+
+ For the design inspiration. The indecision is mine.
+
+///
+
+LICENSE:
+ Code: AGPL-3.0-only. See LICENSE.
+ Personal writing and portrait artwork: all rights reserved.
+ Inter retains its OFL license. Full scope: docs/licensing.md.

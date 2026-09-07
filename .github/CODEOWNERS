@@ -1,0 +1,11 @@
+# Ownership is informational; main is gated by CI and resolved conversations.
+# Keep automation, contact handling, and dependency changes visible to the owner.
+*                         @fschrhunt
+/.github/                 @fschrhunt
+/.agents/                 @fschrhunt
+/AGENTS.md                @fschrhunt
+/src/components/contact-conversation.tsx @fschrhunt
+/scripts/                 @fschrhunt
+/package.json             @fschrhunt
+/package-lock.json        @fschrhunt
+/next.config.ts           @fschrhunt
