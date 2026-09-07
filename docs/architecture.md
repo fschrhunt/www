@@ -26,6 +26,9 @@ the accepted homepage. Read the agent kit for creative decisions.
 - `scramble-link.tsx` preserves the accessible label and fits the temporary
   symbols within its measured width. CSS draws the underline and arrow mask.
 - `social-hub.tsx` contains the profile links and the shared return-arrow icon.
+- `contact-viewport.tsx` fits the contact frame to the visual viewport above
+  mobile keyboards and keeps the latest message in view when already at the
+  bottom. Pinch zoom is not disabled.
 - `contact-conversation.tsx` validates name, email, and message locally, then
   prepares a `mailto:` draft. Clipboard copy is the fallback. Nothing is sent
   by the app, and replies are not persisted.
@@ -42,3 +45,7 @@ at tab-icon size. `public/link-arrow.svg` supplies the hover mask.
 Inter and its separate OFL license are in `src/app/fonts/`. Retain that license.
 Product illustrations are not real captures. Product dates are repository
 creation dates, and Diffuse's private repository is not linked publicly.
+
+The footer mark is an inline SVG, not a Unicode character that can become an
+emoji. Portrait links keep their hit area stationary while only the image tilts.
+Touch layouts provide 44px targets for index links, navigation, and form actions.

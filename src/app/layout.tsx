@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { FaviconTheme } from "@/components/favicon-theme";
 import "./globals.css";
 
 const inter = localFont({ src: "./fonts/inter-regular.ttf", variable: "--font-inter", display: "swap", weight: "400" });
+
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export const metadata: Metadata = {
   title: "Fischer Hunt",

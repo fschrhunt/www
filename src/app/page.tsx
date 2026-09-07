@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { SocialHub } from "@/components/social-hub";
 import { ScrambleLink } from "@/components/scramble-link";
 
@@ -11,9 +12,9 @@ const products = [
 
 /** The supplied portrait, framed around its transparent padding and tilted on hover. */
 function Portrait() {
-  return <div className="portrait" tabIndex={0} aria-label="Hello from Fischer">
+  return <Link className="portrait" href="/" aria-label="Fischer’s home page">
     <Image src="/portrait.png" alt="An illustrated portrait of Fischer" width={160} height={160} sizes="160px" preload />
-  </div>;
+  </Link>;
 }
 
 /** A personal introduction, products, notes, and floating contact hub. */
@@ -42,7 +43,7 @@ export default function Home() {
         <span className="reading-time">1 min read</span>
       </li></ul>
     </section>
-    <footer className="letter-footer"><a href="https://shedsgns.me/" aria-label="A nod to Shed for the design inspiration">a nod to shed</a><span className="tiny-mark" aria-hidden="true">✳</span></footer>
+    <footer className="letter-footer"><a href="https://shedsgns.me/" aria-label="A nod to Shed for the design inspiration">a nod to shed</a><svg className="tiny-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v16M2 10h16M4.35 4.35l11.3 11.3M4.35 15.65l11.3-11.3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg></footer>
   </main>
   <SocialHub />
   </>;
