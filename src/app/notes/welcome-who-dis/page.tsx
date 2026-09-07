@@ -22,9 +22,9 @@ export default function WelcomeNote() {
         <p>at one point, the scrambled text was running into the little arrow beside it. even the letters were trying to leave.</p>
         <p>anyway. welcome.</p>
         <p>i originally called this a blog, then renamed the repo before i had anything to post. good to get the important work out of the way.</p>
-        <p>i want to write down the bits that usually disappear once something works. what i tried, what broke, what i deleted. the finished thing rarely tells you how many bad versions came before it. this website would prefer that we didn&apos;t discuss those.</p>
+        <p>i want to write down the bits that usually disappear once something works. what i tried, what broke, what i deleted. the finished thing rarely tells you how many bad versions came before it. i&apos;d prefer not to discuss those.</p>
         <p>no posting schedule. i&apos;m not giving myself a manager just because i own a domain.</p>
-        <p>if you&apos;re here early, there isn&apos;t much to read yet. please enjoy the favicon. we worked hard on that.</p>
+        <p>if you&apos;re here early, there isn&apos;t much to read yet. please enjoy the favicon. i worked hard on that.</p>
         <p><ScrambleLink href="/contact">say hi</ScrambleLink></p>
       </article>
     </main>

@@ -31,7 +31,10 @@ is personal artwork as described above.
 ## Third-party material
 
 Inter remains under its SIL Open Font License in
-[src/app/fonts/OFL.txt](../src/app/fonts/OFL.txt). Dependencies retain their own
+[src/app/fonts/OFL.txt](../src/app/fonts/OFL.txt). Caveat comes from
+[Google Fonts](https://github.com/google/fonts/tree/main/ofl/caveat) and retains
+its SIL Open Font License in
+[src/app/fonts/caveat-OFL.txt](../src/app/fonts/caveat-OFL.txt). Dependencies retain their own
 licenses. The curved link-arrow graphic in `public/link-arrow.svg` was sourced
 from https://shedsgns.me/assets/arrow.svg; no independent license grant for that
 third-party graphic is asserted here. The repository's AGPL grant covers only
