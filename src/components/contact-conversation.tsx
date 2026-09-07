@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
 type Step = "name" | "email" | "message" | "review";
 type Message = { from: "fischer" | "visitor"; text: string };
@@ -12,13 +12,14 @@ const introduction: Message[] = [
 
 /** A guided contact form presented as a conversation, with an explicit email-draft handoff. */
 export function ContactConversation() {
-  const [messages, setMessages] = useState<Message[]>([welcome]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [step, setStep] = useState<Step>("name");
   const [value, setValue] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(true);
+  const [typing, setTyping] = useState(true);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const timer = useRef<number | undefined>(undefined);
@@ -27,14 +28,31 @@ export function ContactConversation() {
   const textarea = useRef<HTMLTextAreaElement>(null);
   const form = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
+  /** Deliver each bubble after typing, with a short reading pause between replies. */
+  const queueReplies = useCallback((replies: Message[], next: Step, firstDelay = 650) => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    timer.current = window.setTimeout(() => {
-      setMessages([welcome, ...introduction]);
-      setBusy(false);
-    }, reduced ? 0 : 850);
-    return () => window.clearTimeout(timer.current);
+    function deliver(index: number) {
+      timer.current = window.setTimeout(() => {
+        setMessages(current => [...current, replies[index]]);
+        setTyping(false);
+        if (index === replies.length - 1) {
+          setStep(next);
+          setBusy(false);
+          return;
+        }
+        timer.current = window.setTimeout(() => {
+          setTyping(true);
+          deliver(index + 1);
+        }, reduced ? 0 : 350);
+      }, reduced ? 0 : index === 0 ? firstDelay : 500 + replies[index].text.length * 8);
+    }
+    deliver(0);
   }, []);
+
+  useEffect(() => {
+    queueReplies([welcome, ...introduction], "name", 900);
+    return () => window.clearTimeout(timer.current);
+  }, [queueReplies]);
 
   useEffect(() => {
     const container = thread.current;
@@ -42,7 +60,24 @@ export function ContactConversation() {
     if (!busy && step !== "review" && window.matchMedia("(min-width: 640px)").matches) {
       (step === "message" ? textarea.current : input.current)?.focus();
     }
-  }, [messages, busy, step]);
+  }, [messages, busy, step, typing]);
+
+  useEffect(() => {
+    /** Focus the current reply field without stealing slash input or browser shortcuts. */
+    function focusReply(event: globalThis.KeyboardEvent) {
+      if (event.key !== "/" || event.defaultPrevented || event.repeat || event.isComposing ||
+        event.ctrlKey || event.metaKey || event.altKey || busy || step === "review") return;
+      const active = document.activeElement;
+      if (active instanceof HTMLElement &&
+        (active.matches("input, textarea, select") || active.isContentEditable)) return;
+      const field = step === "message" ? textarea.current : input.current;
+      if (!field || field.disabled) return;
+      event.preventDefault();
+      field.focus();
+    }
+    window.addEventListener("keydown", focusReply);
+    return () => window.removeEventListener("keydown", focusReply);
+  }, [busy, step]);
 
   /** Advance the form only after validating the current reply. */
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -61,6 +96,7 @@ export function ContactConversation() {
     setMessages(current => [...current, { from: "visitor", text: answer }]);
     setValue("");
     setBusy(true);
+    setTyping(true);
     let reply: string;
     let next: Step;
     if (step === "name") {
@@ -76,11 +112,7 @@ export function ContactConversation() {
       reply = "all set. your note is ready to go.";
       next = "review";
     }
-    timer.current = window.setTimeout(() => {
-      setMessages(current => [...current, { from: "fischer", text: reply }]);
-      setStep(next);
-      setBusy(false);
-    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 650);
+    queueReplies([{ from: "fischer", text: reply }], next);
   }
 
   /** Enter sends a message; Shift+Enter keeps a newline, including during IME composition. */
@@ -91,17 +123,20 @@ export function ContactConversation() {
     }
   }
 
+  /** Clear the draft and replay the greeting with the same message pacing. */
   function startOver() {
     window.clearTimeout(timer.current);
-    setMessages([welcome, ...introduction]);
+    setMessages([]);
     setStep("name");
     setValue("");
     setName("");
     setEmail("");
     setNote("");
-    setBusy(false);
+    setBusy(true);
+    setTyping(true);
     setError("");
     setCopied(false);
+    queueReplies([welcome, ...introduction], "name", 900);
   }
 
   const body = `${note}\n\n${name}\n${email}`;
@@ -124,7 +159,7 @@ export function ContactConversation() {
       {messages.map((message, index) => <div key={index} className={`message-row message-${message.from}`}>
         <div className="message-bubble"><span className="sr-only">{message.from === "visitor" ? "You: " : "Fischer’s contact form: "}</span>{message.text}</div>
       </div>)}
-      {busy && <div className="typing-bubble" role="status" aria-label="Next question is coming"><i /><i /><i /></div>}
+      {typing && <div className="typing-bubble" role="status" aria-label="Next question is coming"><i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" /></div>}
     </div>
 
     <div className="conversation-bottom">
@@ -139,7 +174,7 @@ export function ContactConversation() {
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
       </form>}
       {error && <p className="reply-error" id="reply-error" role="alert">{error}</p>}
-      <p className="conversation-footnote" id="reply-hint">{step === "message" ? "Enter to reply · Shift + Enter for a new line" : step === "review" ? "Nothing is sent until you send the email." : "A little conversation before the email."}</p>
+      <p className="conversation-footnote" id="reply-hint">{step === "message" ? "Enter to reply · Shift + Enter for a new line" : step === "review" ? "Nothing is sent until you send the email." : "A little conversation before the email."}{step !== "review" && <span className="focus-shortcut"> · / to focus</span>}</p>
     </div>
   </>;
 }

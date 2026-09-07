@@ -13,7 +13,9 @@ a hover arrow right. That is better material than a generic joke about coffee.
 Let the joke end without explaining it. Some paragraphs should just say things.
 
 Notes currently use lowercase conversational prose. Names and product spellings
-still matter. Product pages prioritize what the software does. Contact and
+still matter. Use `𝑒` for the product name, matching its own README. Executable
+commands, repository names, and URL paths remain plain `e`. Product pages
+prioritize what the software does. Contact and
 error messages prioritize helping someone finish. Those surfaces do not need
 identical levels of informality.
 
@@ -48,7 +50,10 @@ and breathing room between ideas. The current letter is 540px wide, with
 values; these are a starting point, not a prohibition on a better composition.
 
 Keep the supplied portrait and its hover tilt unless asked to change them.
-The small serif pronunciation beside Fischer's name is intentional. The footer
+The small serif pronunciation beside Fischer's name is intentional. The expanded
+About passage uses Inter with roomy spacing and readable body text. Its label
+and arrow are an intentional blue crayon exception, using local Caveat lettering
+and a grain texture. The footer
 credit is quiet, with the turning mark opposite it. The floating hub belongs to
 the site, while Contact has its own conversation layout.
 
