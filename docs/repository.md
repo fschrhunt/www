@@ -13,7 +13,11 @@ and deletion are blocked. Administrators are included. CODEOWNERS assigns
 Tags are protected from deletion and force updates.
 
 Actions default to read-only tokens and cannot approve PR reviews. CI actions
-are pinned to commit SHAs; Dependabot proposes weekly Actions and npm updates.
+are pinned to commit SHAs. Dependabot groups weekly Actions updates into one PR
+and npm maintenance into one PR, with at most one open version-update PR per
+ecosystem. npm security updates have their own group. npm major upgrades are
+reviewed manually so incompatible toolchain bumps do not repeatedly open PRs.
+Keep dependency alerts enabled and review advisories even when a major is ignored.
 Triage has narrowly scoped write permissions for labels. It uses the base-branch
 workflow and reads filenames through the API; it must never check out or execute
 PR code. Triage becomes active after its workflow reaches the default branch.
