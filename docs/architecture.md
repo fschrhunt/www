@@ -11,6 +11,7 @@ server-side contact delivery, or required environment configuration.
 | `src/app/page.tsx` | Introduction, expandable About passage, product and note indexes, credit |
 | `src/app/products/{e,flip,diffuse}/page.tsx` | Product descriptions and demos |
 | `src/app/notes/welcome-who-dis/page.tsx` | First note and its metadata |
+| `src/app/notes/i-aquired-a-color/page.tsx` | Fischer blue note, color swatch, and metadata |
 | `src/app/contact/page.tsx` | Contact layout and navigation |
 | `src/app/layout.tsx` | Local font, document metadata, favicon links |
 | `src/app/template.tsx` | Route remount boundary for entrance effects |
