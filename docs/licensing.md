@@ -36,10 +36,9 @@ Inter remains under its SIL Open Font License in
 [Google Fonts](https://github.com/google/fonts/tree/main/ofl/caveat) and retains
 its SIL Open Font License in
 [src/app/fonts/caveat-OFL.txt](../src/app/fonts/caveat-OFL.txt). Dependencies retain their own
-licenses. The curved link-arrow graphic in `public/link-arrow.svg` was sourced
-from https://shedsgns.me/assets/arrow.svg; no independent license grant for that
-third-party graphic is asserted here. The repository's AGPL grant covers only
-material Fischer Hunt has the right to license.
+licenses. The curved link-arrow graphic in `public/link-arrow.svg` is drawn
+locally and covered by the repository's AGPL license. The repository's AGPL grant
+covers only material Fischer Hunt has the right to license.
 
 The About annotation uses Benji Script, sourced from the font served by
 [benji.org](https://benji.org/family-values). This third-party font is excluded
