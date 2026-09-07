@@ -51,3 +51,4 @@ creation dates, and Diffuse's private repository is not linked publicly.
 The footer mark is an inline SVG, not a Unicode character that can become an
 emoji. Portrait links keep their hit area stationary while only the image tilts.
 Touch layouts provide 44px targets for index links, navigation, and form actions.
+Links and buttons suppress the native tap highlight; keyboard focus remains visible.

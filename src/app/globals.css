@@ -17,6 +17,9 @@ h1, h2, h3, p { margin: 0; font-size: inherit; font-weight: 400; }
 ul { list-style: none; padding: 0; margin: 0; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; }
+/* Suppress the browser's tap rectangle while retaining keyboard focus indicators. */
+a, button { -webkit-tap-highlight-color: transparent; }
+a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 ::selection { background: #dededb; color: #111; }
 :focus-visible { outline: 1px solid #777; outline-offset: 5px; border-radius: 2px; }
 .muted { color: var(--muted); }
