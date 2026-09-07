@@ -1,4 +1,4 @@
-/** Accelerate to the document top, then finish navigation; return a cancellation function. */
+/** Scroll the current article to its top; return a cancellation function. */
 export function scrollToTop(onComplete: () => void = () => {}) {
   const start = window.scrollY;
   if (start < 40 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {

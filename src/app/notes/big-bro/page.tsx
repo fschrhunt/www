@@ -26,6 +26,7 @@ export default function BigBroNote() {
         <p>more than the debates, though, i&apos;m grateful that he&apos;s been there. through the good parts and the parts i wouldn&apos;t put in a photo album. he knows more versions of me than most people ever will, and he&apos;s still my friend.</p>
         <p>i wouldn&apos;t be where i am without him. i wanted to put that somewhere i couldn&apos;t immediately take it back with a joke.</p>
         <p>love you. this is a thank-you, not a concession. we can resume being wrong about each other tomorrow.</p>
+        <p>&gt; p.s. if you&apos;re reading this, don&apos;t make it weird next time i see you.</p>
       </article>
     </main>
     <SocialHub />

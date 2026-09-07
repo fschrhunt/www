@@ -62,7 +62,7 @@ Current interaction decisions:
 - The current pages share one entrance treatment with a short stagger. A new
   creative direction can include its own purposeful motion or interaction.
   Design its reading and reduced-motion states as carefully as its moving state.
-- Text links stay still. The underline draws and the separate 11px arrow
+- Text links stay still. The underline draws and the separate 12px arrow
   appears. Scramble symbols must fit inside the original label width.
 - Reduced motion keeps all content and controls usable.
 
