@@ -16,7 +16,7 @@ export default function WelcomeNote() {
       <ReaderIndex />
       <article className="product-note">
         <h1>welcome who dis?</h1>
-        <div className="product-meta"><time dateTime="2026-09-07">September 7, 2026</time><span>1 min read</span></div>
+        <div className="product-meta"><time dateTime="2026-08-26">August 26, 2026</time><span>1 min read</span></div>
         <p>this was supposed to be a quick personal website.</p>
         <p>then the font was wrong. then the hover was wrong. then the hover was almost right, which is much worse because now you know it can be right.</p>
         <p>at one point, the scrambled text was running into the little arrow beside it. even the letters were trying to leave.</p>

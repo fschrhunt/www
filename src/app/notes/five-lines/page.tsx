@@ -3,7 +3,7 @@ import { ReaderIndex } from "@/components/reader-index";
 import { SocialHub } from "@/components/social-hub";
 
 export const metadata: Metadata = {
-  title: "five lines would have been fine · Fischer Hunt",
+  title: "damn you, agents · Fischer Hunt",
   description: "A working feature can still be too much code. How I want to review what an agent leaves behind.",
 };
 
@@ -14,8 +14,8 @@ export default function FiveLinesNote() {
     <main id="main" className="letter reader-page">
       <ReaderIndex />
       <article className="product-note">
-        <h1>five lines would have been fine</h1>
-        <div className="product-meta"><time dateTime="2026-09-07">September 7, 2026</time><span>5 min read</span></div>
+        <h1>damn you, agents</h1>
+        <div className="product-meta"><time dateTime="2026-09-03">September 3, 2026</time><span>5 min read</span></div>
         <p>i ask an agent to change something small. it comes back with a function long enough to have its own table of contents.</p>
         <p>the feature works. somehow, that makes this more annoying. now i have to explain why working isn&apos;t the only thing i asked for.</p>
         <p>i got back into coding because the idea of AGI made me want to help build something. i still want that. i would just prefer not to spend the next five years reviewing infrastructure for a button.</p>

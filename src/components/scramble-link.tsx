@@ -8,7 +8,7 @@ type ScrambleLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "children
   href: string;
 };
 
-/** Scramble the label's tail, fitting wider symbols inside its original width. */
+/** Scramble the whole label, resolving left to right within its original width. */
 export function ScrambleLink({ children, className = "", ...props }: ScrambleLinkProps) {
   const overlay = useRef<HTMLSpanElement>(null);
   const label = useRef<HTMLSpanElement>(null);
@@ -27,18 +27,16 @@ export function ScrambleLink({ children, className = "", ...props }: ScrambleLin
     const started = performance.now();
     const symbols = "@#$%&*+=<>?!/~^§¶†•◊×÷±∆";
     const characters = Array.from(children);
-    const tailLength = Math.min(6, Math.max(3, Math.round(characters.length * 0.4)));
-    const tailStart = characters.length - tailLength;
-    const punctuation = new Set(" ,./()—–-'’:?");
+    const punctuation = /[\s\p{P}]/u;
     label.current?.setAttribute("data-scrambling", "true");
 
     function tick(now: number) {
       const progress = (now - started) / 560;
       if (progress >= 1) return reset();
-      const settled = tailStart + Math.floor(progress * tailLength);
+      const settled = Math.floor(progress * characters.length);
       if (overlay.current) {
         overlay.current.textContent = characters.map((character, index) =>
-          index < settled || punctuation.has(character)
+          index < settled || punctuation.test(character)
             ? character
             : symbols[Math.floor(Math.random() * symbols.length)],
         ).join("");
@@ -49,7 +47,7 @@ export function ScrambleLink({ children, className = "", ...props }: ScrambleLin
       frame.current = requestAnimationFrame(tick);
     }
 
-    frame.current = requestAnimationFrame(tick);
+    tick(started);
   }
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);

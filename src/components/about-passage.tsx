@@ -1,13 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import localFont from "next/font/local";
 
 const crayon = localFont({ src: "../app/fonts/caveat.ttf", variable: "--font-crayon", display: "swap", weight: "400 700" });
+const openedKey = "www:about-opened";
+let openedThisVisit = false;
+
+/** Read the remembered interaction, retaining a fallback when storage is unavailable. */
+function hasOpenedAbout() {
+  try { return openedThisVisit || localStorage.getItem(openedKey) === "true"; }
+  catch { return openedThisVisit; }
+}
+
+/** Keep the current page and other tabs in sync when About is first opened. */
+function subscribeToAbout(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener("about-opened", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener("about-opened", callback);
+  };
+}
+
+/** Render without a blink until the browser has checked the saved preference. */
+function serverSnapshot() { return true; }
 
 /** An inline About disclosure that animates to the passage's natural height. */
 export function AboutPassage() {
   const [open, setOpen] = useState(false);
+  const hasOpened = useSyncExternalStore(subscribeToAbout, hasOpenedAbout, serverSnapshot);
+
+  /** Permanently retire the invitation on the first opening, independently of expanded state. */
+  function toggleAbout() {
+    if (!open && !hasOpened) {
+      openedThisVisit = true;
+      try { localStorage.setItem(openedKey, "true"); } catch { /* The in-memory fallback still survives navigation. */ }
+      window.dispatchEvent(new Event("about-opened"));
+    }
+    setOpen(!open);
+  }
 
   return <section className={`about-passage ${crayon.variable}`} aria-labelledby="about-heading">
     <svg className="crayon-definitions" width="0" height="0" aria-hidden="true">
@@ -20,7 +52,7 @@ export function AboutPassage() {
       </filter></defs>
     </svg>
     <h2 id="about-heading">
-      <button className="about-trigger" type="button" aria-expanded={open} aria-controls="about-content" onClick={() => setOpen(!open)}>
+      <button className="about-trigger" type="button" data-unopened={!hasOpened} aria-expanded={open} aria-controls="about-content" onClick={toggleAbout}>
         <span className="about-label">About</span> <svg className="about-arrow" width="20" height="22" viewBox="0 0 20 22" fill="none" aria-hidden="true">
           <path d="M1 10c3-.5 5.4.7 7.3.1 3-.5 5.2 2 4.7 5.2l.1 2.7m-4.3-3.7 4.3 3.7 3.8-4.2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>

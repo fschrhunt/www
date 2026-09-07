@@ -19,7 +19,7 @@ function Portrait() {
   </Link>;
 }
 
-/** A personal letter with an inline About passage, products, notes, and contact hub. */
+/** A personal letter with an inline About passage, products, writings, and contact hub. */
 export default function Home() {
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
@@ -39,10 +39,13 @@ export default function Home() {
         </li>)}
       </ul>
     </section>
-    <section className="products notes" aria-labelledby="notes-heading">
-      <h2 id="notes-heading">Notes</h2>
+    <section className="products notes" aria-labelledby="writings-heading">
+      <h2 id="writings-heading">Writings</h2>
       <ul><li>
-        <ScrambleLink href="/notes/five-lines">five lines would have been fine</ScrambleLink>
+        <ScrambleLink href="/notes/big-bro">big bro</ScrambleLink>
+        <span className="reading-time">2 min read</span>
+      </li><li>
+        <ScrambleLink href="/notes/five-lines">damn you, agents</ScrambleLink>
         <span className="reading-time">5 min read</span>
       </li><li>
         <ScrambleLink href="/notes/i-aquired-a-color">I aquired a color!</ScrambleLink>

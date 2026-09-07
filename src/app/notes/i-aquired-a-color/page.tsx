@@ -15,7 +15,7 @@ export default function ColorNote() {
       <ReaderIndex />
       <article className="product-note">
         <h1>I aquired a color!</h1>
-        <div className="product-meta"><time dateTime="2026-09-07">September 7, 2026</time><span>1 min read</span></div>
+        <div className="product-meta"><time dateTime="2026-08-30">August 30, 2026</time><span>1 min read</span></div>
         <p>this is my favorite blue.</p>
         <figure className="color-note-swatch">
           <div role="img" aria-label="A swatch of Fischer blue, hex 3565C5"><span>fischer blue</span></div>
