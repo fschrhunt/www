@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
+  turbopack: { root: process.cwd() },
   // Let the dev server be reached from non-localhost origins (a phone on the
   // LAN, a Tailscale hostname). Next 16 otherwise blocks the cross-origin dev
   // requests, so the HTML loads but client components never hydrate.
