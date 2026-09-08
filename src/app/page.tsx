@@ -34,7 +34,7 @@ export default function Home() {
         </li>)}
       </ul>
     </section>
-    <section className="products notes" aria-labelledby="writings-heading">
+    <section className="products writings" aria-labelledby="writings-heading">
       <h2 id="writings-heading">Writings</h2>
       <ul>{writings.map(writing => <li key={writing.slug}>
         <ScrambleLink href={`/writings/${writing.slug}`}>{writing.title}</ScrambleLink>
