@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Token usage · Fischer Hunt</title>
+<meta name="description" content="My model usage, day by day.">
+<link rel="canonical" href="https://fschrhunt.com/token-usage">
+<link rel="icon" type="image/png" sizes="32x32" href="/token-usage-assets/favicon.png">
+<link rel="icon" type="image/svg+xml" href="/token-usage-assets/favicon.svg">
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{background:#3565c5;color:#f0f1f3;font:12px/16px ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}header{position:fixed;z-index:2;top:16px;left:50%;transform:translateX(-50%);width:min(712px,100%);padding:0 16px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}a{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:9px;min-width:44px;min-height:44px;font-size:13px;margin-left:0;pointer-events:auto}a:focus-visible{outline:1px solid #f0f1f3;outline-offset:2px}.total{font-variant-numeric:tabular-nums}main{position:relative;height:100dvh;width:100%;outline:none;touch-action:pan-x pinch-zoom;cursor:default}#timeline{height:100%;width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pinch-zoom;user-select:none}#timeline::-webkit-scrollbar{display:none}#scrub{position:absolute;left:0;right:0;bottom:calc(50% - var(--half-chart,152px) - 28px);height:calc(var(--half-chart,152px) + var(--half-chart,152px) + 28px);touch-action:pinch-zoom}#bars{position:relative;height:100%;pointer-events:none}.dragging{cursor:grabbing}.day{position:absolute;bottom:calc(50% - var(--half-chart,152px));width:1px;display:flex;flex-direction:column;gap:2px;align-items:stretch}.segment{background:#e5e8ee;min-height:1px}.day.month .segment:first-child{background:#bfcbe2}.cursor{position:absolute;bottom:calc(50% - var(--half-chart,152px));height:min(380px,calc(50dvh + var(--half-chart,152px) - 140px));width:2px;background:#cbd5e8;border-radius:2px;opacity:0;pointer-events:none;transition:opacity .13s}.cursor.visible{opacity:1}.date{position:absolute;top:100%;margin-top:12px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#e0e6f0;font-size:13px;line-height:19.5px}.details{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:16px;min-width:190px;font-size:14px;line-height:20px;color:#f0f1f3}.row{display:flex;margin-top:4px;align-items:center;gap:12px;white-space:nowrap}.row .price{margin-left:auto;color:inherit;font-variant-numeric:tabular-nums}.mark{display:block;flex:0 0 14px;width:14px;height:14px;color:inherit}.provider-mark{background:currentColor;mask:var(--provider-icon) center/contain no-repeat;-webkit-mask:var(--provider-icon) center/contain no-repeat}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:480px){header{top:20px;padding:0 24px}.details{min-width:172px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><a href="/" aria-label="Back to home"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5.5 4 1.5 8m0 0 4 4m-4-4H10a2.5 2.5 0 0 0 0-5H8.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" /></svg></a><span id="total" class="total" title="Usage is loading"></span></header>
+<main id="chart" tabindex="0" role="slider" aria-orientation="horizontal" aria-label="Daily token usage cost. Scroll or drag horizontally, or use left and right arrows to explore dates. Press M to mute sounds." aria-valuemin="0" aria-valuemax="179" aria-valuenow="179">
+<h1 class="sr-only">Token usage</h1>
+<div id="timeline"><div id="bars" aria-hidden="true"></div></div>
+<div id="scrub" aria-hidden="true"></div>
+<div id="cursor" class="cursor" aria-hidden="true"><div id="details" class="details"></div><div id="date" class="date"></div></div>
+</main>
+<script src="/token-usage-assets/provider-icons.js"></script>
+<script src="/token-usage-assets/chart.js?v=20260908-history"></script>
+</body></html>

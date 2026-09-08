@@ -1,0 +1,11 @@
+[Unit]
+Description=Poll private Codex usage every five minutes
+
+[Timer]
+OnCalendar=*:0/5
+RandomizedDelaySec=20
+Persistent=true
+Unit=token-usage.service
+
+[Install]
+WantedBy=timers.target

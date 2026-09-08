@@ -15,6 +15,7 @@ server-side contact delivery, or required environment configuration.
 | `src/lib/content.ts` | Metadata validation, file discovery, date ordering, and reading-time estimates |
 | `src/components/content-page.tsx` | Shared article shell, title, date, and navigation |
 | `src/mdx-components.tsx` | Markdown links mapped to the site's link treatment |
+| `src/app/token-usage/route.ts` | Static full-screen usage chart backed by the public aggregate snapshot |
 | `src/app/contact/page.tsx` | Contact layout and navigation |
 | `src/app/layout.tsx` | Local font, default metadata, OpenGraph/Twitter defaults, favicon links |
 | `src/app/template.tsx` | Route remount boundary for entrance effects |
@@ -40,8 +41,7 @@ slugs return 404. New page directions can use scoped CSS or their own components
 without changing the accepted homepage. Read the agent kit for creative decisions.
 
 Styles that a single component fully owns and that only one route needs live in a
-co-located CSS Module: the family album (`photo-album.module.css`) and the product
-demos (`showcase.module.css`). `globals.css` keeps the shared tokens, layout,
+co-located CSS Module, such as the family album (`photo-album.module.css`). `globals.css` keeps the shared tokens, layout,
 utilities, the cross-page entrance system, and the article styles that authored
 Markdown targets by class (those cannot use scoped names). Prefer a CSS Module for
 a new component's private styles; reach for `globals.css` only for genuinely shared
@@ -97,7 +97,6 @@ no manual index, sitemap, or metadata edit.
   combinations, composition, loading, and the final review alone. Greetings
   arrive separately with typing dots and reading pauses; reduced motion skips
   delays and animation. Pending replies are canceled on unmount.
-- `flip-demo.tsx` toggles an illustrative window between its front and note.
 - `favicon-theme.tsx` selects a PNG from the browser's color preference.
 
 ## Assets
@@ -113,8 +112,9 @@ the supplied JPEGs, with orientation applied and metadata stripped.
 Inter and Caveat are locally hosted in `src/app/fonts/`, with their separate
 OFL licenses. Retain both licenses. Caveat is limited to the blue About marks;
 an inline SVG filter adds their crayon grain.
-Product illustrations are not real captures. Product dates are repository
-creation dates, and Diffuse's private repository is not linked publicly.
+Product pages use prose without demos or diagrams and link to their public
+repositories. Product dates are repository creation dates. Diffuse's source is
+public under the Business Source License 1.1; its page retains the v1 development status.
 
 The footer mark is an inline SVG, not a Unicode character that can become an
 emoji. The homepage portrait has no link; the contact portrait links home.
@@ -196,3 +196,14 @@ the email does the card fly upward with an original synthesized swoosh. Reduced
 motion skips travel. Errors preserve edits and allow a retry with the same
 idempotency key. Acceptance does not guarantee inbox placement. See
 [contact setup](contact.md) for credentials, delivery, limits, and Gmail labeling.
+
+## Private usage collection
+
+`ops/token-usage/` contains separate Codex and OpenCode dashboard collectors on
+the private server. Each writes its own SQLite ledger and sanitized JSON snapshot,
+keeping Codex credits separate from OpenCode USD usage costs. The publisher prices local model token counts for Codex and Claude, uses OpenCode USD costs, and publishes a small public JSON
+snapshot to Vercel Blob; `/token-usage` reads it directly. See [token usage operations](token-usage.md) for authentication,
+units, isolation, and publishing work. Claude Code and Codex use incremental collectors on
+the Mac, mini, and server, with durable local queues and a restricted SSH receiver.
+See [Claude collection](claude-collection.md) for its separate token ledger and
+offline recovery.

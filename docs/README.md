@@ -11,3 +11,7 @@
 Start commands and a brief overview are in the root [README](../README).
 
 - [Contact email](contact.md): Resend setup, sending behavior, and Gmail labels.
+- [Token usage](token-usage.md): private server collection, authentication, units, and remaining integrations.
+
+- [Claude collection](claude-collection.md): incremental device collection, private uploads, and offline recovery.
+- [Usage publishing](usage-publishing.md): pricing, Vercel Blob delivery, and the real-data chart.

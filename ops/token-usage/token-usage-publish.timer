@@ -1,0 +1,9 @@
+[Unit]
+Description=Publish usage every fifteen minutes after device collection
+[Timer]
+OnCalendar=*:2/15
+RandomizedDelaySec=15
+Persistent=true
+Unit=token-usage-publish.service
+[Install]
+WantedBy=timers.target

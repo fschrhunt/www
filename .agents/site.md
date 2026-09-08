@@ -75,7 +75,7 @@ Borrow visual mechanisms without importing someone else's biography or prose.
 
 Read `README` for routes and run commands. Read existing components before
 making a parallel version of them. Product rows open local pages. Public source
-links belong on those pages; Diffuse's source remains private. Repository
+links belong on those pages. All three product repositories are public; Diffuse uses the Business Source License 1.1. Repository
 creation dates are not launch dates. Reverify product claims if they may have
 changed. Illustrations must be distinguishable from real product captures.
 
