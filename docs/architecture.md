@@ -131,31 +131,35 @@ photos change. Its frame follows the photo aspect ratio, with Back centered abov
 arrows beside the vertical midpoint, and the count centered below. On narrow
 screens the arrows sit inside the photo edges to leave more room for the image.
 
-The contact form collects name, email, and message through composer hints and
-accessible field labels. No label or navigation row sits above the composer.
-Names preserve spelling and case. Explicit introductions are extracted locally;
-ambiguous conversational answers prompt clarification, with repeat entry accepted
-as confirmation. Messages retain their content with outside whitespace trimmed.
-There is no spelling repair, general chatbot, or typed-command interpretation. Replies never interpolate the entered name. Reloading starts a fresh draft. The review
-lets visitors edit every field and closes with Escape or a click on the dimmed area.
+The contact form walks four steps in a chat — name, email, message, and a human
+check — through composer hints and accessible field labels. No label or navigation
+row sits above the composer. The name is taken exactly as typed, with no parsing,
+correction, or re-entry loop; the reply repeats it back. Email is checked only for
+shape (a mailbox, an `@`, a dotted domain); an unfinished one keeps the form on
+Email with a plain retry. The message is kept verbatim with outside whitespace
+trimmed. The human check is one small arithmetic question ("what's 5 plus 4?")
+answered as a digit or a word; a wrong answer asks again. Replies are lightly
+funny, aimed at the form and the situation rather than the visitor. Reloading
+starts a fresh draft. The review lets visitors edit every field and closes with
+Escape or a click on the dimmed area.
 
-`src/lib/contact-rules.ts` handles browser-only name parsing, email cleanup, and
-optional provider typo suggestions. It uses no model or external inference service. Invalid email syntax keeps the form on Email. A proposed correction
-can be accepted or declined; the server still validates the chosen address.
-No data goes to the contact endpoint until the visitor sends the reviewed note.
-That endpoint checks reply-domain DNS before sending, rejecting explicit no-mail
-domains and missing mail routes while allowing temporary DNS failures. It cannot
-verify a mailbox exists or belongs to the visitor. An off-screen honeypot field
-(`company`), invisible and unfocusable for people, makes the endpoint feign success
-without sending when a form-filling bot completes it. A per-instance rate limit and
-the same-origin check remain a first pass, not a substitute for the deployment's
-firewall against direct API abuse. `next.config.ts` sets conservative response
-headers (`nosniff`, `DENY` framing, a strict referrer policy, and a restrictive
-permissions policy) on every route.
+`src/lib/contact-rules.ts` is deliberately small: email spacing cleanup
+(`tidyContactEmail`), a shape check (`isContactEmail`), and the human challenge
+(`humanChallenge`/`isHumanAnswer`). It uses no model, dictionary, or external
+inference, and does not parse names or guess provider typos. No data goes to the
+contact endpoint until the visitor sends the reviewed note. That endpoint checks
+reply-domain DNS before sending, rejecting explicit no-mail domains and missing
+mail routes while allowing temporary DNS failures. It cannot verify a mailbox
+exists or belongs to the visitor. The visible human check is the in-app bot gate;
+a rate limit (shared across instances when a store is configured, else
+per-instance) and the same-origin check back it up, but the deployment firewall
+remains the defense against direct API abuse. `next.config.ts` sets conservative
+response headers (`nosniff`, `DENY` framing, a strict referrer policy, and a
+restrictive permissions policy) on every route.
 
 The contact reply queue switches the composer hint to the next accepted field
 immediately, then enables that field after the reply finishes. The hints are
-"your name", "you@example.com", and "your message". Visitor bubbles share the
+"your name", "you@example.com", "your message", and "your answer". Visitor bubbles share the
 send button's blue; Fischer replies and the review prompt stay gray.
 The queue cancels superseded timers and records only unsent bubbles. Development effect restarts resume that queue without replaying the
 introduction or resetting the active question. A synchronous busy guard blocks

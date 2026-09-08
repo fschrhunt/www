@@ -25,9 +25,9 @@ the filter is an inbox setting. If CONTACT_FROM changes, update the filter too.
 ## Sending behavior
 
 The server bounds and validates fields, refuses cross-origin browser requests,
-fixes the recipient, drops submissions that fill the hidden `company` honeypot
-(returning a feigned success so bots learn nothing), and limits each IP to five
-attempts per ten minutes.
+fixes the recipient, and limits each IP to five attempts per ten minutes. The
+in-app bot gate is the conversation's human check (a small arithmetic question in
+the browser), not a server field.
 
 The rate limit is shared across serverless instances when a store is configured:
 set `KV_REST_API_URL` + `KV_REST_API_TOKEN` (Vercel KV) or
@@ -37,8 +37,9 @@ dependency, using `INCR` and a first-hit `EXPIRE` for a fixed ten-minute window.
 If the store is absent or briefly unreachable, it falls back to a per-instance
 in-memory limit that resets on cold starts and is not shared across instances.
 A Vercel firewall rate-limit rule on `/api/contact` remains the deployment-level
-backstop, and the honeypot plus origin check are the only in-app bot defenses —
-origin checks alone are not bot protection.
+backstop. The browser human check and the origin check are the only in-app
+defenses, and origin checks alone are not bot protection, so keep the firewall
+rule for direct API abuse.
 
 A draft UUID and payload hash form the Resend idempotency key. Retrying an
 unchanged note cannot duplicate it within Resend's idempotency window. Editing
@@ -70,8 +71,8 @@ DNS runs within the existing Vercel function's compute allowance.
 
 This checks domain routing only, not mailbox existence or ownership. It does not
 send verification messages or attempt SMTP mailbox probes. A domain error keeps
-the review open so the visitor can correct their email. Composer typo suggestions
-still run locally; DNS runs only when the reviewed note is submitted.
+the review open so the visitor can correct their email. DNS runs only when the
+reviewed note is submitted.
 
 Run `node --test scripts/contact-send.test.mjs` for validation, domain checks, fixed routing,
 retry keys, missing configuration, and provider failures. These tests stub DNS and the provider and send no mail. A real end-to-end check requires the API key and a
@@ -79,23 +80,26 @@ verified domain. Send a clearly labeled test only when authorized, then check
 Resend's delivery status and the Gmail label. Local changes must be deployed
 before they change the public contact page.
 
-Name parsing runs entirely in the browser, with no model, download, or inference API.
-It extracts explicit introductions such as "my name is", "the names", and "call me",
-while preserving the name's spelling, script, case, and internal spacing. Bare names
-need no dictionary match. A few clear conversational signals, email addresses, and
-unfinished introductions ask what name to use. Repeating the same answer accepts
-it as entered, so the heuristic cannot permanently exclude an unusual name.
-This is limited parsing, not identity validation or general conversation understanding.
-The approach follows [W3C name guidance](https://www.w3.org/International/questions/qa-personal-names). Names and messages
-remain editable in review. Composer hints identify what to enter. Reloading starts a fresh draft; corrections
-can be made in the review. Typed messages are never navigation commands.
-Email entry trims outside whitespace and spaces around @ and
-lowercases the domain, preserving the mailbox. A unique single-letter edit or adjacent swap in a common .com provider, or a
-listed .com suffix typo, prompts “did you mean?” with buttons to use the suggestion
-or keep the original. Custom suffixes, subdomains, and mailbox spelling are preserved. Suggestions are
-heuristics, not domain ownership checks. Keeping the original suppresses another
-prompt for that domain until Start over.
-Starting over, going back, or submitting another answer clears the suggestion. Message fields use browser spellcheck without rewriting the message.
+The conversation takes the name exactly as typed. There is no name parsing,
+dictionary, or conversation understanding: whatever the visitor enters becomes the
+name, and the reply repeats it back. This follows
+[W3C name guidance](https://www.w3.org/International/questions/qa-personal-names)
+by never judging what a real name looks like. Names and messages remain editable
+in review. Composer hints identify what to enter, and reloading starts a fresh
+draft.
+
+Email entry trims outside whitespace and spaces around `@` and lowercases the
+domain, preserving the mailbox. The only check is shape — a mailbox, an `@`, and a
+dotted domain — so an unfinished address keeps the form on Email with a plain
+retry. There is no provider typo correction. Message fields use browser spellcheck
+without rewriting the message. Test the browser rules with
+`node --test scripts/contact-rules.test.mjs`.
+
+The final step is a human check: one small arithmetic question ("what's 5 plus
+4?") answered as a digit or a spelled-out word. A wrong answer asks again with the
+same sum; a correct answer opens the review. It is the visible, in-character bot
+gate and is not verified server-side, so it stands alongside the rate limit,
+origin check, and firewall rather than replacing them.
 
 The review keeps sender fields together under From on desktop. On phones, Name
 and Email have separate aligned labels and single-line inputs. Long values scroll

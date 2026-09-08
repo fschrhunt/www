@@ -297,14 +297,6 @@ a, button { touch-action: manipulation; }
   .letter.reader-page { margin-inline: 0; }
 }
 
-.contact-suggestions { display: none; }
-.contact-suggestions button { display: inline-flex; align-items: center; gap: 14px; min-height: 44px; max-width: 100%; padding: 10px 14px; border: 1px solid #3565c5; border-radius: 22px; background: #3565c5; color: #fff; font: inherit; font-size: 13px; line-height: 20px; text-align: left; }
-.contact-suggestions button span { color: inherit; }
-.contact-suggestions button:active { background: #2854b4; border-color: #2854b4; }
-@media (max-width: 1099px) {
-  .contact-suggestions { display: flex; padding: 0 0 10px; }
-}
-
 /* Reviewed fields keep text clear of their rounded focus outlines. */
 .contact-letter-address { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 8px; margin-bottom: 12px; font-size: 12px; line-height: 20px; overflow-wrap: anywhere; }
 .contact-letter-address > span:first-child, .contact-letter-muted { color: #888; }
@@ -319,8 +311,6 @@ a, button { touch-action: manipulation; }
 .contact-review-sender input { display: block; width: 100%; min-width: 0; min-height: 44px; padding: 8px 12px; border: 0; background: transparent; color: #484848; font: inherit; }
 .contact-review-sender input[type="email"] { color: #777; }
 textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; margin-top: 12px; padding: 12px 14px; border: 0; background: transparent; color: #484848; font-family: inherit; font-size: 14px; line-height: 24px; white-space: pre-wrap; overflow-wrap: anywhere; field-sizing: content; resize: none; }
-/* Off-screen honeypot: present for form-filling bots, invisible and unfocusable for people. */
-.contact-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .contact-review-sheet input:focus-visible, .contact-review-sheet textarea:focus-visible { outline-offset: -1px; border-radius: 22px; outline-color: #b3b3b3; }
 @media (max-width: 640px) {
   .contact-review-sender input, textarea.contact-letter-body { font-size: 16px; }
@@ -367,11 +357,7 @@ textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; m
 .about-body .about-inline-link { margin-right: 0; line-height: inherit; }
 .about-body .about-inline-link::after { display: none; }
 
-.contact-email-suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 10px; }
-.contact-email-suggestions button { overflow-wrap: anywhere; text-align: left; }
-.contact-email-suggestions button:last-child { background: #ebebed; border-color: #ebebed; color: #555; }
-
-.contact-suggestions button:focus-visible, .contact-draft-return > button:focus-visible { border-radius: 22px; outline-offset: 2px; }
+.contact-draft-return > button:focus-visible { border-radius: 22px; outline-offset: 2px; }
 
 /* Give the editable draft more room when the keyboard leaves a short viewport. */
 .conversation-page[data-compact] .contact-review-heading { display: none; }

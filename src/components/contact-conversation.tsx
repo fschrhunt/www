@@ -5,32 +5,29 @@ import { suggestContactSubject } from "@/lib/contact-subject";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
-import { parseContactName, suggestContactEmail, tidyContactEmail } from "@/lib/contact-rules";
+import { humanChallenge, isContactEmail, isHumanAnswer, tidyContactEmail } from "@/lib/contact-rules";
 
-type Step = "name" | "email" | "message" | "review";
+type Step = "name" | "email" | "message" | "human" | "review";
 type Message = { from: "fischer" | "visitor"; text: string };
 const welcome: Message = { from: "fischer", text: "hey, glad you’re here :)" };
 const introduction: Message[] = [
   { from: "fischer", text: "let’s put together a little note." },
-  { from: "fischer", text: "first, enter your name below." },
+  { from: "fischer", text: "first, what should I call you?" },
 ];
 
-/** Collect three explicit fields in a chat layout, then let the visitor review and send the draft. */
+/** Collect a name, email, message, and one human check in a chat, then review and send the draft. */
 export function ContactConversation() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [step, setStep] = useState<Step>("name");
   const [value, setValue] = useState("");
   const [name, setName] = useState("");
-  const questionedName = useRef("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [subject, setSubject] = useState("");
   const [busy, setBusy] = useState(true);
   const [typing, setTyping] = useState(true);
   const [error, setError] = useState("");
-  const [questionedEmail, setQuestionedEmail] = useState("");
-  const [suggestedEmail, setSuggestedEmail] = useState("");
-  const keptEmailDomains = useRef(new Set<string>());
+  const challenge = useRef({ question: "", answer: 0 });
   const timer = useRef<number | undefined>(undefined);
   const replyGeneration = useRef(0);
   const busyRef = useRef(true);
@@ -121,7 +118,6 @@ export function ContactConversation() {
     }
     busyRef.current = true;
     setError("");
-    setSuggestedEmail("");
     setMessages(current => [...current, { from: "visitor", text: answer }]);
     setValue("");
     setBusy(true);
@@ -129,69 +125,34 @@ export function ContactConversation() {
     let reply: string;
     let next: Step;
     if (step === "name") {
-      const parsedName = parseContactName(answer);
-      if (parsedName === null && questionedName.current !== answer) {
-        questionedName.current = answer;
-        queueReplies([{ from: "fischer", text: "what name should I use? if that was your name, enter it again." }], "name");
-        return;
-      }
-      setName(parsedName ?? answer);
-      questionedName.current = "";
-      setValue(email);
-      reply = "thanks. what's a good email to reach you at?";
+      // Take the name exactly as given. No parsing, no second-guessing, no re-entry loop.
+      setName(answer);
+      reply = `nice to meet you, ${answer}. what’s a good email to reach you at?`;
       next = "email";
     } else if (step === "email") {
       const address = tidyContactEmail(answer);
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
-        setQuestionedEmail(answer);
-        queueReplies([{ from: "fischer", text: "please enter a valid email address, like you@example.com." }], "email");
+      if (!isContactEmail(address)) {
+        queueReplies([{ from: "fischer", text: "that email looks unfinished — I need an @ and something after the dot. mind trying again?" }], "email");
         return;
       }
-      const suggestion = suggestContactEmail(address);
-      if (suggestion && !keptEmailDomains.current.has(address.split("@")[1])) {
-        setQuestionedEmail(address);
-        setSuggestedEmail(suggestion);
-        queueReplies([{ from: "fischer", text: `did you mean ${suggestion}? you can use the suggestion or keep what you typed.` }], "email");
-        return;
-      }
-      setQuestionedEmail("");
       setEmail(address);
-      setValue(note);
-      reply = "what would you like to say? write your message below.";
+      reply = "got it. so, what’s on your mind? take all the room you need.";
       next = "message";
-    } else {
+    } else if (step === "message") {
       setNote(answer);
-      setSubject(suggestContactSubject(answer));
-      reply = "please look this over and edit anything you need before sending.";
+      challenge.current = humanChallenge();
+      reply = `last thing, and I feel a little silly asking: what’s ${challenge.current.question}?`;
+      next = "human";
+    } else {
+      if (!isHumanAnswer(answer, challenge.current.answer)) {
+        queueReplies([{ from: "fischer", text: `not quite. a bot would’ve had that instantly, which makes this more awkward for me than you. what’s ${challenge.current.question}?` }], "human");
+        return;
+      }
+      setSubject(suggestContactSubject(note));
+      reply = "human, confirmed. here’s your note — edit anything, then send it.";
       next = "review";
     }
     queueReplies([{ from: "fischer", text: reply }], next);
-  }
-
-  /** Apply a domain correction only after the visitor chooses it. */
-  function useSuggestedEmail() {
-    if (busyRef.current || step !== "email" || !suggestedEmail) return;
-    setEmail(suggestedEmail);
-    setMessages(current => [...current, { from: "visitor", text: `Use ${suggestedEmail}` }]);
-    setSuggestedEmail("");
-    setQuestionedEmail("");
-    setValue(note);
-    setError("");
-    queueReplies([{ from: "fischer", text: "thanks. write your message below." }], "message");
-  }
-
-  /** Use the visitor's chosen address verbatim in the draft after an explicit override. */
-  function useQuestionedEmail() {
-    if (busyRef.current || !questionedEmail || step !== "email") return;
-    if (suggestedEmail) keptEmailDomains.current.add(questionedEmail.split("@")[1]);
-    setEmail(questionedEmail);
-    setSuggestedEmail("");
-    setQuestionedEmail("");
-    setValue(note);
-    setError("");
-    setBusy(true);
-    setTyping(true);
-    queueReplies([{ from: "fischer", text: "thanks. write your message below." }], "message");
   }
 
   /** Enter sends a message; Shift+Enter keeps a newline, including during IME composition. */
@@ -209,20 +170,16 @@ export function ContactConversation() {
     setStep("name");
     setValue("");
     setName("");
-    questionedName.current = "";
     setEmail("");
     setNote("");
     setSubject("");
     setBusy(true);
     setTyping(true);
     setError("");
-    setQuestionedEmail("");
-    setSuggestedEmail("");
-    keptEmailDomains.current.clear();
     queueReplies([welcome, ...introduction], "name", 900);
   }
 
-  const placeholder = step === "name" ? "your name" : step === "email" ? "you@example.com" : "your message";
+  const placeholder = step === "name" ? "your name" : step === "email" ? "you@example.com" : step === "human" ? "your answer" : "your message";
 
   return <>
     <div className="conversation-thread" ref={thread} role="log" aria-label="Your contact note" aria-live="polite" aria-relevant="additions">
@@ -233,15 +190,11 @@ export function ContactConversation() {
     </div>
 
     <div className="conversation-bottom">
-      {suggestedEmail && step === "email" && !busy && <div className="contact-suggestions contact-email-suggestions" aria-label="Email correction">
-        <button type="button" onClick={useSuggestedEmail}>Use {suggestedEmail}</button>
-        <button type="button" onClick={useQuestionedEmail}>Keep what I typed</button>
-      </div>}
       {step === "review" ? <ContactReview name={name} email={email} subject={subject} note={note}
         setName={setName} setEmail={setEmail} setSubject={setSubject} setNote={setNote}
         startOver={startOver} /> : <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
         {step === "message" ? <textarea id="contact-reply" ref={textarea} aria-label="Your message" spellCheck aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :
-          <input id="contact-reply" ref={input} aria-label={step === "name" ? "Your name" : "Your email"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type="text" inputMode={step === "email" ? "email" : "text"} autoComplete={step === "email" ? "email" : "name"} spellCheck={false} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : 254} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
+          <input id="contact-reply" ref={input} aria-label={step === "name" ? "Your name" : step === "email" ? "Your email" : "Your answer"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type="text" inputMode={step === "email" ? "email" : "text"} autoComplete={step === "email" ? "email" : step === "name" ? "name" : "off"} spellCheck={false} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : step === "email" ? 254 : 40} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
       </form>}
       {error && <p className="reply-error" id="reply-error" role="alert">{error}</p>}

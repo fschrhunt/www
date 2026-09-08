@@ -87,8 +87,6 @@ export async function POST(request: Request) {
     data = JSON.parse(raw);
   } catch { return fail("I couldn't read that note. Please try again.", 400); }
   if (!data || typeof data !== "object") return fail("Please check your note.", 400);
-  // Honeypot: a hidden field only automated form-fillers complete. Feign success without sending.
-  if (typeof data.company === "string" && data.company.trim()) return Response.json({ sent: true });
   const { name, email, subject, note, id } = data;
   if ([name, email, subject, note, id].some(value => typeof value !== "string")) return fail("Please fill in every field.", 400);
   if (!name.trim() || name.length > 80 || /[\r\n\x00]/.test(name)) return fail("Please check your name.", 400);
