@@ -125,3 +125,37 @@ test('a stalled DNS lookup is cancelled and the note can proceed', async t => {
     assert.equal(cancellation.mock.callCount(),1);
   });
 });
+
+// A fixed IP (no shared store configured in tests) exercises the per-instance fallback limiter.
+test('the fallback limit allows five notes per IP and blocks the sixth', async t => {
+  await withSending(t, async () => {
+    const fromOneIp = () => new Request('https://fschrhunt.com/api/contact', {
+      method:'POST',
+      headers:{origin:'https://fschrhunt.com','content-type':'application/json','x-forwarded-for':'fallback-limit-single'},
+      body:JSON.stringify(draft),
+    });
+    for (let i = 0; i < 5; i++) assert.equal((await POST(fromOneIp())).status, 200);
+    assert.equal((await POST(fromOneIp())).status, 429);
+  });
+});
+
+// With a store configured, the endpoint rejects on the store's count, not per-instance memory.
+test('a configured shared store enforces the limit on its own count', async t => {
+  const saved = {key:process.env.RESEND_API_KEY, url:process.env.KV_REST_API_URL, token:process.env.KV_REST_API_TOKEN};
+  process.env.RESEND_API_KEY = 'test-only';
+  process.env.KV_REST_API_URL = 'https://store.test';
+  process.env.KV_REST_API_TOKEN = 'token';
+  let count = 0;
+  const fetches = t.mock.method(globalThis, 'fetch', async url => {
+    if (String(url).includes('store.test')) return Response.json([{result: ++count}, {result: 1}]);
+    return Response.json({id:'test-id'});
+  });
+  try {
+    for (let i = 0; i < 5; i++) assert.equal((await POST(request())).status, 200);
+    assert.equal((await POST(request())).status, 429);
+    assert.ok(fetches.mock.calls.some(call => String(call.arguments[0]).endsWith('/pipeline')));
+  } finally {
+    for (const [name, value] of [['RESEND_API_KEY',saved.key],['KV_REST_API_URL',saved.url],['KV_REST_API_TOKEN',saved.token]])
+      if (value === undefined) delete process.env[name]; else process.env[name] = value;
+  }
+});

@@ -25,11 +25,20 @@ the filter is an inbox setting. If CONTACT_FROM changes, update the filter too.
 ## Sending behavior
 
 The server bounds and validates fields, refuses cross-origin browser requests,
-fixes the recipient, and limits each IP to five attempts per ten minutes per
-running instance. This in-memory limit resets on cold starts and is not shared
-across Vercel instances. Configure a Vercel firewall rate-limit rule for
-`/api/contact` for durable deployment-level abuse control. Origin checks alone
-are not bot protection.
+fixes the recipient, drops submissions that fill the hidden `company` honeypot
+(returning a feigned success so bots learn nothing), and limits each IP to five
+attempts per ten minutes.
+
+The rate limit is shared across serverless instances when a store is configured:
+set `KV_REST_API_URL` + `KV_REST_API_TOKEN` (Vercel KV) or
+`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` (Upstash Redis). The
+endpoint calls the store's Upstash-compatible REST API directly, with no added
+dependency, using `INCR` and a first-hit `EXPIRE` for a fixed ten-minute window.
+If the store is absent or briefly unreachable, it falls back to a per-instance
+in-memory limit that resets on cold starts and is not shared across instances.
+A Vercel firewall rate-limit rule on `/api/contact` remains the deployment-level
+backstop, and the honeypot plus origin check are the only in-app bot defenses —
+origin checks alone are not bot protection.
 
 A draft UUID and payload hash form the Resend idempotency key. Retrying an
 unchanged note cannot duplicate it within Resend's idempotency window. Editing
