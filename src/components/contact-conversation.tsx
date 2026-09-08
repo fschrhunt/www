@@ -169,8 +169,8 @@ export function ContactConversation() {
   function chooseEmail() {
     setFunChoiceMade(true);
     setMessages(current => [...current,
-      { from: "visitor", text: "just email him" },
-      { from: "fischer", text: `no problem :) opening ur email now — or grab it here: ${contactEmail}` },
+      { from: "visitor", text: "im boring" },
+      { from: "fischer", text: `haha no worries :) opening ur email now — or grab it here: ${contactEmail}` },
     ]);
   }
 
@@ -214,8 +214,8 @@ export function ContactConversation() {
         setName={setName} setEmail={setEmail} setSubject={setSubject} setNote={setNote}
         startOver={startOver} /> : <>
         {step === "name" && !funChoiceMade && !busy && <div className="contact-choice" role="group" aria-label="How would you like to reach Fischer?">
-          <button type="button" className="contact-choice-fun" onClick={chooseFun}>the fun way</button>
-          <a className="contact-choice-email" href={mailtoHref} onClick={chooseEmail}>just email him</a>
+          <button type="button" className="contact-choice-fun" onClick={chooseFun}>fun way</button>
+          <a className="contact-choice-email" href={mailtoHref} onClick={chooseEmail}>im boring</a>
         </div>}
         <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
         {step === "message" ? <textarea id="contact-reply" ref={textarea} aria-label="Your message" spellCheck aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :

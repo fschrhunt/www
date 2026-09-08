@@ -134,9 +134,9 @@ screens the arrows sit inside the photo edges to leave more room for the image.
 The contact form walks four steps in a chat — name, email, message, and a human
 check — through composer hints and accessible field labels. No label or navigation
 row sits above the composer. The opening offers a way out: two iMessage-style reply
-bubbles ("the fun way" / "just email him") sit above the name field. "just email
-him" opens a `mailto:` to Fischer and leaves the address in the thread as a
-fallback; "the fun way" (or simply typing) dismisses them and continues the note. The name is taken exactly as typed, with no parsing,
+bubbles ("fun way" / "im boring") sit above the name field. "im boring" opens a
+`mailto:` to Fischer and leaves the address in the thread as a fallback; "fun way"
+(or simply typing) dismisses them and continues the note. The name is taken exactly as typed, with no parsing,
 correction, or re-entry loop; the reply repeats it back. Email is checked only for
 shape (a mailbox, an `@`, a dotted domain); an unfinished one keeps the form on
 Email with a plain retry. The message is kept verbatim with outside whitespace
