@@ -22,7 +22,7 @@ export default function Home() {
     <Portrait />
     <header className="letter-note">
       <p className="muted">Hello, I’m Fischer. <span className="name-pronunciation"><span aria-hidden="true">/&apos;fish-er/</span><span className="sr-only">Pronounced fish-er.</span></span></p>
-      <h1>I make software, mostly for the terminal and the Mac.<br className="desktop-break" /> Small things that make the everyday a little nicer.</h1>
+      <h1>I build things.<br className="desktop-break" /> What they add up to, I&apos;m still figuring out.</h1>
     </header>
     <AboutPassage />
     <section className="products" aria-labelledby="products-heading">

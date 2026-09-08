@@ -67,14 +67,12 @@ export function AboutPassage() {
     <div id="about-content" className="about-reveal" data-open={open} inert={!open}>
       <div className="about-clip">
         <div className="about-body">
-          <div className="about-title">
-            <p className="about-opening">I&apos;m Fischer. I&apos;m 16.</p>
-          </div>
-          <p>I run, cycle, and swim. I realized my entire life was tech and I didn&apos;t really have a hobby outside it. I missed playing sports, so I picked them back up. Now I also have Strava activities to post.</p>
-          <p>I started coding pretty young, if writing Roblox scripts to cheat at games counts. Then I took a break from being a nerd to try being the guy everyone liked. In hindsight, a questionable use of my time.</p>
-          <p><ScrambleLink href="https://openclaw.ai" className="about-inline-link">OpenClaw</ScrambleLink> got me back into coding. What happened to them btw? The idea of AGI, and how different life could be in five years, made me want to help build some part of it.</p>
+          <p>My favorite color is blue, the one up there. I&apos;m 16. There, the small talk&apos;s out of the way.</p>
+          <p>My whole life was tech. Eventually I noticed the one system I&apos;d never tried to optimize was my own body, so I took up running, cycling, and swimming. It fixed things I hadn&apos;t even filed a bug for. Now I have Strava activities to post.</p>
+          <p>I started coding young, if Roblox scripts to cheat at games count. Then I shelved it, figuring the weird kid was first in line to get bullied, and spent a while trying to be likeable instead. Bad trade, in hindsight.</p>
+          <p><ScrambleLink href="https://openclaw.ai" className="about-inline-link">OpenClaw</ScrambleLink> got me back into it. What happened to them btw? The idea of AGI, and how different life might look in five years, made me want to build some part of it.</p>
           <p>It&apos;s been hell ever since. Mostly reading a <ScrambleLink href="/writings/damn-you-agents" className="about-inline-link">400-line function</ScrambleLink> an agent wrote for something that needed five.</p>
-          <p className="about-postscript">My favorite color is the blue up there. That part of the website is finished.</p>
+          <p className="about-postscript">Anyway, that&apos;s the tour.</p>
         </div>
       </div>
     </div>
