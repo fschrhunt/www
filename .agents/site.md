@@ -48,9 +48,9 @@ Keep the supplied portrait and its hover tilt unless asked to change them.
 The small serif pronunciation beside Fischer's name is intentional. The expanded
 About passage uses Inter with roomy spacing and readable body text. Its label
 and arrow are an intentional blue crayon exception, using local Caveat lettering
-and a grain texture. About has a handwritten invitation to its left on desktop, separated by a drawn
-bracket. On mobile it sits on the right with a square bracket. Both markers draw
-once from top to bottom, with a static stroke for reduced motion.
+and a grain texture. About has a handwritten "click this" invitation to its left, with a drawn
+right-pointing chevron on desktop and mobile. The chevron draws once from top
+to bottom, with a static stroke for reduced motion.
 The invitation disappears after opening About, remembered in session storage across internal
 navigation and reloads in the same tab. A new browsing session shows it again. The footer shows the last site update date, with the
 blue crayon casino-chip link to token usage opposite it. The floating hub belongs to
