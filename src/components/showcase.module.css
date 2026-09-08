@@ -1,0 +1,16 @@
+/* Small product illustrations show the workflow without pretending to be screenshots. */
+.productShowcase { margin: 7px 0; min-width: 0; }
+.productShowcase figcaption { margin-top: 10px; color: var(--muted); font-size: 12px; line-height: 19px; }
+.terminalExample, .flipExample { border: 1px solid #e2e2e2; border-radius: 9px; overflow: hidden; background: #f5f5f5; }
+.showcaseBar { display: flex; align-items: center; gap: 16px; padding: 11px 15px; border: 0; border-bottom: 1px solid #e2e2e2; background: #efefef; color: #777; font-size: 11px; line-height: 18px; width: 100%; text-align: left; }
+.showcaseBar > :first-child { font-size: 9px; letter-spacing: 2px; color: #bbb; }
+.showcaseBar > :last-child:not(:nth-child(2)) { margin-left: auto; }
+.terminalExample pre { margin: 0; padding: 25px 20px 29px; font-size: 12px; line-height: 23px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.terminalComment { color: #888; }
+.flipExample .showcaseBar:hover { background: #e9e9e9; }
+.flipExample .showcaseBar:focus-visible { outline-offset: -4px; }
+.flipExampleBody { min-height: 218px; padding: 26px; white-space: pre-line; }
+.exampleLabel { color: #999; font-size: 10px; letter-spacing: 1px; margin-bottom: 22px; }
+.exampleSecondary { color: #888; margin-top: 12px; font-size: 13px; line-height: 22px; }
+/* Match the 44px tap target of the interactive flip bar. */
+button.showcaseBar { min-height: 44px; }

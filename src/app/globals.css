@@ -231,25 +231,9 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
   to { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
 
-/* Small product illustrations show the workflow without pretending to be screenshots. */
-.product-showcase { margin: 7px 0; min-width: 0; }
-.product-showcase figcaption { margin-top: 10px; color: var(--muted); font-size: 12px; line-height: 19px; }
-.terminal-example, .flip-example { border: 1px solid #e2e2e2; border-radius: 9px; overflow: hidden; background: #f5f5f5; }
-.showcase-bar { display: flex; align-items: center; gap: 16px; padding: 11px 15px; border: 0; border-bottom: 1px solid #e2e2e2; background: #efefef; color: #777; font-size: 11px; line-height: 18px; width: 100%; text-align: left; }
-.showcase-bar > :first-child { font-size: 9px; letter-spacing: 2px; color: #bbb; }
-.showcase-bar > :last-child:not(:nth-child(2)) { margin-left: auto; }
-.terminal-example pre { margin: 0; padding: 25px 20px 29px; font-size: 12px; line-height: 23px; white-space: pre-wrap; overflow-wrap: anywhere; }
-.terminal-comment { color: #888; }
-.flip-example .showcase-bar:hover { background: #e9e9e9; }
-.flip-example .showcase-bar:focus-visible { outline-offset: -4px; }
-.flip-example-body { min-height: 218px; padding: 26px; white-space: pre-line; }
-.example-label { color: #999; font-size: 10px; letter-spacing: 1px; margin-bottom: 22px; }
-.example-secondary { color: #888; margin-top: 12px; font-size: 13px; line-height: 22px; }
-
 /* Touch gets room to tap without turning a first tap into a hover preview. */
 a, button { touch-action: manipulation; }
 .letter-footer > time { display: inline-flex; align-items: center; min-height: 44px; }
-button.showcase-bar { min-height: 44px; }
 @media (hover: hover) and (pointer: fine) and (min-width: 641px) {
   .text-link:hover .link-label::after { transform: scaleX(1); }
   .text-link:hover::after { opacity: .8; transform: translate(0); }
@@ -312,69 +296,6 @@ button.showcase-bar { min-height: 44px; }
 @media (max-width: 588px) {
   .letter.reader-page { margin-inline: 0; }
 }
-
-/* Family snapshots spread from a loose pile into a row, without cropping the originals. */
-.bro-photos { margin: 4px 0 5px; }
-.bro-photo-stage { position: relative; left: 50%; width: min(900px, calc(100vw - 48px)); height: 330px; transform: translateX(-50%); }
-.bro-photo-track { position: relative; height: 100%; margin: 0; padding: 0; list-style: none; }
-.bro-photo { position: absolute; top: 50%; left: 50%; width: 230px; padding: 6px 6px 18px; background: #fff; box-shadow: 0 2px 4px #0000000d, 0 10px 25px #00000012; transform: translate(calc(-50% + var(--pile-x, 0px)), calc(-50% + var(--pile-y, 0px))) rotate(var(--pile-turn, 0deg)); transition: left 650ms cubic-bezier(.22,1,.36,1), width 650ms cubic-bezier(.22,1,.36,1), transform 650ms cubic-bezier(.22,1,.36,1), box-shadow 650ms; }
-.bro-photo img { display: block; width: 100%; height: auto; }
-.bro-photo:nth-child(1) { --pile-x: -17px; --pile-y: -6px; --pile-turn: -9deg; z-index: 2; }
-.bro-photo:nth-child(2) { --pile-x: 13px; --pile-y: 4px; --pile-turn: 7deg; z-index: 3; }
-.bro-photo:nth-child(3) { --pile-x: -2px; --pile-y: 10px; --pile-turn: -3deg; z-index: 4; }
-.bro-photo:nth-child(4) { --pile-x: 27px; --pile-y: -12px; --pile-turn: 12deg; z-index: 1; }
-.bro-photo[data-portrait="true"] { width: 174px; }
-.bro-photos[data-expanded="true"] .bro-photo { left: calc(var(--photo-index) * 100% / 7 + 100% / 14); width: calc(100% / 7 - 10px); transform: translate(-50%, -50%); box-shadow: 0 2px 4px #0000000a, 0 6px 18px #0000000d; }
-.bro-photos[data-expanded="true"] .bro-photo[data-portrait="true"] { width: calc((100% / 7 - 10px) * .75); }
-.bro-photos figcaption { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; line-height: 18px; }
-.bro-photos figcaption button { border: 0; padding: 8px 0 8px 8px; background: none; color: inherit; font-size: inherit; min-height: 44px; white-space: nowrap; }
-.bro-photos figcaption button:hover { color: var(--ink); }
-@media (min-width: 1081px) {
-  .bro-photo-stage { width: min(900px, calc(100vw - 520px)); }
-}
-@media (max-width: 640px) {
-  .bro-photo-stage { height: 310px; overflow: hidden; }
-  .bro-photos[data-expanded="true"] .bro-photo-stage { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: #d4d4d4 transparent; }
-  .bro-photos[data-expanded="true"] .bro-photo-track { width: 1750px; }
-  .bro-photos[data-expanded="true"] .bro-photo { width: 230px; }
-  .bro-photos[data-expanded="true"] .bro-photo[data-portrait="true"] { width: 174px; }
-  .bro-photos figcaption { flex-wrap: wrap; gap: 0 12px; }
-}
-
-
-.bro-photo > button { display: block; width: 100%; padding: 0; border: 0; background: none; }
-.bro-photo:nth-child(5) { --pile-x: -28px; --pile-y: 14px; --pile-turn: -13deg; z-index: 1; }
-.bro-photo:nth-child(6) { --pile-x: -10px; --pile-y: -16px; --pile-turn: -5deg; z-index: 0; }
-.bro-photo:nth-child(7) { --pile-x: 20px; --pile-y: 18px; --pile-turn: 5deg; z-index: 2; }
-/* Controls hug the full, uncropped photo instead of the viewport edges. */
-.bro-photo-viewer { position: fixed; inset: 0; width: 100%; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 12px 56px; border: 0; background: transparent; color: #eee; }
-.bro-photo-viewer[open] { display: grid; place-items: center; animation: photo-viewer-appear 220ms ease-out; }
-.bro-photo-viewer::backdrop { background: rgb(20 20 20 / 94%); backdrop-filter: blur(10px); animation: photo-viewer-appear 220ms ease-out; }
-.bro-photo-viewer-content { width: min(calc(100vw - 112px), calc((100dvh - 112px) * var(--photo-ratio))); display: flex; flex-direction: column; gap: 6px; }
-.bro-photo-toolbar, .bro-photo-navigation { display: flex; align-items: center; justify-content: center; height: 38px; color: #aaa; font-size: 12px; }
-.bro-photo-viewer button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 44px; min-height: 44px; padding: 0 8px; border: 0; background: none; color: #ccc; font: inherit; font-size: 13px; transition: color 150ms; }
-.bro-photo-viewer button:hover { color: #fff; }
-/* Album keyboard focus uses brightness and text underlines instead of boxes. */
-.bro-photo-viewer:focus, .bro-photo-viewer button:focus, .bro-photos :focus { outline: none; }
-.bro-photo-viewer button:focus-visible { color: #fff; }
-.bro-photo-back:focus-visible span, .bro-photos figcaption button:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
-.bro-photo > button:focus-visible img { filter: brightness(1.12); }
-.bro-photo-stage:focus-visible + figcaption { color: var(--ink); }
-.bro-photo-back svg { width: 14px; height: 14px; }
-.bro-photo-frame { position: relative; width: 100%; aspect-ratio: var(--photo-ratio); }
-.bro-photo-frame img { display: block; width: 100%; height: 100%; object-fit: contain; animation: photo-viewer-appear 180ms ease-out; }
-.bro-photo-frame .bro-photo-prev, .bro-photo-frame .bro-photo-next { position: absolute; z-index: 1; top: 50%; transform: translateY(-50%); font-size: 22px; }
-.bro-photo-prev { right: calc(100% + 6px); }
-.bro-photo-next { left: calc(100% + 6px); }
-.bro-photo-count { font-size: 12px; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
-@media (max-width: 640px) {
-  .bro-photo-viewer { padding: max(12px, env(safe-area-inset-top)) 8px max(12px, env(safe-area-inset-bottom)); }
-  .bro-photo-viewer-content { width: min(calc(100vw - 16px), calc((100dvh - 132px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * var(--photo-ratio))); }
-  .bro-photo-prev { right: auto; left: 0; }
-  .bro-photo-next { left: auto; right: 0; }
-  .bro-photo-frame .bro-photo-prev, .bro-photo-frame .bro-photo-next { color: white; text-shadow: 0 1px 5px #000, 0 0 12px #000; }
-}
-@keyframes photo-viewer-appear { from { opacity: 0; } to { opacity: 1; } }
 
 .contact-suggestions { display: none; }
 .contact-suggestions button { display: inline-flex; align-items: center; gap: 14px; min-height: 44px; max-width: 100%; padding: 10px 14px; border: 1px solid #3565c5; border-radius: 22px; background: #3565c5; color: #fff; font: inherit; font-size: 13px; line-height: 20px; text-align: left; }

@@ -22,7 +22,8 @@ server-side contact delivery, or required environment configuration.
 | `src/app/not-found.tsx`, `src/app/error.tsx` | On-voice 404 and route error boundary |
 | `src/lib/site.ts` | Canonical production origin shared by metadata, sitemap, and robots |
 | `src/site-updated.json` | UTC update timestamp rendered in the homepage footer |
-| `src/app/globals.css` | Current shared styles and motion |
+| `src/app/globals.css` | Shared tokens, layout, utilities, entrance motion, and MDX article styles |
+| `*.module.css` | Route-local styles co-located with the component that owns them |
 
 New notes need only a `.md` or `.mdx` file in `src/content/writings/`. Product
 prose lives in `src/content/products/`. The homepage discovers both collections
@@ -37,6 +38,14 @@ them in development so edits hot-reload. Content imports and interactive compone
 remain normal React code; there is no runtime content evaluation or CMS. Unknown
 slugs return 404. New page directions can use scoped CSS or their own components
 without changing the accepted homepage. Read the agent kit for creative decisions.
+
+Styles that a single component fully owns and that only one route needs live in a
+co-located CSS Module: the family album (`photo-album.module.css`) and the product
+demos (`showcase.module.css`). `globals.css` keeps the shared tokens, layout,
+utilities, the cross-page entrance system, and the article styles that authored
+Markdown targets by class (those cannot use scoped names). Prefer a CSS Module for
+a new component's private styles; reach for `globals.css` only for genuinely shared
+or MDX-targeted rules.
 
 Each page's frontmatter title and description also drive its `<title>`, canonical
 URL, and OpenGraph/Twitter tags, so shared links unfurl with a name and summary.
