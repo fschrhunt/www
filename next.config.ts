@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
       { source: "/notes/:path*", destination: "/writings/:path*", permanent: true },
     ];
   },
+  /** Serve the published usage snapshot from a stable same-origin path instead of the
+   *  opaque Vercel Blob host the publisher writes to. This is the one place the raw
+   *  blob URL lives on the read side. */
+  async rewrites() {
+    return [
+      { source: "/token-usage/data.json", destination: "https://nlpa7zeomhdxzvkl.public.blob.vercel-storage.com/usage.json" },
+    ];
+  },
   /** Conservative security headers for a static site with one server-side send endpoint. */
   async headers() {
     return [{

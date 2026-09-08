@@ -19,8 +19,9 @@ collection and publisher cycle. Offline sources take longer.
 `public/token-usage-assets/`. Keeping this full-screen route outside the site's
 React layout preserves its typography, blue background, horizontal gestures, and
 sound behavior. The only visible numbers remain the total and hovered model costs.
-Its source URL is public configuration, not a credential. Other page favicons are
-unchanged. The older prototype remains a fictional design reference.
+The chart reads the snapshot from the same-origin `/token-usage/data.json`, which
+`next.config.ts` rewrites to the public Blob; that Blob URL is public, not a
+credential. Other page favicons are unchanged.
 
 The client validates a new snapshot before replacing the current chart. A failed
 refresh leaves the last loaded numbers visible. Freshness and missing-value details
