@@ -56,7 +56,10 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .letter-note h1 { font-size: 15px; line-height: 25px; }
 .letter-note > p:not(:first-child) { color: #484848; line-height: 23px; }
 .letter-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 74px; font-size: 12px; color: var(--muted); }
-.tiny-mark { display: block; flex-shrink: 0; color: #999; transition: transform 450ms; }
+/* A small crayon chip keeps a full tap target and shares About's blue grain. */
+.token-usage-link { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; margin-right: -6px; color: #3565c5; border-radius: 50%; }
+.token-usage-link img { display: block; transform: rotate(-8deg); transition: transform 220ms ease; }
+.token-usage-link:focus-visible { outline: 2px solid #3565c5; outline-offset: 3px; }
 
 /* A curved line leads from About into the passage; text unfolds in reading order. */
 .about-passage { margin-top: 17px; }
@@ -109,7 +112,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .portrait:hover img, .portrait:focus-visible img, .tiny-mark:hover { transform: none; }
+  .portrait:hover img, .portrait:focus-visible img { transform: none; }
 }
 
 /* A small floating hub keeps social and contact links out of the letter. */
@@ -248,7 +251,7 @@ a, button { touch-action: manipulation; }
   .text-link:hover .link-label::after { transform: scaleX(1); }
   .text-link:hover::after { opacity: .8; transform: translate(0); }
   .portrait:hover img { transform: rotate(-9deg) translateY(-2px); }
-  .tiny-mark:hover { transform: rotate(90deg); }
+  .token-usage-link:hover img { transform: rotate(7deg); }
   .social-hub > a:hover .hub-tooltip { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
 }
 @media (any-pointer: coarse), (max-width: 640px) {
@@ -272,7 +275,7 @@ a, button { touch-action: manipulation; }
 .conversation-page[data-compact] { padding-top: max(12px, env(safe-area-inset-top)); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
 .conversation-page[data-compact] .conversation-header { margin-bottom: 8px; }
 @media (prefers-reduced-motion: reduce) {
-  .portrait:hover img, .tiny-mark:hover { transform: none; }
+  .portrait:hover img { transform: none; }
 }
 
 /* Benji's reading geometry: an 80px desktop rail, inline Index at 1080px and below. */
@@ -375,3 +378,7 @@ textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; m
 /* Give the editable draft more room when the keyboard leaves a short viewport. */
 .conversation-page[data-compact] .contact-review-heading { display: none; }
 .conversation-page[data-compact] .contact-review-modal { padding-block: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .token-usage-link img, .token-usage-link:hover img { transition: none; transform: rotate(-8deg); }
+}

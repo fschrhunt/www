@@ -25,3 +25,16 @@ their own licenses:
   license was supplied with the font file. The accompanying bracket is drawn
   locally.
 - Dependencies retain their own licenses.
+
+The token-usage page and prototype vendor SVG icons from
+`@lobehub/icons-static-svg@1.95.0`, copyright (c) 2023 LobeHub, under the
+[MIT license](../prototypes/token-usage/icons/LICENSE). The license is retained
+in both `prototypes/token-usage/icons/` and `public/token-usage-assets/icons/`.
+Brand names and marks remain the trademarks of their respective owners.
+The locally drawn `icons/unknown.svg` fallback is original repository material.
+See the [icon README](../prototypes/token-usage/icons/README.md) for asset sources.
+
+The Xiaomi icon comes from Simple Icons under
+[CC0](../prototypes/token-usage/icons/LICENSE-simple-icons.md). Its trademark
+remains Xiaomi's. The token-usage portrait favicons are Fischer's personal artwork
+and remain subject to the repository's all-rights-reserved terms.

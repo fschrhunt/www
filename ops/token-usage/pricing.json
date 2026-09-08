@@ -1,0 +1,1031 @@
+{
+  "verifiedAt": "2026-09-08",
+  "claudeSource": "https://platform.claude.com/docs/en/about-claude/pricing",
+  "codexSource": "https://developers.openai.com/api/docs/pricing",
+  "claudeUsdPerMillion": {
+    "claude-fable-5-1": [
+      "10",
+      "50",
+      "0.25",
+      "12.5",
+      "20"
+    ],
+    "claude-fable-5": [
+      "10",
+      "50",
+      "1",
+      "12.5",
+      "20"
+    ],
+    "claude-opus-5": [
+      "5",
+      "25",
+      "0.5",
+      "6.25",
+      "10"
+    ],
+    "claude-opus-4-8": [
+      "5",
+      "25",
+      "0.5",
+      "6.25",
+      "10"
+    ],
+    "claude-haiku-4-5": [
+      "1",
+      "5",
+      "0.1",
+      "1.25",
+      "2"
+    ]
+  },
+  "codexUsdPerMillion": {
+    "gpt-6-astra": [
+      "10",
+      "50",
+      "1"
+    ],
+    "gpt-5.6-sol": [
+      "4",
+      "20",
+      ".4"
+    ],
+    "gpt-5.6-terra": [
+      "2",
+      "12",
+      ".2"
+    ],
+    "gpt-5.6-luna": [
+      ".2",
+      "1.2",
+      ".02"
+    ],
+    "gpt-5.5": [
+      "5",
+      "30",
+      ".5"
+    ],
+    "gpt-5.4": [
+      "2.5",
+      "15",
+      ".25"
+    ],
+    "gpt-5.4-mini": [
+      ".75",
+      "4.5",
+      ".075"
+    ],
+    "gpt-5.3-codex": [
+      "1.75",
+      "14",
+      ".175"
+    ]
+  },
+  "historicalCodex": {
+    "through": "2026-09-07",
+    "calibratedAt": "2026-09-08",
+    "usdPerToken": "8.884715830103606897295269675E-7",
+    "method": "recorded_daily_tokens_times_fixed_observed_blended_rate",
+    "calibrationTokens": 533891193,
+    "models": [
+      [
+        "2026-02-05",
+        "gpt-5.3-codex"
+      ],
+      [
+        "2026-03-05",
+        "gpt-5.4"
+      ],
+      [
+        "2026-04-23",
+        "gpt-5.5"
+      ],
+      [
+        "2026-07-09",
+        "gpt-5.6-sol"
+      ],
+      [
+        "2026-09-03",
+        "gpt-6-astra"
+      ]
+    ],
+    "modelAttribution": "assumed_newest_generally_available_flagship_per_user",
+    "releaseSources": [
+      "https://openai.com/index/introducing-gpt-5-3-codex/",
+      "https://openai.com/index/introducing-gpt-5-4/",
+      "https://openai.com/index/introducing-gpt-5-5/",
+      "https://openai.com/index/gpt-5-6/",
+      "https://openai.com/index/gpt-6-astra/"
+    ]
+  },
+  "syntheticClaude": {
+    "method": "synthetic_daily_values_sampled_from_retained_cost_distribution_v1",
+    "start": "2026-02-23",
+    "through": "2026-08-15",
+    "modelAttribution": "assumed_newest_generally_available_flagship_per_user",
+    "models": [
+      [
+        "2026-02-05",
+        "claude-opus-4-6"
+      ],
+      [
+        "2026-04-16",
+        "claude-opus-4-7"
+      ],
+      [
+        "2026-05-28",
+        "claude-opus-4-8"
+      ],
+      [
+        "2026-06-09",
+        "claude-fable-5"
+      ],
+      [
+        "2026-06-12",
+        "claude-opus-4-8"
+      ],
+      [
+        "2026-07-01",
+        "claude-fable-5"
+      ]
+    ],
+    "releaseSources": [
+      "https://www.anthropic.com/news/claude-opus-4-6",
+      "https://www.anthropic.com/news/claude-opus-4-7",
+      "https://www.anthropic.com/news/claude-opus-4-8",
+      "https://www.anthropic.com/news/claude-fable-5-mythos-5"
+    ],
+    "days": [
+      {
+        "date": "2026-02-23",
+        "modelId": "claude-opus-4-6",
+        "usd": "1.713864"
+      },
+      {
+        "date": "2026-02-24",
+        "modelId": "claude-opus-4-6",
+        "usd": "123.459920"
+      },
+      {
+        "date": "2026-02-25",
+        "modelId": "claude-opus-4-6",
+        "usd": "0.143228"
+      },
+      {
+        "date": "2026-02-26",
+        "modelId": "claude-opus-4-6",
+        "usd": "148.665664"
+      },
+      {
+        "date": "2026-02-27",
+        "modelId": "claude-opus-4-6",
+        "usd": "23.888282"
+      },
+      {
+        "date": "2026-02-28",
+        "modelId": "claude-opus-4-6",
+        "usd": "69.503697"
+      },
+      {
+        "date": "2026-03-01",
+        "modelId": "claude-opus-4-6",
+        "usd": "14.115668"
+      },
+      {
+        "date": "2026-03-02",
+        "modelId": "claude-opus-4-6",
+        "usd": "1.680955"
+      },
+      {
+        "date": "2026-03-03",
+        "modelId": "claude-opus-4-6",
+        "usd": "0.122719"
+      },
+      {
+        "date": "2026-03-04",
+        "modelId": "claude-opus-4-6",
+        "usd": "14.499462"
+      },
+      {
+        "date": "2026-03-05",
+        "modelId": "claude-opus-4-6",
+        "usd": "380.702389"
+      },
+      {
+        "date": "2026-03-06",
+        "modelId": "claude-opus-4-6",
+        "usd": "2.578404"
+      },
+      {
+        "date": "2026-03-07",
+        "modelId": "claude-opus-4-6",
+        "usd": "514.302208"
+      },
+      {
+        "date": "2026-03-08",
+        "modelId": "claude-opus-4-6",
+        "usd": "99.194804"
+      },
+      {
+        "date": "2026-03-09",
+        "modelId": "claude-opus-4-6",
+        "usd": "14.356817"
+      },
+      {
+        "date": "2026-03-10",
+        "modelId": "claude-opus-4-6",
+        "usd": "181.587653"
+      },
+      {
+        "date": "2026-03-11",
+        "modelId": "claude-opus-4-6",
+        "usd": "6.322355"
+      },
+      {
+        "date": "2026-03-12",
+        "modelId": "claude-opus-4-6",
+        "usd": "14.934683"
+      },
+      {
+        "date": "2026-03-13",
+        "modelId": "claude-opus-4-6",
+        "usd": "5.269013"
+      },
+      {
+        "date": "2026-03-14",
+        "modelId": "claude-opus-4-6",
+        "usd": "5.671155"
+      },
+      {
+        "date": "2026-03-15",
+        "modelId": "claude-opus-4-6",
+        "usd": "0.152150"
+      },
+      {
+        "date": "2026-03-16",
+        "modelId": "claude-opus-4-6",
+        "usd": "7.246919"
+      },
+      {
+        "date": "2026-03-17",
+        "modelId": "claude-opus-4-6",
+        "usd": "10.008784"
+      },
+      {
+        "date": "2026-03-18",
+        "modelId": "claude-opus-4-6",
+        "usd": "7.749936"
+      },
+      {
+        "date": "2026-03-19",
+        "modelId": "claude-opus-4-6",
+        "usd": "2.716326"
+      },
+      {
+        "date": "2026-03-20",
+        "modelId": "claude-opus-4-6",
+        "usd": "15.933398"
+      },
+      {
+        "date": "2026-03-21",
+        "modelId": "claude-opus-4-6",
+        "usd": "11.343089"
+      },
+      {
+        "date": "2026-03-22",
+        "modelId": "claude-opus-4-6",
+        "usd": "12.899790"
+      },
+      {
+        "date": "2026-03-23",
+        "modelId": "claude-opus-4-6",
+        "usd": "33.156035"
+      },
+      {
+        "date": "2026-03-24",
+        "modelId": "claude-opus-4-6",
+        "usd": "4.410563"
+      },
+      {
+        "date": "2026-03-25",
+        "modelId": "claude-opus-4-6",
+        "usd": "6.297334"
+      },
+      {
+        "date": "2026-03-26",
+        "modelId": "claude-opus-4-6",
+        "usd": "83.754227"
+      },
+      {
+        "date": "2026-03-27",
+        "modelId": "claude-opus-4-6",
+        "usd": "98.522700"
+      },
+      {
+        "date": "2026-03-28",
+        "modelId": "claude-opus-4-6",
+        "usd": "3.583835"
+      },
+      {
+        "date": "2026-03-29",
+        "modelId": "claude-opus-4-6",
+        "usd": "59.920415"
+      },
+      {
+        "date": "2026-03-30",
+        "modelId": "claude-opus-4-6",
+        "usd": "4.687485"
+      },
+      {
+        "date": "2026-03-31",
+        "modelId": "claude-opus-4-6",
+        "usd": "92.499457"
+      },
+      {
+        "date": "2026-04-01",
+        "modelId": "claude-opus-4-6",
+        "usd": "14.509312"
+      },
+      {
+        "date": "2026-04-02",
+        "modelId": "claude-opus-4-6",
+        "usd": "86.445190"
+      },
+      {
+        "date": "2026-04-03",
+        "modelId": "claude-opus-4-6",
+        "usd": "3.426194"
+      },
+      {
+        "date": "2026-04-04",
+        "modelId": "claude-opus-4-6",
+        "usd": "8.898971"
+      },
+      {
+        "date": "2026-04-05",
+        "modelId": "claude-opus-4-6",
+        "usd": "27.471052"
+      },
+      {
+        "date": "2026-04-06",
+        "modelId": "claude-opus-4-6",
+        "usd": "15.354038"
+      },
+      {
+        "date": "2026-04-07",
+        "modelId": "claude-opus-4-6",
+        "usd": "91.504839"
+      },
+      {
+        "date": "2026-04-08",
+        "modelId": "claude-opus-4-6",
+        "usd": "11.310126"
+      },
+      {
+        "date": "2026-04-09",
+        "modelId": "claude-opus-4-6",
+        "usd": "1.709883"
+      },
+      {
+        "date": "2026-04-10",
+        "modelId": "claude-opus-4-6",
+        "usd": "212.941153"
+      },
+      {
+        "date": "2026-04-11",
+        "modelId": "claude-opus-4-6",
+        "usd": "19.105150"
+      },
+      {
+        "date": "2026-04-12",
+        "modelId": "claude-opus-4-6",
+        "usd": "44.948886"
+      },
+      {
+        "date": "2026-04-13",
+        "modelId": "claude-opus-4-6",
+        "usd": "3.350899"
+      },
+      {
+        "date": "2026-04-14",
+        "modelId": "claude-opus-4-6",
+        "usd": "7.825312"
+      },
+      {
+        "date": "2026-04-15",
+        "modelId": "claude-opus-4-6",
+        "usd": "22.601234"
+      },
+      {
+        "date": "2026-04-16",
+        "modelId": "claude-opus-4-7",
+        "usd": "389.982533"
+      },
+      {
+        "date": "2026-04-17",
+        "modelId": "claude-opus-4-7",
+        "usd": "7.444263"
+      },
+      {
+        "date": "2026-04-18",
+        "modelId": "claude-opus-4-7",
+        "usd": "8.030030"
+      },
+      {
+        "date": "2026-04-19",
+        "modelId": "claude-opus-4-7",
+        "usd": "5.169592"
+      },
+      {
+        "date": "2026-04-20",
+        "modelId": "claude-opus-4-7",
+        "usd": "213.392020"
+      },
+      {
+        "date": "2026-04-21",
+        "modelId": "claude-opus-4-7",
+        "usd": "104.887883"
+      },
+      {
+        "date": "2026-04-22",
+        "modelId": "claude-opus-4-7",
+        "usd": "6.919520"
+      },
+      {
+        "date": "2026-04-23",
+        "modelId": "claude-opus-4-7",
+        "usd": "22.187197"
+      },
+      {
+        "date": "2026-04-24",
+        "modelId": "claude-opus-4-7",
+        "usd": "1.824567"
+      },
+      {
+        "date": "2026-04-25",
+        "modelId": "claude-opus-4-7",
+        "usd": "8.800061"
+      },
+      {
+        "date": "2026-04-26",
+        "modelId": "claude-opus-4-7",
+        "usd": "15.839152"
+      },
+      {
+        "date": "2026-04-27",
+        "modelId": "claude-opus-4-7",
+        "usd": "180.322234"
+      },
+      {
+        "date": "2026-04-28",
+        "modelId": "claude-opus-4-7",
+        "usd": "0.134172"
+      },
+      {
+        "date": "2026-04-29",
+        "modelId": "claude-opus-4-7",
+        "usd": "91.042692"
+      },
+      {
+        "date": "2026-04-30",
+        "modelId": "claude-opus-4-7",
+        "usd": "18.328492"
+      },
+      {
+        "date": "2026-05-01",
+        "modelId": "claude-opus-4-7",
+        "usd": "81.565624"
+      },
+      {
+        "date": "2026-05-02",
+        "modelId": "claude-opus-4-7",
+        "usd": "6.910025"
+      },
+      {
+        "date": "2026-05-03",
+        "modelId": "claude-opus-4-7",
+        "usd": "19.523095"
+      },
+      {
+        "date": "2026-05-04",
+        "modelId": "claude-opus-4-7",
+        "usd": "14.496615"
+      },
+      {
+        "date": "2026-05-05",
+        "modelId": "claude-opus-4-7",
+        "usd": "0.091173"
+      },
+      {
+        "date": "2026-05-06",
+        "modelId": "claude-opus-4-7",
+        "usd": "28.065620"
+      },
+      {
+        "date": "2026-05-07",
+        "modelId": "claude-opus-4-7",
+        "usd": "0.244082"
+      },
+      {
+        "date": "2026-05-08",
+        "modelId": "claude-opus-4-7",
+        "usd": "3.439178"
+      },
+      {
+        "date": "2026-05-09",
+        "modelId": "claude-opus-4-7",
+        "usd": "83.663440"
+      },
+      {
+        "date": "2026-05-10",
+        "modelId": "claude-opus-4-7",
+        "usd": "2.906872"
+      },
+      {
+        "date": "2026-05-11",
+        "modelId": "claude-opus-4-7",
+        "usd": "14.030277"
+      },
+      {
+        "date": "2026-05-12",
+        "modelId": "claude-opus-4-7",
+        "usd": "2.111738"
+      },
+      {
+        "date": "2026-05-13",
+        "modelId": "claude-opus-4-7",
+        "usd": "6.416087"
+      },
+      {
+        "date": "2026-05-14",
+        "modelId": "claude-opus-4-7",
+        "usd": "24.893954"
+      },
+      {
+        "date": "2026-05-15",
+        "modelId": "claude-opus-4-7",
+        "usd": "62.172327"
+      },
+      {
+        "date": "2026-05-16",
+        "modelId": "claude-opus-4-7",
+        "usd": "148.668476"
+      },
+      {
+        "date": "2026-05-17",
+        "modelId": "claude-opus-4-7",
+        "usd": "18.698009"
+      },
+      {
+        "date": "2026-05-18",
+        "modelId": "claude-opus-4-7",
+        "usd": "3.718823"
+      },
+      {
+        "date": "2026-05-19",
+        "modelId": "claude-opus-4-7",
+        "usd": "22.501090"
+      },
+      {
+        "date": "2026-05-20",
+        "modelId": "claude-opus-4-7",
+        "usd": "6.492472"
+      },
+      {
+        "date": "2026-05-21",
+        "modelId": "claude-opus-4-7",
+        "usd": "0.204597"
+      },
+      {
+        "date": "2026-05-22",
+        "modelId": "claude-opus-4-7",
+        "usd": "25.206071"
+      },
+      {
+        "date": "2026-05-23",
+        "modelId": "claude-opus-4-7",
+        "usd": "30.993768"
+      },
+      {
+        "date": "2026-05-24",
+        "modelId": "claude-opus-4-7",
+        "usd": "125.339770"
+      },
+      {
+        "date": "2026-05-25",
+        "modelId": "claude-opus-4-7",
+        "usd": "3.920946"
+      },
+      {
+        "date": "2026-05-26",
+        "modelId": "claude-opus-4-7",
+        "usd": "13.497529"
+      },
+      {
+        "date": "2026-05-27",
+        "modelId": "claude-opus-4-7",
+        "usd": "188.631820"
+      },
+      {
+        "date": "2026-05-28",
+        "modelId": "claude-opus-4-8",
+        "usd": "10.771783"
+      },
+      {
+        "date": "2026-05-29",
+        "modelId": "claude-opus-4-8",
+        "usd": "6.606816"
+      },
+      {
+        "date": "2026-05-30",
+        "modelId": "claude-opus-4-8",
+        "usd": "108.669190"
+      },
+      {
+        "date": "2026-05-31",
+        "modelId": "claude-opus-4-8",
+        "usd": "9.424762"
+      },
+      {
+        "date": "2026-06-01",
+        "modelId": "claude-opus-4-8",
+        "usd": "263.045498"
+      },
+      {
+        "date": "2026-06-02",
+        "modelId": "claude-opus-4-8",
+        "usd": "8.738455"
+      },
+      {
+        "date": "2026-06-03",
+        "modelId": "claude-opus-4-8",
+        "usd": "76.583872"
+      },
+      {
+        "date": "2026-06-04",
+        "modelId": "claude-opus-4-8",
+        "usd": "35.730461"
+      },
+      {
+        "date": "2026-06-05",
+        "modelId": "claude-opus-4-8",
+        "usd": "147.863615"
+      },
+      {
+        "date": "2026-06-06",
+        "modelId": "claude-opus-4-8",
+        "usd": "256.449468"
+      },
+      {
+        "date": "2026-06-07",
+        "modelId": "claude-opus-4-8",
+        "usd": "301.996014"
+      },
+      {
+        "date": "2026-06-08",
+        "modelId": "claude-opus-4-8",
+        "usd": "1.339168"
+      },
+      {
+        "date": "2026-06-09",
+        "modelId": "claude-fable-5",
+        "usd": "25.343201"
+      },
+      {
+        "date": "2026-06-10",
+        "modelId": "claude-fable-5",
+        "usd": "18.202947"
+      },
+      {
+        "date": "2026-06-11",
+        "modelId": "claude-fable-5",
+        "usd": "2.678968"
+      },
+      {
+        "date": "2026-06-12",
+        "modelId": "claude-opus-4-8",
+        "usd": "24.338439"
+      },
+      {
+        "date": "2026-06-13",
+        "modelId": "claude-opus-4-8",
+        "usd": "1.964094"
+      },
+      {
+        "date": "2026-06-14",
+        "modelId": "claude-opus-4-8",
+        "usd": "21.059388"
+      },
+      {
+        "date": "2026-06-15",
+        "modelId": "claude-opus-4-8",
+        "usd": "2.639614"
+      },
+      {
+        "date": "2026-06-16",
+        "modelId": "claude-opus-4-8",
+        "usd": "4.213075"
+      },
+      {
+        "date": "2026-06-17",
+        "modelId": "claude-opus-4-8",
+        "usd": "42.834905"
+      },
+      {
+        "date": "2026-06-18",
+        "modelId": "claude-opus-4-8",
+        "usd": "10.854223"
+      },
+      {
+        "date": "2026-06-19",
+        "modelId": "claude-opus-4-8",
+        "usd": "9.097611"
+      },
+      {
+        "date": "2026-06-20",
+        "modelId": "claude-opus-4-8",
+        "usd": "7.418544"
+      },
+      {
+        "date": "2026-06-21",
+        "modelId": "claude-opus-4-8",
+        "usd": "216.925127"
+      },
+      {
+        "date": "2026-06-22",
+        "modelId": "claude-opus-4-8",
+        "usd": "0.359585"
+      },
+      {
+        "date": "2026-06-23",
+        "modelId": "claude-opus-4-8",
+        "usd": "14.435795"
+      },
+      {
+        "date": "2026-06-24",
+        "modelId": "claude-opus-4-8",
+        "usd": "123.773218"
+      },
+      {
+        "date": "2026-06-25",
+        "modelId": "claude-opus-4-8",
+        "usd": "124.680159"
+      },
+      {
+        "date": "2026-06-26",
+        "modelId": "claude-opus-4-8",
+        "usd": "37.876738"
+      },
+      {
+        "date": "2026-06-27",
+        "modelId": "claude-opus-4-8",
+        "usd": "94.460730"
+      },
+      {
+        "date": "2026-06-28",
+        "modelId": "claude-opus-4-8",
+        "usd": "12.591703"
+      },
+      {
+        "date": "2026-06-29",
+        "modelId": "claude-opus-4-8",
+        "usd": "26.383635"
+      },
+      {
+        "date": "2026-06-30",
+        "modelId": "claude-opus-4-8",
+        "usd": "12.015896"
+      },
+      {
+        "date": "2026-07-01",
+        "modelId": "claude-fable-5",
+        "usd": "19.576692"
+      },
+      {
+        "date": "2026-07-02",
+        "modelId": "claude-fable-5",
+        "usd": "11.530718"
+      },
+      {
+        "date": "2026-07-03",
+        "modelId": "claude-fable-5",
+        "usd": "29.775637"
+      },
+      {
+        "date": "2026-07-04",
+        "modelId": "claude-fable-5",
+        "usd": "962.817923"
+      },
+      {
+        "date": "2026-07-05",
+        "modelId": "claude-fable-5",
+        "usd": "1.343346"
+      },
+      {
+        "date": "2026-07-06",
+        "modelId": "claude-fable-5",
+        "usd": "13.373685"
+      },
+      {
+        "date": "2026-07-07",
+        "modelId": "claude-fable-5",
+        "usd": "584.049591"
+      },
+      {
+        "date": "2026-07-08",
+        "modelId": "claude-fable-5",
+        "usd": "0.123784"
+      },
+      {
+        "date": "2026-07-09",
+        "modelId": "claude-fable-5",
+        "usd": "878.801812"
+      },
+      {
+        "date": "2026-07-10",
+        "modelId": "claude-fable-5",
+        "usd": "5.106263"
+      },
+      {
+        "date": "2026-07-11",
+        "modelId": "claude-fable-5",
+        "usd": "10.249190"
+      },
+      {
+        "date": "2026-07-12",
+        "modelId": "claude-fable-5",
+        "usd": "6.708166"
+      },
+      {
+        "date": "2026-07-13",
+        "modelId": "claude-fable-5",
+        "usd": "14.503700"
+      },
+      {
+        "date": "2026-07-14",
+        "modelId": "claude-fable-5",
+        "usd": "16.673201"
+      },
+      {
+        "date": "2026-07-15",
+        "modelId": "claude-fable-5",
+        "usd": "22.616066"
+      },
+      {
+        "date": "2026-07-16",
+        "modelId": "claude-fable-5",
+        "usd": "1042.440180"
+      },
+      {
+        "date": "2026-07-17",
+        "modelId": "claude-fable-5",
+        "usd": "657.550902"
+      },
+      {
+        "date": "2026-07-18",
+        "modelId": "claude-fable-5",
+        "usd": "300.493949"
+      },
+      {
+        "date": "2026-07-19",
+        "modelId": "claude-fable-5",
+        "usd": "33.236812"
+      },
+      {
+        "date": "2026-07-20",
+        "modelId": "claude-fable-5",
+        "usd": "14.594799"
+      },
+      {
+        "date": "2026-07-21",
+        "modelId": "claude-fable-5",
+        "usd": "13.179025"
+      },
+      {
+        "date": "2026-07-22",
+        "modelId": "claude-fable-5",
+        "usd": "0.214041"
+      },
+      {
+        "date": "2026-07-23",
+        "modelId": "claude-fable-5",
+        "usd": "27.892143"
+      },
+      {
+        "date": "2026-07-24",
+        "modelId": "claude-fable-5",
+        "usd": "29.225608"
+      },
+      {
+        "date": "2026-07-25",
+        "modelId": "claude-fable-5",
+        "usd": "17.079593"
+      },
+      {
+        "date": "2026-07-26",
+        "modelId": "claude-fable-5",
+        "usd": "90.515594"
+      },
+      {
+        "date": "2026-07-27",
+        "modelId": "claude-fable-5",
+        "usd": "4.045503"
+      },
+      {
+        "date": "2026-07-28",
+        "modelId": "claude-fable-5",
+        "usd": "153.431802"
+      },
+      {
+        "date": "2026-07-29",
+        "modelId": "claude-fable-5",
+        "usd": "8.105373"
+      },
+      {
+        "date": "2026-07-30",
+        "modelId": "claude-fable-5",
+        "usd": "99.042702"
+      },
+      {
+        "date": "2026-07-31",
+        "modelId": "claude-fable-5",
+        "usd": "2.634168"
+      },
+      {
+        "date": "2026-08-01",
+        "modelId": "claude-fable-5",
+        "usd": "3.878632"
+      },
+      {
+        "date": "2026-08-02",
+        "modelId": "claude-fable-5",
+        "usd": "13.309305"
+      },
+      {
+        "date": "2026-08-03",
+        "modelId": "claude-fable-5",
+        "usd": "319.658309"
+      },
+      {
+        "date": "2026-08-04",
+        "modelId": "claude-fable-5",
+        "usd": "1.941341"
+      },
+      {
+        "date": "2026-08-05",
+        "modelId": "claude-fable-5",
+        "usd": "31.178745"
+      },
+      {
+        "date": "2026-08-06",
+        "modelId": "claude-fable-5",
+        "usd": "12.420106"
+      },
+      {
+        "date": "2026-08-07",
+        "modelId": "claude-fable-5",
+        "usd": "0.417353"
+      },
+      {
+        "date": "2026-08-08",
+        "modelId": "claude-fable-5",
+        "usd": "14.255784"
+      },
+      {
+        "date": "2026-08-09",
+        "modelId": "claude-fable-5",
+        "usd": "20.435907"
+      },
+      {
+        "date": "2026-08-10",
+        "modelId": "claude-fable-5",
+        "usd": "12.952781"
+      },
+      {
+        "date": "2026-08-11",
+        "modelId": "claude-fable-5",
+        "usd": "3.092463"
+      },
+      {
+        "date": "2026-08-12",
+        "modelId": "claude-fable-5",
+        "usd": "45.946429"
+      },
+      {
+        "date": "2026-08-13",
+        "modelId": "claude-fable-5",
+        "usd": "0.355573"
+      },
+      {
+        "date": "2026-08-14",
+        "modelId": "claude-fable-5",
+        "usd": "7.243825"
+      },
+      {
+        "date": "2026-08-15",
+        "modelId": "claude-fable-5",
+        "usd": "16.317840"
+      }
+    ]
+  }
+}

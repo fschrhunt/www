@@ -34,7 +34,7 @@ Markdown and MDX file. See [the writing guide](../src/content/README.md).
   Symbols must not reach the arrow or move neighboring dates. Check focus,
   pointer exit, and reduced motion.
 - Entrance: check direct load and internal navigation. Local state changes such
-  as a Flip demo click must not replay the page entrance.
+  as opening About must not replay the page entrance.
 - Contact: test the visual viewport shrinking with a keyboard, including the
   latest message, composer, and review controls staying in view. Test on native
   mobile Safari when available; a simulated viewport is not a keyboard test.
@@ -58,3 +58,12 @@ Contact name and email helpers have focused regression coverage.
 fallbacks, and temporary DNS failures with DNS and the mail provider stubbed.
 `node --test scripts/contact-subject.test.mjs` checks subject intent and product selection. Run
 `node --test scripts/contact-rules.test.mjs` on Node 22.18 or newer.
+
+## Real token usage
+
+`/token-usage` loads the public Blob snapshot. Verify a real total, creator icons,
+left/right wheel motion, keyboard dates, and pointer exit at desktop and phone
+widths. Check a date with many models for tooltip clipping. Failed refreshes must
+retain the last total; source and publisher freshness are in the total hover title.
+The prototype remains a separate fictional reference. See
+[usage publishing](usage-publishing.md) for the data contract.

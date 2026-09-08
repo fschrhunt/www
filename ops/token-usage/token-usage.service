@@ -1,0 +1,39 @@
+[Unit]
+Description=Collect private Codex daily usage
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=token-usage
+Group=token-usage
+WorkingDirectory=/srv/apps/token-usage/current
+LoadCredential=codex-auth:/home/fischer/.codex/auth.json
+LoadCredential=collector-config:/srv/apps/token-usage/shared/env/config.json
+ExecStart=/usr/bin/python3 -B /srv/apps/token-usage/current/collector.py --auth %d/codex-auth --config %d/collector-config --data /srv/apps/token-usage/shared/data
+UMask=0077
+TimeoutStartSec=180
+MemoryMax=256M
+CPUQuota=25%
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/srv/apps/token-usage/shared/data
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+SystemCallArchitectures=native
+SystemCallFilter=@system-service

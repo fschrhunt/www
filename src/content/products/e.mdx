@@ -1,20 +1,18 @@
 ---
 title: "𝑒"
 date: "2026-08-21"
-description: "A small coding agent for the terminal. One Rust binary, with tools, commands, themes, and skills."
+description: "A terminal coding agent you can change. One Rust binary, your choice of model, and extensions written in any language."
 status: "In development"
 ---
 
-import { TerminalExample } from "./_components/terminal-example";
-
 A small coding agent for the terminal.
 
-𝑒 is a tool I'm building for working on code from the command line. Open it in a project, ask a question, and work from there.
+Open 𝑒 in a project and ask it to explain a function, chase a bug, or make a change. It can read and edit files, search the code, and run commands. The conversation stays in your terminal, and you can resume it later.
 
-<TerminalExample />
+You can change how it works without changing 𝑒 itself. Choose a model, give it reusable instructions through skills, or write an extension that adds a tool or command. An extension is an ordinary program exchanging JSON over standard input and output. Write it in whatever language you already use.
 
-It's one Rust binary, with tools, commands, themes, prompts, and skills. Executable extensions can add tools and commands, or hook into a session.
+The core is one Rust binary. Even things like starting work in a fresh Git worktree or asking a second agent for help can live in extensions. You can read those examples, change them, and make the setup your own.
 
-I'm still working on it. The code and setup instructions are on GitHub.
+𝑒 is still in development. The source, installer, and extension examples are on GitHub.
 
 [Explore 𝑒 on GitHub](https://github.com/intuitums/e)

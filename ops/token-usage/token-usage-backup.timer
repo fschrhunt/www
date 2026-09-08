@@ -1,0 +1,8 @@
+[Unit]
+Description=Archive token usage daily off server
+[Timer]
+OnCalendar=*-*-* 06:10:00 UTC
+RandomizedDelaySec=60
+Persistent=true
+[Install]
+WantedBy=timers.target
