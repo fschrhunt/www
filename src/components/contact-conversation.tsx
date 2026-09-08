@@ -13,7 +13,10 @@ const welcome: Message = { from: "fischer", text: "hey, glad ur here :)" };
 const introduction: Message[] = [
   { from: "fischer", text: "let’s put together a quick note." },
   { from: "fischer", text: "first, whats ur name?" },
+  { from: "fischer", text: "we can do this the fun way, or the boring way :)" },
 ];
+const contactEmail = "fschrhunt@gmail.com";
+const mailtoHref = `mailto:${contactEmail}?subject=${encodeURIComponent("hey fischer")}`;
 
 /** Collect a name, email, message, and one human check in a chat, then review and send the draft. */
 export function ContactConversation() {
@@ -27,6 +30,7 @@ export function ContactConversation() {
   const [busy, setBusy] = useState(true);
   const [typing, setTyping] = useState(true);
   const [error, setError] = useState("");
+  const [funChoiceMade, setFunChoiceMade] = useState(false);
   const challenge = useRef({ question: "", answer: 0 });
   const timer = useRef<number | undefined>(undefined);
   const replyGeneration = useRef(0);
@@ -155,6 +159,21 @@ export function ContactConversation() {
     queueReplies([{ from: "fischer", text: reply }], next);
   }
 
+  /** Dismiss the choice and keep going with the guided note. */
+  function chooseFun() {
+    setFunChoiceMade(true);
+    input.current?.focus();
+  }
+
+  /** Skip the chat entirely: post the choice, drop Fischer's address as a fallback, and open the mail app. */
+  function chooseEmail() {
+    setFunChoiceMade(true);
+    setMessages(current => [...current,
+      { from: "visitor", text: "just email him" },
+      { from: "fischer", text: `no problem :) opening ur email now — or grab it here: ${contactEmail}` },
+    ]);
+  }
+
   /** Enter sends a message; Shift+Enter keeps a newline, including during IME composition. */
   function messageKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -176,6 +195,7 @@ export function ContactConversation() {
     setBusy(true);
     setTyping(true);
     setError("");
+    setFunChoiceMade(false);
     queueReplies([welcome, ...introduction], "name", 900);
   }
 
@@ -192,11 +212,16 @@ export function ContactConversation() {
     <div className="conversation-bottom">
       {step === "review" ? <ContactReview name={name} email={email} subject={subject} note={note}
         setName={setName} setEmail={setEmail} setSubject={setSubject} setNote={setNote}
-        startOver={startOver} /> : <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
+        startOver={startOver} /> : <>
+        {step === "name" && !funChoiceMade && !busy && <div className="contact-choice" role="group" aria-label="How would you like to reach Fischer?">
+          <button type="button" className="contact-choice-fun" onClick={chooseFun}>the fun way</button>
+          <a className="contact-choice-email" href={mailtoHref} onClick={chooseEmail}>just email him</a>
+        </div>}
+        <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
         {step === "message" ? <textarea id="contact-reply" ref={textarea} aria-label="Your message" spellCheck aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :
           <input id="contact-reply" ref={input} aria-label={step === "name" ? "Your name" : step === "email" ? "Your email" : "Your answer"} aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} type="text" inputMode={step === "email" ? "email" : "text"} autoComplete={step === "email" ? "email" : step === "name" ? "name" : "off"} spellCheck={false} enterKeyHint="send" placeholder={placeholder} value={value} maxLength={step === "name" ? 80 : step === "email" ? 254 : 40} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} />}
         <button className="reply-send" type="submit" aria-label="Send reply" disabled={busy || !value.trim()}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
-      </form>}
+      </form></>}
       {error && <p className="reply-error" id="reply-error" role="alert">{error}</p>}
     </div>
   </>;

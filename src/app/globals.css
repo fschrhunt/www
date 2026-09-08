@@ -161,6 +161,14 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .reply-send { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 0; background: var(--contact-blue); color: white; cursor: pointer; transition: background-color 160ms, opacity 160ms; }
 .reply-send:disabled { background: #303030; opacity: .25; cursor: default; }
 .reply-error { font-size: 12px; line-height: 19px; margin-top: 9px; color: #555; }
+/* iMessage-style reply chips: two sent-shaped bubbles offering the guided note or a plain email. */
+.contact-choice { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding: 0 3px 12px; }
+.contact-choice > * { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; max-width: 82%; padding: 8px 20px; border: 1px solid var(--contact-blue); border-radius: 16px; border-bottom-right-radius: 5px; font: inherit; font-size: 14px; line-height: 21px; text-align: center; transform-origin: bottom right; animation: message-appear 360ms cubic-bezier(.16,1,.3,1) both; }
+.contact-choice > :nth-child(2) { animation-delay: 60ms; }
+.contact-choice-fun { background: var(--contact-blue); color: #fafafa; }
+.contact-choice-email { background: transparent; color: var(--contact-blue); }
+.contact-choice-fun:active { background: #2854b4; border-color: #2854b4; }
+.contact-choice-email:active { background: #eef2fb; }
 @keyframes typing-dot { 0%, 100% { opacity: .4; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
 @keyframes message-appear { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 640px) {
