@@ -183,6 +183,8 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 
 /* Keep the normal arrow cursor across the site, including interactive controls. */
 *, *::before, *::after { cursor: default !important; }
+/* Editable fields keep the text caret, so selecting and highlighting reads as supported. */
+input, textarea { cursor: text !important; }
 
 
 /* Compact dated product rows follow the same reading edge as the introduction. */

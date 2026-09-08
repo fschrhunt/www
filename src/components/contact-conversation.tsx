@@ -161,7 +161,7 @@ export function ContactConversation() {
   function chooseFun() {
     setChoice("fun");
     setMessages(current => [...current, { from: "visitor", text: "fun way" }]);
-    queueReplies([{ from: "fischer", text: "knew u’d pick that :) so what do i call u?" }], "name");
+    queueReplies([{ from: "fischer", text: "knew you’d pick that :) so what do i call u?" }], "name");
   }
 
   /** Skip the chat: hand over the review card as a plain, in-page form with nothing prefilled. */
