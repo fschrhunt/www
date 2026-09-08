@@ -48,8 +48,9 @@ Keep the supplied portrait and its hover tilt unless asked to change them.
 The small serif pronunciation beside Fischer's name is intentional. The expanded
 About passage uses Inter with roomy spacing and readable body text. Its label
 and arrow are an intentional blue crayon exception, using local Caveat lettering
-and a grain texture. About has a handwritten "click this" invitation to its left, with a drawn
-right-pointing chevron on desktop and mobile. The chevron draws once from top
+and a grain texture. About has a handwritten "click this" invitation in the left
+margin when the viewport is wider than 820px. At narrower widths it sits to the
+right of About. Its chevron always points toward About and draws once from top
 to bottom, with a static stroke for reduced motion.
 The invitation disappears after opening About, remembered in session storage across internal
 navigation and reloads in the same tab. A new browsing session shows it again. The footer shows the last site update date, with the
