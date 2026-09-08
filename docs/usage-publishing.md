@@ -17,7 +17,8 @@ collection and publisher cycle. Offline sources take longer.
 `/token-usage`. Its HTML, JavaScript, icons, and scoped favicon live in
 `public/token-usage-assets/`. Keeping this full-screen route outside the site's
 React layout preserves its typography, blue background, horizontal gestures, and
-sound behavior. The only visible numbers remain the total and hovered model costs.
+sound behavior. A small, non-underlined source link stays in the bottom-right
+corner and opens the chart asset directory on GitHub. The only visible numbers remain the total and hovered model costs.
 The chart tries to start its audio context on load. When browser autoplay policy
 blocks it, a click, tap, or keypress retries; hover alone cannot grant permission.
 The chart reads the snapshot from the same-origin `/token-usage/data.json`, which

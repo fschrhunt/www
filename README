@@ -9,7 +9,7 @@ LOCAL:
  npm ci
  npm run dev
 
- http://localhost:3000. Email setup: docs/contact.md.
+ http://localhost:3000
 
 CHECK:
  npm run lint
@@ -19,13 +19,15 @@ CHECK:
 ///
 
 MAP:
- src/app/        pages
- src/content/    Markdown and MDX writings and product descriptions
- public/writings/   media grouped by writing
- docs/           how things work
- AGENTS.md       where agents start
- .agents/        writing, design, and review skills
+ src/app/                   home, contact, writings, products, and route handlers
+ src/components/            shared navigation, conversations, and interactions
+ src/content/               the writing and product copy, in Markdown and MDX
+ public/writings/           photos and media filed with each writing
+ public/token-usage-assets/ the token chart: HTML, JavaScript, and icons
+ ops/token-usage/           usage collectors, publishing, and deployment tools
+ docs/                      architecture, setup, and verification
+ AGENTS.md                  the starting point for agents
+ .agents/                   site direction and writing, design, and review skills
 
 LICENSE:
  Proprietary. All rights reserved, except third-party materials.
- See LICENSE and docs/licensing.md.

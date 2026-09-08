@@ -10,6 +10,7 @@ or type scale as limits on a creative brief.
 
 - `README`: setup commands and a short overview.
 - `docs/README.md`: technical documentation index.
+- `docs/contact.md`: contact email setup, sending requirements, and validation.
 - `docs/architecture.md`: routes, shared components, assets, and data boundaries.
 - `docs/verification.md`: checks and relevant browser workflows.
 - `docs/repository.md`: GitHub controls, labeling, and Vercel release behavior.
