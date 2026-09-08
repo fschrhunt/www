@@ -169,6 +169,8 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .contact-choice-email { background: transparent; color: var(--contact-blue); }
 .contact-choice-fun:active { background: #2854b4; border-color: #2854b4; }
 .contact-choice-email:active { background: #eef2fb; }
+/* A tappable mailto address inside a reply bubble (the second way to reach the inbox). */
+.message-link { color: var(--contact-blue); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
 @keyframes typing-dot { 0%, 100% { opacity: .4; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
 @keyframes message-appear { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 640px) {

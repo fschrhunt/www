@@ -133,10 +133,13 @@ screens the arrows sit inside the photo edges to leave more room for the image.
 
 The contact form walks four steps in a chat — name, email, message, and a human
 check — through composer hints and accessible field labels. No label or navigation
-row sits above the composer. The opening offers a way out: two iMessage-style reply
-bubbles ("fun way" / "im boring") sit above the name field. "im boring" opens a
-`mailto:` to Fischer and leaves the address in the thread as a fallback; "fun way"
-(or simply typing) dismisses them and continues the note. The name is taken exactly as typed, with no parsing,
+row sits above the composer. The opening ends with a choice, not a field: two
+iMessage-style reply bubbles ("fun way" / "im boring") and no composer yet.
+Picking either posts it as a sent bubble. "fun way" then reveals the name flow
+behind a humored prompt and shows the composer; "im boring" opens a `mailto:` to
+Fischer (triggered programmatically, since removing the chip would cancel the
+anchor's own navigation), leaves the address in the thread as a second, clickable
+`mailto:` link for when no mail client is set up, and shows no composer. The name is taken exactly as typed, with no parsing,
 correction, or re-entry loop; the reply repeats it back. Email is checked only for
 shape (a mailbox, an `@`, a dotted domain); an unfinished one keeps the form on
 Email with a plain retry. The message is kept verbatim with outside whitespace
