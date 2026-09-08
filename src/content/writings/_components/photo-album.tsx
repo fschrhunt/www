@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { ReturnArrow } from "@/components/social-hub";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import styles from "./photo-album.module.css";
 
 const photos = [
   { file: "7419", width: 1824, height: 1368, alt: "Two children opening Christmas presents beside an adult in the living room." },
@@ -41,11 +42,11 @@ export function PhotoAlbum() {
     };
   }, [viewerOpen]);
 
-  return <><figure className="bro-photos" data-expanded={expanded}
+  return <><figure className={styles.broPhotos} data-expanded={expanded}
     onPointerLeave={() => setHovered(false)}>
-    <div className="bro-photo-stage" id="bro-photo-album" tabIndex={expanded ? 0 : -1} aria-label="Seven family photos. Scroll horizontally when spread on a small screen.">
-      <ol className="bro-photo-track">
-        {photos.map((photo, index) => <li className="bro-photo" key={photo.file} data-portrait={photo.height > photo.width}
+    <div className={styles.broPhotoStage} id="bro-photo-album" tabIndex={expanded ? 0 : -1} aria-label="Seven family photos. Scroll horizontally when spread on a small screen.">
+      <ol className={styles.broPhotoTrack}>
+        {photos.map((photo, index) => <li className={styles.broPhoto} key={photo.file} data-portrait={photo.height > photo.width}
           style={{ "--photo-index": index } as CSSProperties}>
           <button type="button" onPointerEnter={event => { if (event.pointerType === "mouse") setHovered(true); }} aria-label={expanded ? `Enlarge photo ${index + 1}: ${photo.alt}` : "Spread the photos"}
             onClick={() => {
@@ -65,7 +66,7 @@ export function PhotoAlbum() {
       }}>{pinned ? "pile them back up" : expanded ? "keep them out" : "spread the photos"}<span aria-hidden="true"> {pinned ? "−" : "+"}</span></button>
     </figcaption>
   </figure>
-    <dialog ref={dialog} className="bro-photo-viewer" aria-label="Family photo album"
+    <dialog ref={dialog} className={styles.broPhotoViewer} aria-label="Family photo album"
       onCancel={() => setSelected(null)}
       onKeyDown={event => {
         if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
@@ -74,13 +75,13 @@ export function PhotoAlbum() {
         }
       }}
       onClick={event => { if (event.target === event.currentTarget) setSelected(null); }}>
-      {selected !== null && <div className="bro-photo-viewer-content" style={{ "--photo-ratio": photos[selected].width / photos[selected].height } as CSSProperties}>
-        <header className="bro-photo-toolbar">
-          <button type="button" className="bro-photo-back" onClick={() => setSelected(null)} aria-label="Back to note">
+      {selected !== null && <div className={styles.broPhotoViewerContent} style={{ "--photo-ratio": photos[selected].width / photos[selected].height } as CSSProperties}>
+        <header className={styles.broPhotoToolbar}>
+          <button type="button" className={styles.broPhotoBack} onClick={() => setSelected(null)} aria-label="Back to note">
             <ReturnArrow /><span>Back</span>
           </button>
         </header>
-        <div className="bro-photo-frame"
+        <div className={styles.broPhotoFrame}
           onClick={event => { if (event.target === event.currentTarget) setSelected(null); }}
           onTouchStart={event => {
             touchStart.current = event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
@@ -94,14 +95,14 @@ export function PhotoAlbum() {
             const dy = event.changedTouches[0].clientY - start.y;
             if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) movePhoto(dx < 0 ? 1 : -1);
           }}>
-          <button className="bro-photo-prev" type="button" onClick={() => movePhoto(-1)} aria-label="Previous photo"><span aria-hidden="true">←</span></button>
+          <button className={styles.broPhotoPrev} type="button" onClick={() => movePhoto(-1)} aria-label="Previous photo"><span aria-hidden="true">←</span></button>
           <Image key={photos[selected].file} src={`/writings/big-bro/${photos[selected].file}.webp`}
             width={photos[selected].width} height={photos[selected].height}
             alt={photos[selected].alt} sizes="(max-width: 640px) 90vw, 90vw" loading="eager" />
-          <button className="bro-photo-next" type="button" onClick={() => movePhoto(1)} aria-label="Next photo"><span aria-hidden="true">→</span></button>
+          <button className={styles.broPhotoNext} type="button" onClick={() => movePhoto(1)} aria-label="Next photo"><span aria-hidden="true">→</span></button>
         </div>
-        <footer className="bro-photo-navigation">
-          <span className="bro-photo-count" aria-live="polite" aria-atomic="true">{selected + 1} / {photos.length}</span>
+        <footer className={styles.broPhotoNavigation}>
+          <span className={styles.broPhotoCount} aria-live="polite" aria-atomic="true">{selected + 1} / {photos.length}</span>
         </footer>
       </div>}
     </dialog>

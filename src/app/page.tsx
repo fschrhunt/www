@@ -1,26 +1,21 @@
 import Image from "next/image";
+import { getContentEntries } from "@/lib/content";
 import siteUpdate from "@/site-updated.json";
 import { AboutPassage } from "@/components/about-passage";
-import Link from "next/link";
 import { SocialHub } from "@/components/social-hub";
 import { ScrambleLink } from "@/components/scramble-link";
 
-// Dates record repository creation, not a product launch or public release.
-const products = [
-  { name: "Flip", href: "/products/flip", date: "2026-09-07", label: "September 2026" },
-  { name: "𝑒", href: "/products/e", date: "2026-08-21", label: "August 2026" },
-  { name: "Diffuse", href: "/products/diffuse", date: "2026-07-23", label: "July 2026" },
-];
-
-/** The supplied portrait, framed around its transparent padding and tilted on hover. */
+/** The homepage portrait has no link and keeps its hover tilt within a stationary frame. */
 function Portrait() {
-  return <Link className="portrait" href="/" aria-label="Fischer’s home page">
+  return <div className="portrait">
     <Image src="/portrait.png" alt="An illustrated portrait of Fischer" width={160} height={160} sizes="160px" preload />
-  </Link>;
+  </div>;
 }
 
 /** A personal letter with an inline About passage, products, writings, and contact hub. */
 export default function Home() {
+  const products = getContentEntries("products");
+  const writings = getContentEntries("writings");
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
     <main id="main" className="letter">
@@ -33,27 +28,18 @@ export default function Home() {
     <section className="products" aria-labelledby="products-heading">
       <h2 id="products-heading">Products</h2>
       <ul>
-        {products.map(product => <li key={product.name}>
-          <ScrambleLink href={product.href}>{product.name}</ScrambleLink>
-          <time dateTime={product.date} title="Repository created">{product.label}</time>
+        {products.map(product => <li key={product.slug}>
+          <ScrambleLink href={`/products/${product.slug}`} className={product.slug === "e" ? "product-e" : undefined}>{product.indexLabel ?? product.title}</ScrambleLink>
+          <time dateTime={product.date} title="Repository created">{new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(product.date))}</time>
         </li>)}
       </ul>
     </section>
     <section className="products notes" aria-labelledby="writings-heading">
       <h2 id="writings-heading">Writings</h2>
-      <ul><li>
-        <ScrambleLink href="/writings/big-bro">big bro</ScrambleLink>
-        <span className="reading-time">2 min read</span>
-      </li><li>
-        <ScrambleLink href="/writings/damn-you-agents">damn you, agents</ScrambleLink>
-        <span className="reading-time">5 min read</span>
-      </li><li>
-        <ScrambleLink href="/writings/i-aquired-a-color">I aquired a color!</ScrambleLink>
-        <span className="reading-time">1 min read</span>
-      </li><li>
-        <ScrambleLink href="/writings/welcome-who-dis">welcome who dis?</ScrambleLink>
-        <span className="reading-time">1 min read</span>
-      </li></ul>
+      <ul>{writings.map(writing => <li key={writing.slug}>
+        <ScrambleLink href={`/writings/${writing.slug}`}>{writing.title}</ScrambleLink>
+        <span className="reading-time">{writing.readingTime}</span>
+      </li>)}</ul>
     </section>
     <footer className="letter-footer"><time dateTime={siteUpdate.updatedAt}>Updated {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(siteUpdate.updatedAt))}</time><svg className="tiny-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v16M2 10h16M4.35 4.35l11.3 11.3M4.35 15.65l11.3-11.3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg></footer>
   </main>

@@ -4,6 +4,7 @@
   --muted: #777;
   --rule: #e8e8e8;
   --link-rule: #e4e4e4;
+  --contact-blue: #3565c5;
   color-scheme: light;
   font-family: var(--font-inter), Arial, sans-serif;
   font-size: 14px;
@@ -12,6 +13,14 @@
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 48px; }
+/* Keep the native page scrollbar, with a gray thumb and no visible track. */
+html { scrollbar-color: #bfbfbf transparent; }
+@supports not (scrollbar-color: #bfbfbf transparent) {
+  html::-webkit-scrollbar { width: 14px; height: 14px; }
+  html::-webkit-scrollbar-track { background: transparent; border: 0; box-shadow: none; }
+  html::-webkit-scrollbar-thumb { background: #bfbfbf; background-clip: padding-box; border: 3px solid transparent; border-radius: 999px; }
+  html::-webkit-scrollbar-corner { background: transparent; }
+}
 body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.65; }
 h1, h2, h3, p { margin: 0; font-size: inherit; font-weight: 400; }
 ul { list-style: none; padding: 0; margin: 0; }
@@ -126,13 +135,15 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .conversation-header { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; height: 44px; margin-bottom: 38px; }
 .contact-portrait { display: block; width: 44px; height: 44px; }
 .contact-portrait img { width: 58px; height: 58px; left: -13px; top: -10px; }
-.conversation-thread { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #dedede transparent; padding: 2px 3px 28px; margin: 0 -3px; }
+/* The chat scrolls but never shows a scrollbar; it reads like a messages thread. */
+.conversation-thread { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 2px 3px 28px; margin: 0 -3px; }
+.conversation-thread::-webkit-scrollbar { display: none; }
 .message-row { display: flex; margin-bottom: 6px; }
 .message-bubble { max-width: 82%; width: fit-content; border-radius: 16px; padding: 7px 14px; font-size: 14px; line-height: 21px; white-space: pre-wrap; overflow-wrap: anywhere; transform-origin: bottom left; animation: message-appear 360ms cubic-bezier(.16,1,.3,1) both; }
 .message-fischer .message-bubble { background: #ebebed; color: #292929; border-bottom-left-radius: 5px; }
 .message-visitor { justify-content: flex-end; margin-top: 16px; margin-bottom: 16px; }
 .message-visitor .message-bubble { transform-origin: bottom right; }
-.message-visitor .message-bubble { background: #303030; color: #fafafa; border-bottom-right-radius: 5px; }
+.message-visitor .message-bubble { background: var(--contact-blue); color: #fafafa; border-bottom-right-radius: 5px; }
 .typing-bubble { display: flex; align-items: center; gap: 4px; width: 61px; height: 35px; border-radius: 16px 16px 16px 5px; background: #ebebed; padding: 0 16px; transform-origin: bottom left; animation: message-appear 360ms cubic-bezier(.16,1,.3,1) both; }
 .typing-bubble i { width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: #999; animation: typing-dot 1s ease-in-out infinite; }
 .typing-bubble i:nth-child(2) { animation-delay: 150ms; }
@@ -141,14 +152,23 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .conversation-composer { display: flex; align-items: flex-end; gap: 8px; }
 .conversation-composer input, .conversation-composer textarea { font: inherit; font-size: 16px; line-height: 22px; border: 1px solid transparent; background: #ebebed; color: #262626; min-width: 0; flex: 1; width: 100%; border-radius: 22px; padding: 10px 15px; outline: none; transition: background 160ms, border-color 160ms; }
 .conversation-composer input { height: 44px; }
-.conversation-composer textarea { resize: none; field-sizing: content; min-height: 44px; max-height: min(150px, 25dvh); }
+.conversation-composer textarea { resize: none; field-sizing: content; min-height: 44px; max-height: min(150px, 25dvh); scrollbar-width: none; }
+.conversation-composer textarea::-webkit-scrollbar { display: none; }
 .conversation-composer input::placeholder, .conversation-composer textarea::placeholder { color: #959595; }
 .conversation-composer input:focus, .conversation-composer textarea:focus { background: #e6e6e8; border-color: #d2d2d4; }
 .conversation-composer [aria-invalid="true"] { border-color: #777; }
 .conversation-composer :disabled { opacity: .6; }
-.reply-send { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 0; background: #3565c5; color: white; cursor: pointer; transition: background-color 160ms, opacity 160ms; }
+.reply-send { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 0; background: var(--contact-blue); color: white; cursor: pointer; transition: background-color 160ms, opacity 160ms; }
 .reply-send:disabled { background: #303030; opacity: .25; cursor: default; }
 .reply-error { font-size: 12px; line-height: 19px; margin-top: 9px; color: #555; }
+/* iMessage-style reply chips: two sent-shaped bubbles offering the guided note or a plain email. */
+.contact-choice { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding: 0 3px 12px; }
+.contact-choice > * { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; max-width: 82%; padding: 8px 20px; border: 1px solid var(--contact-blue); border-radius: 16px; border-bottom-right-radius: 5px; font: inherit; font-size: 14px; line-height: 21px; text-align: center; transform-origin: bottom right; animation: message-appear 360ms cubic-bezier(.16,1,.3,1) both; }
+.contact-choice > :nth-child(2) { animation-delay: 60ms; }
+.contact-choice-fun { background: var(--contact-blue); color: #fafafa; }
+.contact-choice-email { background: transparent; color: var(--contact-blue); }
+.contact-choice-fun:active { background: #2854b4; border-color: #2854b4; }
+.contact-choice-email:active { background: #eef2fb; }
 @keyframes typing-dot { 0%, 100% { opacity: .4; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
 @keyframes message-appear { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 640px) {
@@ -163,6 +183,8 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 
 /* Keep the normal arrow cursor across the site, including interactive controls. */
 *, *::before, *::after { cursor: default !important; }
+/* Editable fields keep the text caret, so selecting and highlighting reads as supported. */
+input, textarea { cursor: text !important; }
 
 
 /* Compact dated product rows follow the same reading edge as the introduction. */
@@ -171,9 +193,23 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .products ul { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
 .products li { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; min-height: 22px; }
 .products time { flex-shrink: 0; color: #929292; font-size: 14px; line-height: 22px; }
+/* The mathematical 𝑒 needs a larger type size to match the neighboring product names. */
+.products .product-e { font-size: 1.2em; }
 .product-note { display: flex; flex-direction: column; gap: 23px; margin-top: 52px; }
 .product-note h1 { font-size: 18px; }
 .product-note > p { color: #484848; line-height: 23px; }
+/* Markdown blocks inherit the article's reading rhythm without changing navigation lists. */
+.product-note :is(ul, ol) { margin: 0; padding-left: 24px; color: #484848; line-height: 23px; }
+.product-note ul { list-style: disc; }
+.product-note li + li { margin-top: 6px; }
+.product-note li > :is(ul, ol) { margin-top: 6px; }
+.product-note > blockquote { margin: 0; padding: 17px 20px; border-left: 2px solid #d9d9d9; color: #555; background: #f5f5f5; font-size: 13px; line-height: 23px; }
+.product-note blockquote > p + p { margin-top: 16px; }
+.product-note > pre { margin: 0; padding: 18px 20px; overflow-x: auto; background: #f5f5f5; border-radius: 9px; font-size: 12px; line-height: 23px; }
+.product-note :not(pre) > code { padding: 2px 4px; background: #f0f0f0; border-radius: 3px; font-size: .9em; }
+.product-note p > img { display: block; max-width: 100%; height: auto; }
+.product-note > hr { width: 100%; margin: 5px 0; border: 0; border-top: 1px solid var(--rule); }
+.product-note a:not(.text-link) { text-decoration: underline; text-underline-offset: 4px; }
 .product-note .product-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; font-size: 12px; color: #888; }
 
 /* One entrance treatment, replayed by the route template, with a short reading-order stagger. */
@@ -208,25 +244,9 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
   to { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
 
-/* Small product illustrations show the workflow without pretending to be screenshots. */
-.product-showcase { margin: 7px 0; min-width: 0; }
-.product-showcase figcaption { margin-top: 10px; color: var(--muted); font-size: 12px; line-height: 19px; }
-.terminal-example, .flip-example { border: 1px solid #e2e2e2; border-radius: 9px; overflow: hidden; background: #f5f5f5; }
-.showcase-bar { display: flex; align-items: center; gap: 16px; padding: 11px 15px; border: 0; border-bottom: 1px solid #e2e2e2; background: #efefef; color: #777; font-size: 11px; line-height: 18px; width: 100%; text-align: left; }
-.showcase-bar > :first-child { font-size: 9px; letter-spacing: 2px; color: #bbb; }
-.showcase-bar > :last-child:not(:nth-child(2)) { margin-left: auto; }
-.terminal-example pre { margin: 0; padding: 25px 20px 29px; font-size: 12px; line-height: 23px; white-space: pre-wrap; overflow-wrap: anywhere; }
-.terminal-comment { color: #888; }
-.flip-example .showcase-bar:hover { background: #e9e9e9; }
-.flip-example .showcase-bar:focus-visible { outline-offset: -4px; }
-.flip-example-body { min-height: 218px; padding: 26px; white-space: pre-line; }
-.example-label { color: #999; font-size: 10px; letter-spacing: 1px; margin-bottom: 22px; }
-.example-secondary { color: #888; margin-top: 12px; font-size: 13px; line-height: 22px; }
-
 /* Touch gets room to tap without turning a first tap into a hover preview. */
 a, button { touch-action: manipulation; }
 .letter-footer > time { display: inline-flex; align-items: center; min-height: 44px; }
-button.showcase-bar { min-height: 44px; }
 @media (hover: hover) and (pointer: fine) and (min-width: 641px) {
   .text-link:hover .link-label::after { transform: scaleX(1); }
   .text-link:hover::after { opacity: .8; transform: translate(0); }
@@ -290,96 +310,6 @@ button.showcase-bar { min-height: 44px; }
   .letter.reader-page { margin-inline: 0; }
 }
 
-/* Family snapshots spread from a loose pile into a row, without cropping the originals. */
-.bro-photos { margin: 4px 0 5px; }
-.bro-photo-stage { position: relative; left: 50%; width: min(900px, calc(100vw - 48px)); height: 330px; transform: translateX(-50%); }
-.bro-photo-track { position: relative; height: 100%; margin: 0; padding: 0; list-style: none; }
-.bro-photo { position: absolute; top: 50%; left: 50%; width: 230px; padding: 6px 6px 18px; background: #fff; box-shadow: 0 2px 4px #0000000d, 0 10px 25px #00000012; transform: translate(calc(-50% + var(--pile-x, 0px)), calc(-50% + var(--pile-y, 0px))) rotate(var(--pile-turn, 0deg)); transition: left 650ms cubic-bezier(.22,1,.36,1), width 650ms cubic-bezier(.22,1,.36,1), transform 650ms cubic-bezier(.22,1,.36,1), box-shadow 650ms; }
-.bro-photo img { display: block; width: 100%; height: auto; }
-.bro-photo:nth-child(1) { --pile-x: -17px; --pile-y: -6px; --pile-turn: -9deg; z-index: 2; }
-.bro-photo:nth-child(2) { --pile-x: 13px; --pile-y: 4px; --pile-turn: 7deg; z-index: 3; }
-.bro-photo:nth-child(3) { --pile-x: -2px; --pile-y: 10px; --pile-turn: -3deg; z-index: 4; }
-.bro-photo:nth-child(4) { --pile-x: 27px; --pile-y: -12px; --pile-turn: 12deg; z-index: 1; }
-.bro-photo[data-portrait="true"] { width: 174px; }
-.bro-photos[data-expanded="true"] .bro-photo { left: calc(var(--photo-index) * 100% / 7 + 100% / 14); width: calc(100% / 7 - 10px); transform: translate(-50%, -50%); box-shadow: 0 2px 4px #0000000a, 0 6px 18px #0000000d; }
-.bro-photos[data-expanded="true"] .bro-photo[data-portrait="true"] { width: calc((100% / 7 - 10px) * .75); }
-.bro-photos figcaption { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; line-height: 18px; }
-.bro-photos figcaption button { border: 0; padding: 8px 0 8px 8px; background: none; color: inherit; font-size: inherit; min-height: 44px; white-space: nowrap; }
-.bro-photos figcaption button:hover { color: var(--ink); }
-@media (min-width: 1081px) {
-  .bro-photo-stage { width: min(900px, calc(100vw - 520px)); }
-}
-@media (max-width: 640px) {
-  .bro-photo-stage { height: 310px; overflow: hidden; }
-  .bro-photos[data-expanded="true"] .bro-photo-stage { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: #d4d4d4 transparent; }
-  .bro-photos[data-expanded="true"] .bro-photo-track { width: 1750px; }
-  .bro-photos[data-expanded="true"] .bro-photo { width: 230px; }
-  .bro-photos[data-expanded="true"] .bro-photo[data-portrait="true"] { width: 174px; }
-  .bro-photos figcaption { flex-wrap: wrap; gap: 0 12px; }
-}
-
-
-.bro-photo > button { display: block; width: 100%; padding: 0; border: 0; background: none; }
-.bro-photo:nth-child(5) { --pile-x: -28px; --pile-y: 14px; --pile-turn: -13deg; z-index: 1; }
-.bro-photo:nth-child(6) { --pile-x: -10px; --pile-y: -16px; --pile-turn: -5deg; z-index: 0; }
-.bro-photo:nth-child(7) { --pile-x: 20px; --pile-y: 18px; --pile-turn: 5deg; z-index: 2; }
-/* Controls hug the full, uncropped photo instead of the viewport edges. */
-.bro-photo-viewer { position: fixed; inset: 0; width: 100%; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 12px 56px; border: 0; background: transparent; color: #eee; }
-.bro-photo-viewer[open] { display: grid; place-items: center; animation: photo-viewer-appear 220ms ease-out; }
-.bro-photo-viewer::backdrop { background: rgb(20 20 20 / 94%); backdrop-filter: blur(10px); animation: photo-viewer-appear 220ms ease-out; }
-.bro-photo-viewer-content { width: min(calc(100vw - 112px), calc((100dvh - 112px) * var(--photo-ratio))); display: flex; flex-direction: column; gap: 6px; }
-.bro-photo-toolbar, .bro-photo-navigation { display: flex; align-items: center; justify-content: center; height: 38px; color: #aaa; font-size: 12px; }
-.bro-photo-viewer button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 44px; min-height: 44px; padding: 0 8px; border: 0; background: none; color: #ccc; font: inherit; font-size: 13px; transition: color 150ms; }
-.bro-photo-viewer button:hover { color: #fff; }
-/* Album keyboard focus uses brightness and text underlines instead of boxes. */
-.bro-photo-viewer:focus, .bro-photo-viewer button:focus, .bro-photos :focus { outline: none; }
-.bro-photo-viewer button:focus-visible { color: #fff; }
-.bro-photo-back:focus-visible span, .bro-photos figcaption button:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
-.bro-photo > button:focus-visible img { filter: brightness(1.12); }
-.bro-photo-stage:focus-visible + figcaption { color: var(--ink); }
-.bro-photo-back svg { width: 14px; height: 14px; }
-.bro-photo-frame { position: relative; width: 100%; aspect-ratio: var(--photo-ratio); }
-.bro-photo-frame img { display: block; width: 100%; height: 100%; object-fit: contain; animation: photo-viewer-appear 180ms ease-out; }
-.bro-photo-frame .bro-photo-prev, .bro-photo-frame .bro-photo-next { position: absolute; z-index: 1; top: 50%; transform: translateY(-50%); font-size: 22px; }
-.bro-photo-prev { right: calc(100% + 6px); }
-.bro-photo-next { left: calc(100% + 6px); }
-.bro-photo-count { font-size: 12px; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
-@media (max-width: 640px) {
-  .bro-photo-viewer { padding: max(12px, env(safe-area-inset-top)) 8px max(12px, env(safe-area-inset-bottom)); }
-  .bro-photo-viewer-content { width: min(calc(100vw - 16px), calc((100dvh - 132px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * var(--photo-ratio))); }
-  .bro-photo-prev { right: auto; left: 0; }
-  .bro-photo-next { left: auto; right: 0; }
-  .bro-photo-frame .bro-photo-prev, .bro-photo-frame .bro-photo-next { color: white; text-shadow: 0 1px 5px #000, 0 0 12px #000; }
-}
-@keyframes photo-viewer-appear { from { opacity: 0; } to { opacity: 1; } }
-
-/* Attach the handwritten override to the questioned message, inside the scroll area. */
-.message-row[data-override="true"] { position: relative; }
-.contact-override { display: flex; align-items: center; gap: 11px; min-height: 44px; padding: 3px 8px; border: 0; background: none; color: #666; font-family: var(--font-contact-annotation), cursive; font-size: 21px; line-height: 1.1; font-feature-settings: "ss03" on; text-align: left; transform: rotate(-5deg); }
-.contact-override span { white-space: nowrap; }
-.contact-override svg { flex-shrink: 0; transform: rotate(5deg); }
-.contact-override path { stroke-dasharray: 1; animation: annotation-draw 450ms 100ms ease both; }
-.contact-override:hover { color: #262626; }
-.contact-override:focus-visible { outline: none; }
-.contact-override:focus-visible span { text-decoration: underline; text-underline-offset: 4px; }
-@media (min-width: 1100px) {
-  .conversation-page { width: 1056px; padding-inline: 308px; }
-  .conversation-thread { width: calc(100% + 286px); padding-right: 283px; }
-  .contact-override { position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%) rotate(-5deg); }
-}
-@media (max-width: 1099px) {
-  .contact-override { display: none; }
-}
-
-
-.contact-suggestions { display: none; }
-.contact-suggestions button { display: inline-flex; align-items: center; gap: 14px; min-height: 44px; max-width: 100%; padding: 10px 14px; border: 1px solid #3565c5; border-radius: 22px; background: #3565c5; color: #fff; font: inherit; font-size: 13px; line-height: 20px; text-align: left; }
-.contact-suggestions button span { color: inherit; }
-.contact-suggestions button:active { background: #2854b4; border-color: #2854b4; }
-@media (max-width: 1099px) {
-  .contact-suggestions { display: flex; padding: 0 0 10px; }
-}
-
 /* Reviewed fields keep text clear of their rounded focus outlines. */
 .contact-letter-address { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 8px; margin-bottom: 12px; font-size: 12px; line-height: 20px; overflow-wrap: anywhere; }
 .contact-letter-address > span:first-child, .contact-letter-muted { color: #888; }
@@ -387,17 +317,28 @@ button.showcase-bar { min-height: 44px; }
 .contact-subject > span { color: #888; font-size: 12px; }
 .contact-subject input { width: 100%; min-width: 0; min-height: 40px; padding: 8px 14px; border: 0; background: transparent; color: #262626; font: inherit; font-size: 16px; font-weight: 500; }
 .contact-review-sender { display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; min-width: 0; }
-.contact-review-sender textarea { display: block; width: 100%; min-width: 0; min-height: 40px; padding: 8px 12px; border: 0; background: transparent; color: #484848; font: inherit; field-sizing: content; resize: none; overflow-wrap: anywhere; }
-.contact-review-sender textarea:first-child { flex: 1 1 12ch; }
-.contact-review-sender textarea[inputmode="email"] { flex: 1 1 22ch; color: #777; }
+.contact-review-sender label { display: block; min-width: 0; }
+.contact-review-sender label > span { display: none; }
+.contact-review-sender label:first-child { flex: 1 1 12ch; }
+.contact-review-sender label:last-child { flex: 1 1 22ch; }
+.contact-review-sender input { display: block; width: 100%; min-width: 0; min-height: 44px; padding: 8px 12px; border: 0; background: transparent; color: #484848; font: inherit; }
+.contact-review-sender input[type="email"] { color: #777; }
 textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; margin-top: 12px; padding: 12px 14px; border: 0; background: transparent; color: #484848; font-family: inherit; font-size: 14px; line-height: 24px; white-space: pre-wrap; overflow-wrap: anywhere; field-sizing: content; resize: none; }
 .contact-review-sheet input:focus-visible, .contact-review-sheet textarea:focus-visible { outline-offset: -1px; border-radius: 22px; outline-color: #b3b3b3; }
+/* Greyed placeholder fillers, matching the composer, shown until a field has text. */
+.contact-review-sheet input::placeholder, .contact-review-sheet textarea::placeholder { color: #959595; font-weight: 400; }
 @media (max-width: 640px) {
-  .contact-review-sender textarea, textarea.contact-letter-body { font-size: 16px; }
+  .contact-review-sender input, textarea.contact-letter-body { font-size: 16px; }
+  .contact-sender-address { display: block; }
+  .contact-sender-address > span { display: none; }
+  .contact-review-sender { display: grid; gap: 0; }
+  .contact-review-sender label { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 8px; }
+  .contact-review-sender label > span { display: block; color: #888; }
+  .contact-review-sender input { padding-inline: 14px; }
 }
 
 /* The draft rises out of the composer while the conversation stays behind it. */
-.contact-review-modal { position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: 24px 16px; border: 0; background: transparent; overflow: hidden; color: #303030; }
+.contact-review-modal { position: fixed; inset: var(--conversation-top, 0px) 0 auto; width: 100%; max-width: none; height: var(--conversation-height, 100dvh); max-height: none; margin: 0; padding: 24px 16px; border: 0; background: transparent; overflow: hidden; color: #303030; }
 .contact-review-modal[open] { display: flex; align-items: center; justify-content: center; }
 .contact-review-modal::backdrop { background: rgb(30 30 30 / .16); backdrop-filter: blur(3px); animation: contact-dim 220ms ease-out; }
 .contact-review-modal[data-leaving="true"]::backdrop { background: transparent; backdrop-filter: blur(0); transition: background 440ms, backdrop-filter 440ms; }
@@ -406,7 +347,8 @@ textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; m
 .contact-review-heading { display: flex; align-items: center; gap: 20px; flex-shrink: 0; color: #555; font-size: 14px; transition: opacity 180ms; }
 .contact-review-heading .message-bubble { margin: 0; max-width: none; flex: 1; background: #ebebed; color: #303030; border-bottom-left-radius: 5px; }
 .contact-review-modal[data-leaving="true"] .contact-review-heading { opacity: 0; }
-.contact-review-scroll { padding: 26px 26px 20px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.contact-review-scroll { scroll-padding-block: 12px; padding: 26px 26px 20px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.contact-review-scroll::-webkit-scrollbar { display: none; }
 .contact-review-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-shrink: 0; padding: 14px 22px; border-top: 1px solid #ededed; }
 .contact-review-actions .reply-send { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .contact-draft-return > button { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; padding: 10px 16px; border: 0; border-radius: 22px; background: #ebebed; color: #555; font: inherit; }
@@ -414,7 +356,7 @@ textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; m
 .contact-draft-return > .contact-start-over { background: transparent; justify-content: center; font-size: 12px; }
 @keyframes contact-dim { from { background: transparent; backdrop-filter: blur(0); } }
 @media (max-width: 600px) {
-  .contact-review-modal { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); height: var(--conversation-height, 100dvh); top: var(--conversation-top, 0px); bottom: auto; }
+  .contact-review-modal { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
   .contact-review-scroll { padding: 22px 20px 20px; }
   .contact-review-heading { gap: 12px; }
   .contact-review-actions { padding: 10px 16px; gap: 10px; }
@@ -431,8 +373,8 @@ textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; m
 .about-body .about-inline-link { margin-right: 0; line-height: inherit; }
 .about-body .about-inline-link::after { display: none; }
 
-.contact-email-suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 10px; }
-.contact-email-suggestions button { overflow-wrap: anywhere; text-align: left; }
-.contact-email-suggestions button:last-child { background: #ebebed; border-color: #ebebed; color: #555; }
+.contact-draft-return > button:focus-visible { border-radius: 22px; outline-offset: 2px; }
 
-.contact-suggestions button:focus-visible, .contact-draft-return > button:focus-visible { border-radius: 22px; outline-offset: 2px; }
+/* Give the editable draft more room when the keyboard leaves a short viewport. */
+.conversation-page[data-compact] .contact-review-heading { display: none; }
+.conversation-page[data-compact] .contact-review-modal { padding-block: 8px; }

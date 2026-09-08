@@ -6,6 +6,6 @@ Title, if I have one:
 
 Give it an observation of its own. Keep the humor specific and unforced. Do not
 repeat the landing page or reuse the welcome note's jokes. If the supplied
-material is enough, implement the note and add its index entry. If a personal
+material is enough, add a Markdown or MDX file using `src/content/README.md`. If a personal
 fact is essential and missing, ask for that fact rather than inventing it.
-Match the length to the material. Update the page metadata and reading time.
+Match the length to the material. Supply its frontmatter. The homepage entry and reading time are generated.

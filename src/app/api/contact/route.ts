@@ -1,7 +1,75 @@
 import { createHash } from "node:crypto";
+import { Resolver } from "node:dns/promises";
+import { domainToASCII } from "node:url";
 
 export const runtime = "nodejs";
+const WINDOW_MS = 600000;
+const MAX_ATTEMPTS = 5;
 const attempts = new Map<string, { count: number; until: number }>();
+
+/** Per-instance fallback counter: bounded and self-expiring, but not shared across serverless instances. */
+function memoryRateLimited(ip: string): boolean {
+  const now = Date.now();
+  for (const [key, entry] of attempts) if (entry.until < now) attempts.delete(key);
+  if (attempts.size >= 10000) return true;
+  const entry = attempts.get(ip) ?? { count: 0, until: now + WINDOW_MS };
+  entry.count++;
+  attempts.set(ip, entry);
+  return entry.count > MAX_ATTEMPTS;
+}
+
+/** Shared fixed-window counter across instances via an Upstash-compatible REST store (Vercel KV or Upstash). */
+async function durableRateLimited(url: string, token: string, ip: string): Promise<boolean> {
+  const key = `contact:rl:${ip}`;
+  // INCR returns the post-increment count; EXPIRE ... NX sets the window only on the first hit.
+  const response = await fetch(`${url}/pipeline`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify([["INCR", key], ["EXPIRE", key, String(WINDOW_MS / 1000), "NX"]]),
+    signal: AbortSignal.timeout(1500),
+  });
+  if (!response.ok) throw new Error(`rate-limit store responded ${response.status}`);
+  const result = await response.json();
+  const count = Number(result?.[0]?.result);
+  if (!Number.isFinite(count)) throw new Error("rate-limit store returned no count");
+  return count > MAX_ATTEMPTS;
+}
+
+/** Prefer the shared store when configured; fall back to per-instance memory if it is absent or unreachable. */
+async function rateLimited(ip: string): Promise<boolean> {
+  const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token) {
+    try { return await durableRateLimited(url, token, ip); }
+    catch { /* A store outage must not take the form down; fall back to the in-memory limit. */ }
+  }
+  return memoryRateLimited(ip);
+}
+
+/** Reject only definite DNS failures; a two-second deadline leaves uncertain domains usable. */
+async function emailDomainError(domain: string): Promise<string | null> {
+  const resolver = new Resolver({ timeout: 800, tries: 1 });
+  const timer = setTimeout(() => resolver.cancel(), 2000);
+  const missing = (error: unknown) => ["ENODATA", "ENOTFOUND"].includes((error as NodeJS.ErrnoException)?.code ?? "");
+  try {
+    const mx = await resolver.resolveMx(domain).catch(error => {
+      if (missing(error)) return [];
+      throw error;
+    });
+    if (mx.some(record => record.exchange && record.exchange !== ".")) return null;
+    if (mx.length === 1 && mx[0].priority === 0 && ["", "."].includes(mx[0].exchange)) {
+      return "That email domain does not accept mail. Please edit your reply email.";
+    }
+    // SMTP permits A/AAAA delivery when MX is absent. DNS errors are not evidence of an invalid inbox.
+    const addresses = await Promise.allSettled([resolver.resolve4(domain), resolver.resolve6(domain)]);
+    if (addresses.some(result => result.status === "fulfilled" && result.value.length)) return null;
+    if (addresses.every(result => result.status === "fulfilled" || missing(result.reason))) {
+      return "That email domain could not be found. Please check the part after @.";
+    }
+    return null;
+  } catch { return null; }
+  finally { clearTimeout(timer); }
+}
 
 /** Validate and send one reviewed note to Fischer, never to a caller-selected recipient. */
 export async function POST(request: Request) {
@@ -23,19 +91,20 @@ export async function POST(request: Request) {
   if ([name, email, subject, note, id].some(value => typeof value !== "string")) return fail("Please fill in every field.", 400);
   if (!name.trim() || name.length > 80 || /[\r\n\x00]/.test(name)) return fail("Please check your name.", 400);
   if (email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) return fail("Please check your reply email.", 400);
+  const [mailbox, rawDomain] = email.split("@");
+  const domain = domainToASCII(rawDomain);
+  if (!domain || domain.length > 253 || !domain.split(".").every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label)) ||
+    mailbox.startsWith(".") || mailbox.endsWith(".") || mailbox.includes("..") || /[\x00-\x1f\x7f]/.test(email)) return fail("Please check your reply email.", 400);
   if (!subject.trim() || subject.length > 120 || /[\r\n\x00]/.test(subject)) return fail("Please check the subject.", 400);
   if (!note.trim() || note.length > 2000 || !/^[\da-f-]{36}$/i.test(id)) return fail("Please check your message.", 400);
   const key = process.env.RESEND_API_KEY;
   if (!key) return fail("Sending isn't connected yet. Your note is still here.", 503);
 
-  // A bounded per-instance limit complements the deployment's firewall protection.
-  const now = Date.now();
-  for (const [ip, entry] of attempts) if (entry.until < now) attempts.delete(ip);
+  // Shared per-IP limit when a store is configured, else a per-instance fallback; both back up the firewall.
   const ip = request.headers.get("x-vercel-forwarded-for") ?? request.headers.get("x-forwarded-for")?.split(",")[0] ?? "local";
-  const entry = attempts.get(ip) ?? { count: 0, until: now + 600000 };
-  if (entry.count >= 5 || attempts.size >= 10000) return fail("A few too many notes at once. Try again in ten minutes.", 429);
-  entry.count++;
-  attempts.set(ip, entry);
+  if (await rateLimited(ip)) return fail("A few too many notes at once. Try again in ten minutes.", 429);
+  const domainError = await emailDomainError(domain);
+  if (domainError) return fail(domainError, 400);
   const payload = {
     from: process.env.CONTACT_FROM || "fschrhunt.com <contact@fschrhunt.com>",
     to: ["fschrhunt@gmail.com"],

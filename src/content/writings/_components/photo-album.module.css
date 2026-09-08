@@ -1,0 +1,62 @@
+/* Family snapshots spread from a loose pile into a row, without cropping the originals. */
+.broPhotos { margin: 4px 0 5px; }
+.broPhotoStage { position: relative; left: 50%; width: min(900px, calc(100vw - 48px)); height: 330px; transform: translateX(-50%); }
+.broPhotoTrack { position: relative; height: 100%; margin: 0; padding: 0; list-style: none; }
+.broPhoto { position: absolute; top: 50%; left: 50%; width: 230px; padding: 6px 6px 18px; background: #fff; box-shadow: 0 2px 4px #0000000d, 0 10px 25px #00000012; transform: translate(calc(-50% + var(--pile-x, 0px)), calc(-50% + var(--pile-y, 0px))) rotate(var(--pile-turn, 0deg)); transition: left 650ms cubic-bezier(.22,1,.36,1), width 650ms cubic-bezier(.22,1,.36,1), transform 650ms cubic-bezier(.22,1,.36,1), box-shadow 650ms; }
+.broPhoto img { display: block; width: 100%; height: auto; }
+.broPhoto:nth-child(1) { --pile-x: -17px; --pile-y: -6px; --pile-turn: -9deg; z-index: 2; }
+.broPhoto:nth-child(2) { --pile-x: 13px; --pile-y: 4px; --pile-turn: 7deg; z-index: 3; }
+.broPhoto:nth-child(3) { --pile-x: -2px; --pile-y: 10px; --pile-turn: -3deg; z-index: 4; }
+.broPhoto:nth-child(4) { --pile-x: 27px; --pile-y: -12px; --pile-turn: 12deg; z-index: 1; }
+.broPhoto[data-portrait="true"] { width: 174px; }
+.broPhotos[data-expanded="true"] .broPhoto { left: calc(var(--photo-index) * 100% / 7 + 100% / 14); width: calc(100% / 7 - 10px); transform: translate(-50%, -50%); box-shadow: 0 2px 4px #0000000a, 0 6px 18px #0000000d; }
+.broPhotos[data-expanded="true"] .broPhoto[data-portrait="true"] { width: calc((100% / 7 - 10px) * .75); }
+.broPhotos figcaption { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; line-height: 18px; }
+.broPhotos figcaption button { border: 0; padding: 8px 0 8px 8px; background: none; color: inherit; font-size: inherit; min-height: 44px; white-space: nowrap; }
+.broPhotos figcaption button:hover { color: var(--ink); }
+@media (min-width: 1081px) {
+  .broPhotoStage { width: min(900px, calc(100vw - 520px)); }
+}
+@media (max-width: 640px) {
+  .broPhotoStage { height: 310px; overflow: hidden; }
+  .broPhotos[data-expanded="true"] .broPhotoStage { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: #d4d4d4 transparent; }
+  .broPhotos[data-expanded="true"] .broPhotoTrack { width: 1750px; }
+  .broPhotos[data-expanded="true"] .broPhoto { width: 230px; }
+  .broPhotos[data-expanded="true"] .broPhoto[data-portrait="true"] { width: 174px; }
+  .broPhotos figcaption { flex-wrap: wrap; gap: 0 12px; }
+}
+
+
+.broPhoto > button { display: block; width: 100%; padding: 0; border: 0; background: none; }
+.broPhoto:nth-child(5) { --pile-x: -28px; --pile-y: 14px; --pile-turn: -13deg; z-index: 1; }
+.broPhoto:nth-child(6) { --pile-x: -10px; --pile-y: -16px; --pile-turn: -5deg; z-index: 0; }
+.broPhoto:nth-child(7) { --pile-x: 20px; --pile-y: 18px; --pile-turn: 5deg; z-index: 2; }
+/* Controls hug the full, uncropped photo instead of the viewport edges. */
+.broPhotoViewer { position: fixed; inset: 0; width: 100%; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 12px 56px; border: 0; background: transparent; color: #eee; }
+.broPhotoViewer[open] { display: grid; place-items: center; animation: photo-viewer-appear 220ms ease-out; }
+.broPhotoViewer::backdrop { background: rgb(20 20 20 / 94%); backdrop-filter: blur(10px); animation: photo-viewer-appear 220ms ease-out; }
+.broPhotoViewerContent { width: min(calc(100vw - 112px), calc((100dvh - 112px) * var(--photo-ratio))); display: flex; flex-direction: column; gap: 6px; }
+.broPhotoToolbar, .broPhotoNavigation { display: flex; align-items: center; justify-content: center; height: 38px; color: #aaa; font-size: 12px; }
+.broPhotoViewer button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 44px; min-height: 44px; padding: 0 8px; border: 0; background: none; color: #ccc; font: inherit; font-size: 13px; transition: color 150ms; }
+.broPhotoViewer button:hover { color: #fff; }
+/* Album keyboard focus uses brightness and text underlines instead of boxes. */
+.broPhotoViewer:focus, .broPhotoViewer button:focus, .broPhotos :focus { outline: none; }
+.broPhotoViewer button:focus-visible { color: #fff; }
+.broPhotoBack:focus-visible span, .broPhotos figcaption button:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
+.broPhoto > button:focus-visible img { filter: brightness(1.12); }
+.broPhotoStage:focus-visible + figcaption { color: var(--ink); }
+.broPhotoBack svg { width: 14px; height: 14px; }
+.broPhotoFrame { position: relative; width: 100%; aspect-ratio: var(--photo-ratio); }
+.broPhotoFrame img { display: block; width: 100%; height: 100%; object-fit: contain; animation: photo-viewer-appear 180ms ease-out; }
+.broPhotoFrame .broPhotoPrev, .broPhotoFrame .broPhotoNext { position: absolute; z-index: 1; top: 50%; transform: translateY(-50%); font-size: 22px; }
+.broPhotoPrev { right: calc(100% + 6px); }
+.broPhotoNext { left: calc(100% + 6px); }
+.broPhotoCount { font-size: 12px; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+@media (max-width: 640px) {
+  .broPhotoViewer { padding: max(12px, env(safe-area-inset-top)) 8px max(12px, env(safe-area-inset-bottom)); }
+  .broPhotoViewerContent { width: min(calc(100vw - 16px), calc((100dvh - 132px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * var(--photo-ratio))); }
+  .broPhotoPrev { right: auto; left: 0; }
+  .broPhotoNext { left: auto; right: 0; }
+  .broPhotoFrame .broPhotoPrev, .broPhotoFrame .broPhotoNext { color: white; text-shadow: 0 1px 5px #000, 0 0 12px #000; }
+}
+@keyframes photo-viewer-appear { from { opacity: 0; } to { opacity: 1; } }

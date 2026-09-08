@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { isContactEmail } from "@/lib/contact-rules";
 
 type Props = {
   name: string; email: string; subject: string; note: string;
   setName: (value: string) => void; setEmail: (value: string) => void;
   setSubject: (value: string) => void; setNote: (value: string) => void;
   startOver: () => void;
+  prompt: string;
 };
 
 /** An original, quiet upward swoosh, synthesized only after an explicit successful send. */
@@ -48,6 +50,8 @@ export function ContactReview(props: Props) {
   const card = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const handingOff = useRef(false);
+  // Enable Send only with a name, a valid reply email, and a message — the card can open blank ("im boring").
+  const ready = Boolean(props.name.trim() && isContactEmail(props.email.trim()) && props.note.trim());
 
   useEffect(() => {
     const modal = dialog.current;
@@ -90,7 +94,7 @@ export function ContactReview(props: Props) {
     try {
       const response = await fetch("/api/contact", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: props.name, email: props.email, subject: props.subject, note: props.note, id: submissionId.current }),
+        body: JSON.stringify({ name: props.name, email: props.email, subject: props.subject.trim() || "A note for Fischer", note: props.note, id: submissionId.current }),
         signal: AbortSignal.timeout(20000),
       });
       const result = await response.json();
@@ -122,31 +126,31 @@ export function ContactReview(props: Props) {
 
   return <>
     <div className="contact-draft-return">
-      {handedOff && <p role="status">sent. thanks for writing :)</p>}
-      {!handedOff && <button ref={trigger} type="button" onClick={() => setOpen(true)}>Review your note <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 4 4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></button>}
-      {handedOff && <button ref={trigger} className="contact-start-over" type="button" onClick={props.startOver}>Start over</button>}
+      {handedOff && <p role="status">sent! thanks for writing :)</p>}
+      {!handedOff && <button ref={trigger} type="button" onClick={() => setOpen(true)}>review ur note <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 4 4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></button>}
+      {handedOff && <button ref={trigger} className="contact-start-over" type="button" onClick={props.startOver}>start over</button>}
     </div>
     <dialog ref={dialog} className="contact-review-modal" tabIndex={-1} aria-label="Review your note" data-leaving={leaving}
       onCancel={event => { event.preventDefault(); dismiss(); }}
       onClick={event => { if (event.target === event.currentTarget) dismiss(); }}>
       <div className="contact-review-frame">
         <header className="contact-review-heading">
-          <p className="message-bubble">please look this over and edit anything you need before sending.</p>
+          <p className="message-bubble">{props.prompt}</p>
         </header>
         <div ref={card} className="contact-review-sheet">
         <div className="contact-review-scroll" inert={leaving || sending}>
           <div className="contact-letter-address"><span>To</span><span>Fischer <span className="contact-letter-muted">· fschrhunt@gmail.com</span></span></div>
-          <div className="contact-letter-address"><span>From</span><div className="contact-review-sender">
-            <textarea rows={1} aria-label="Your name for this email" autoComplete="name" value={props.name} maxLength={80} onChange={event => props.setName(event.target.value.replace(/[\r\n]/g, ""))} />
-            <textarea rows={1} aria-label="Your reply email" autoComplete="email" inputMode="email" value={props.email} maxLength={254} onChange={event => props.setEmail(event.target.value.replace(/[\r\n]/g, ""))} />
+          <div className="contact-letter-address contact-sender-address"><span>From</span><div className="contact-review-sender">
+            <label><span>Name</span><input aria-label="Your name for this email" placeholder="name here" autoComplete="name" value={props.name} maxLength={80} onChange={event => props.setName(event.target.value)} /></label>
+            <label><span>Email</span><input aria-label="Your reply email" placeholder="email here" type="email" autoComplete="email" inputMode="email" value={props.email} maxLength={254} onChange={event => props.setEmail(event.target.value)} /></label>
           </div></div>
-          <label className="contact-subject"><span>Subject</span><input aria-label="Email subject" value={props.subject} maxLength={120} onChange={event => props.setSubject(event.target.value)} /></label>
-          <textarea className="contact-letter-body" aria-label="Email message" spellCheck value={props.note} maxLength={2000} onChange={event => props.setNote(event.target.value)} />
+          <label className="contact-subject"><span>Subject</span><input aria-label="Email subject" placeholder="you know what goes here" value={props.subject} maxLength={120} onChange={event => props.setSubject(event.target.value)} /></label>
+          <textarea className="contact-letter-body" aria-label="Email message" placeholder="go ahead, rant" spellCheck value={props.note} maxLength={2000} onChange={event => props.setNote(event.target.value)} />
         </div>
         {error && <p className="contact-send-error" role="alert">{error}</p>}
         <footer className="contact-review-actions">
           {sending && <span role="status">sending…</span>}
-          <button className="reply-send" type="button" aria-label="Send note" disabled={sending || leaving} onClick={() => void handoff()}>
+          <button className="reply-send" type="button" aria-label="Send note" disabled={sending || leaving || !ready} onClick={() => void handoff()}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
         </footer>

@@ -1,4 +1,10 @@
 import type { NextConfig } from "next";
+import createMDX from "@next/mdx";
+
+const withMDX = createMDX({
+  extension: /\.(md|mdx)$/,
+  options: { remarkPlugins: ["remark-frontmatter"] },
+});
 
 const nextConfig: NextConfig = {
   devIndicators: false,
@@ -9,6 +15,18 @@ const nextConfig: NextConfig = {
       { source: "/writings/five-lines", destination: "/writings/damn-you-agents", permanent: true },
       { source: "/notes/:path*", destination: "/writings/:path*", permanent: true },
     ];
+  },
+  /** Conservative security headers for a static site with one server-side send endpoint. */
+  async headers() {
+    return [{
+      source: "/:path*",
+      headers: [
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "DENY" },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+      ],
+    }];
   },
   turbopack: { root: process.cwd() },
   // Let the dev server be reached from non-localhost origins (a phone on the
@@ -22,4 +40,4 @@ const nextConfig: NextConfig = {
   ],
 };
 
-export default nextConfig;
+export default withMDX(nextConfig);
