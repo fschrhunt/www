@@ -13,7 +13,7 @@ or type scale as limits on a creative brief.
 - `docs/architecture.md`: routes, shared components, assets, and data boundaries.
 - `docs/verification.md`: checks and relevant browser workflows.
 - `docs/repository.md`: GitHub controls, labeling, and Vercel release behavior.
-- `docs/licensing.md`: AGPL code, reserved personal content, and third-party terms.
+- `docs/licensing.md`: proprietary all-rights-reserved terms and third-party licenses.
 
 Read only the docs relevant to the task. Check the actual code and remote state
 when facts may have changed. Keep touched documentation accurate as paths move.

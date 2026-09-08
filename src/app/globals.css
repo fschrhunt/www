@@ -93,12 +93,10 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .about-reveal[data-open="true"] .about-body > :nth-child(2) { transition-delay: 120ms; }
 .about-reveal[data-open="true"] .about-body > :nth-child(3) { transition-delay: 170ms; }
 .about-reveal[data-open="true"] .about-body > :nth-child(n+4) { transition-delay: 220ms; }
-.about-title { display: flex; flex-direction: column; gap: 16px; }
-.about-opening { font-size: 22px; line-height: 1.5; letter-spacing: -.35px; }
 .about-body > p { margin-top: 28px; color: #555; font-size: 15px; line-height: 27px; }
+.about-body > p:first-child { margin-top: 0; }
 .about-body > .about-postscript { margin-top: 32px; color: var(--ink); }
 @media (max-width: 640px) {
-  .about-opening { font-size: 21px; }
   .about-body { padding-top: 28px; }
 }
 
@@ -106,7 +104,6 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
   .letter { width: auto; margin: 0 28px; padding-top: 60px; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
   .letter-note { gap: 20px; }
   .letter-note h1 { font-size: 14px; line-height: 24px; }
-  .desktop-break { display: none; }
   .letter-footer { margin-top: 50px; }
 }
 @media (prefers-reduced-motion: reduce) {
