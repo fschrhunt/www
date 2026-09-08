@@ -159,7 +159,9 @@ restrictive permissions policy) on every route.
 
 The contact reply queue switches the composer hint to the next accepted field
 immediately, then enables that field after the reply finishes. The hints are
-"your name", "you@example.com", "your message", and "your answer". Visitor bubbles share the
+"ur name", "u@example.com", "ur message", and "ur answer". Replies use a casual,
+lowercase texting voice. The thread scrolls without ever showing a scrollbar, so
+it reads like a messages app. Visitor bubbles share the
 send button's blue; Fischer replies and the review prompt stay gray.
 The queue cancels superseded timers and records only unsent bubbles. Development effect restarts resume that queue without replaying the
 introduction or resetting the active question. A synchronous busy guard blocks

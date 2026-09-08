@@ -9,10 +9,10 @@ import { humanChallenge, isContactEmail, isHumanAnswer, tidyContactEmail } from 
 
 type Step = "name" | "email" | "message" | "human" | "review";
 type Message = { from: "fischer" | "visitor"; text: string };
-const welcome: Message = { from: "fischer", text: "hey, glad you’re here :)" };
+const welcome: Message = { from: "fischer", text: "hey, glad ur here :)" };
 const introduction: Message[] = [
-  { from: "fischer", text: "let’s put together a little note." },
-  { from: "fischer", text: "first, what should I call you?" },
+  { from: "fischer", text: "let’s put together a quick note." },
+  { from: "fischer", text: "first, whats ur name?" },
 ];
 
 /** Collect a name, email, message, and one human check in a chat, then review and send the draft. */
@@ -113,7 +113,7 @@ export function ContactConversation() {
     if (busyRef.current || step === "review") return;
     const answer = value.trim();
     if (!answer) {
-      setError(step === "message" ? "Write a little something first." : "Pop your answer in below.");
+      setError(step === "message" ? "write something first :)" : "pop ur answer in below");
       return;
     }
     busyRef.current = true;
@@ -127,29 +127,29 @@ export function ContactConversation() {
     if (step === "name") {
       // Take the name exactly as given. No parsing, no second-guessing, no re-entry loop.
       setName(answer);
-      reply = `nice to meet you, ${answer}. what’s a good email to reach you at?`;
+      reply = `nice to meet u, ${answer}. whats a good email?`;
       next = "email";
     } else if (step === "email") {
       const address = tidyContactEmail(answer);
       if (!isContactEmail(address)) {
-        queueReplies([{ from: "fischer", text: "that email looks unfinished — I need an @ and something after the dot. mind trying again?" }], "email");
+        queueReplies([{ from: "fischer", text: "hmm that doesnt look like an email, try again?" }], "email");
         return;
       }
       setEmail(address);
-      reply = "got it. so, what’s on your mind? take all the room you need.";
+      reply = "got it. so whats on ur mind? take all the room u need.";
       next = "message";
     } else if (step === "message") {
       setNote(answer);
       challenge.current = humanChallenge();
-      reply = `last thing, and I feel a little silly asking: what’s ${challenge.current.question}?`;
+      reply = `last thing, u a human? whats ${challenge.current.question}?`;
       next = "human";
     } else {
       if (!isHumanAnswer(answer, challenge.current.answer)) {
-        queueReplies([{ from: "fischer", text: `not quite. a bot would’ve had that instantly, which makes this more awkward for me than you. what’s ${challenge.current.question}?` }], "human");
+        queueReplies([{ from: "fischer", text: `not quite lol. whats ${challenge.current.question}?` }], "human");
         return;
       }
       setSubject(suggestContactSubject(note));
-      reply = "human, confirmed. here’s your note — edit anything, then send it.";
+      reply = "nice, ur human. heres ur note — fix anything, then send.";
       next = "review";
     }
     queueReplies([{ from: "fischer", text: reply }], next);
@@ -179,7 +179,7 @@ export function ContactConversation() {
     queueReplies([welcome, ...introduction], "name", 900);
   }
 
-  const placeholder = step === "name" ? "your name" : step === "email" ? "you@example.com" : step === "human" ? "your answer" : "your message";
+  const placeholder = step === "name" ? "ur name" : step === "email" ? "u@example.com" : step === "human" ? "ur answer" : "ur message";
 
   return <>
     <div className="conversation-thread" ref={thread} role="log" aria-label="Your contact note" aria-live="polite" aria-relevant="additions">

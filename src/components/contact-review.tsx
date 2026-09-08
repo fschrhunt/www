@@ -122,16 +122,16 @@ export function ContactReview(props: Props) {
 
   return <>
     <div className="contact-draft-return">
-      {handedOff && <p role="status">sent. thanks for writing :)</p>}
-      {!handedOff && <button ref={trigger} type="button" onClick={() => setOpen(true)}>Review your note <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 4 4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></button>}
-      {handedOff && <button ref={trigger} className="contact-start-over" type="button" onClick={props.startOver}>Start over</button>}
+      {handedOff && <p role="status">sent! thanks for writing :)</p>}
+      {!handedOff && <button ref={trigger} type="button" onClick={() => setOpen(true)}>review ur note <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 4 4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></button>}
+      {handedOff && <button ref={trigger} className="contact-start-over" type="button" onClick={props.startOver}>start over</button>}
     </div>
     <dialog ref={dialog} className="contact-review-modal" tabIndex={-1} aria-label="Review your note" data-leaving={leaving}
       onCancel={event => { event.preventDefault(); dismiss(); }}
       onClick={event => { if (event.target === event.currentTarget) dismiss(); }}>
       <div className="contact-review-frame">
         <header className="contact-review-heading">
-          <p className="message-bubble">please look this over and edit anything you need before sending.</p>
+          <p className="message-bubble">have a look, fix anything, then send :)</p>
         </header>
         <div ref={card} className="contact-review-sheet">
         <div className="contact-review-scroll" inert={leaving || sending}>
