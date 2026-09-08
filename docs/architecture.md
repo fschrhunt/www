@@ -16,21 +16,34 @@ server-side contact delivery, or required environment configuration.
 | `src/components/content-page.tsx` | Shared article shell, title, date, and navigation |
 | `src/mdx-components.tsx` | Markdown links mapped to the site's link treatment |
 | `src/app/contact/page.tsx` | Contact layout and navigation |
-| `src/app/layout.tsx` | Local font, document metadata, favicon links |
+| `src/app/layout.tsx` | Local font, default metadata, OpenGraph/Twitter defaults, favicon links |
 | `src/app/template.tsx` | Route remount boundary for entrance effects |
+| `src/app/sitemap.ts`, `src/app/robots.ts` | Generated `sitemap.xml` and `robots.txt` from the canonical origin and content |
+| `src/app/not-found.tsx`, `src/app/error.tsx` | On-voice 404 and route error boundary |
+| `src/lib/site.ts` | Canonical production origin shared by metadata, sitemap, and robots |
 | `src/site-updated.json` | UTC update timestamp rendered in the homepage footer |
 | `src/app/globals.css` | Current shared styles and motion |
 
 New notes need only a `.md` or `.mdx` file in `src/content/writings/`. Product
 prose lives in `src/content/products/`. The homepage discovers both collections
 and orders them by date. Writings require title, date, and description; products
-require title, date, and status. Reading time is estimated from prose at 200 words
+require title, date, and status. The optional `indexLabel` frontmatter sets the
+homepage link text when it should differ from the article heading (the lowercase
+product names use it). Reading time is estimated from prose at 200 words
 per minute. `@next/mdx` compiles content at build time, `remark-frontmatter` removes
 the metadata block from the rendered body, and `gray-matter` reads it for listings
-and page metadata. Content imports and interactive components remain normal React
-code; there is no runtime content evaluation or CMS. Unknown slugs return 404.
-New page directions can use scoped CSS or their own components without changing
-the accepted homepage. Read the agent kit for creative decisions.
+and page metadata. `getContentEntries` caches parsed files in production and re-reads
+them in development so edits hot-reload. Content imports and interactive components
+remain normal React code; there is no runtime content evaluation or CMS. Unknown
+slugs return 404. New page directions can use scoped CSS or their own components
+without changing the accepted homepage. Read the agent kit for creative decisions.
+
+Each page's frontmatter title and description also drive its `<title>`, canonical
+URL, and OpenGraph/Twitter tags, so shared links unfurl with a name and summary.
+Titles use the `%s · Fischer Hunt` template from `layout.tsx`; individual pages set
+only the bare name. `metadataBase` and the canonical origin come from `src/lib/site.ts`.
+`sitemap.ts` and `robots.ts` regenerate from the same content, so a new file needs
+no manual index, sitemap, or metadata edit.
 
 ## Client behavior
 
@@ -123,7 +136,13 @@ can be accepted or declined; the server still validates the chosen address.
 No data goes to the contact endpoint until the visitor sends the reviewed note.
 That endpoint checks reply-domain DNS before sending, rejecting explicit no-mail
 domains and missing mail routes while allowing temporary DNS failures. It cannot
-verify a mailbox exists or belongs to the visitor.
+verify a mailbox exists or belongs to the visitor. An off-screen honeypot field
+(`company`), invisible and unfocusable for people, makes the endpoint feign success
+without sending when a form-filling bot completes it. A per-instance rate limit and
+the same-origin check remain a first pass, not a substitute for the deployment's
+firewall against direct API abuse. `next.config.ts` sets conservative response
+headers (`nosniff`, `DENY` framing, a strict referrer policy, and a restrictive
+permissions policy) on every route.
 
 The contact reply queue switches the composer hint to the next accepted field
 immediately, then enables that field after the reply finishes. The hints are

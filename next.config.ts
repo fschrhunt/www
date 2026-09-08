@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
       { source: "/notes/:path*", destination: "/writings/:path*", permanent: true },
     ];
   },
+  /** Conservative security headers for a static site with one server-side send endpoint. */
+  async headers() {
+    return [{
+      source: "/:path*",
+      headers: [
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "DENY" },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+      ],
+    }];
+  },
   turbopack: { root: process.cwd() },
   // Let the dev server be reached from non-localhost origins (a phone on the
   // LAN, a Tailscale hostname). Next 16 otherwise blocks the cross-origin dev

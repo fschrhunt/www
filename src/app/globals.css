@@ -398,6 +398,8 @@ button.showcase-bar { min-height: 44px; }
 .contact-review-sender input { display: block; width: 100%; min-width: 0; min-height: 44px; padding: 8px 12px; border: 0; background: transparent; color: #484848; font: inherit; }
 .contact-review-sender input[type="email"] { color: #777; }
 textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; margin-top: 12px; padding: 12px 14px; border: 0; background: transparent; color: #484848; font-family: inherit; font-size: 14px; line-height: 24px; white-space: pre-wrap; overflow-wrap: anywhere; field-sizing: content; resize: none; }
+/* Off-screen honeypot: present for form-filling bots, invisible and unfocusable for people. */
+.contact-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .contact-review-sheet input:focus-visible, .contact-review-sheet textarea:focus-visible { outline-offset: -1px; border-radius: 22px; outline-color: #b3b3b3; }
 @media (max-width: 640px) {
   .contact-review-sender input, textarea.contact-letter-body { font-size: 16px; }

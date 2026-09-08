@@ -21,3 +21,9 @@ test("missing title fails instead of publishing an unnamed note", () => {
   assert.throws(() => parseContent("a-note.md", metadata.replace('title: "A note"\n', "")),
     /a-note.md: title must be a nonempty quoted string/);
 });
+
+test("an optional index label is read as a string and rejects non-strings", () => {
+  assert.equal(parseContent("a-note.md", metadata.replace('date: "2026-09-07"\n', 'date: "2026-09-07"\nindexLabel: "a note"\n')).indexLabel, "a note");
+  assert.throws(() => parseContent("a-note.md", metadata.replace('date: "2026-09-07"\n', 'date: "2026-09-07"\nindexLabel: 5\n')),
+    /a-note.md: indexLabel must be a string/);
+});

@@ -12,6 +12,8 @@ export type ContentEntry = {
   date: string;
   description?: string;
   status?: string;
+  /** Optional homepage label when the index should read differently from the article heading. */
+  indexLabel?: string;
   readingTime: string;
 };
 
@@ -29,7 +31,7 @@ export function parseContent(filename: string, source: string): ContentEntry {
       Number.isNaN(Date.parse(data.date)) || new Date(data.date).toISOString().slice(0, 10) !== data.date) {
     throw new Error(`${filename}: date must be a valid YYYY-MM-DD date`);
   }
-  for (const field of ["description", "status"]) {
+  for (const field of ["description", "status", "indexLabel"]) {
     if (data[field] !== undefined && typeof data[field] !== "string") {
       throw new Error(`${filename}: ${field} must be a string`);
     }
@@ -43,12 +45,19 @@ export function parseContent(filename: string, source: string): ContentEntry {
   return {
     slug: match[1], extension: match[2] as ContentEntry["extension"],
     title: data.title, date: data.date, description: data.description, status: data.status,
+    indexLabel: data.indexLabel,
     readingTime: `${Math.max(1, Math.ceil(words / 200))} min read`,
   };
 }
 
+// Parsing every file runs three times per page (params, metadata, render). Cache the
+// result in production, where content is fixed; skip the cache in dev so edits hot-reload.
+const cache = new Map<Collection, ContentEntry[]>();
+
 /** Read local content on the server, newest first; duplicate URLs fail the build. */
 export function getContentEntries(collection: Collection): ContentEntry[] {
+  const cached = process.env.NODE_ENV === "production" ? cache.get(collection) : undefined;
+  if (cached) return cached;
   const directory = path.join(process.cwd(), "src/content", collection);
   const entries = readdirSync(directory).filter(file => /\.(md|mdx)$/.test(file))
     .map(file => parseContent(file, readFileSync(path.join(directory, file), "utf8")));
@@ -59,5 +68,12 @@ export function getContentEntries(collection: Collection): ContentEntry[] {
     if (collection === "writings" && !entry.description) throw new Error(`${entry.slug}: description is required`);
     if (collection === "products" && !entry.status) throw new Error(`${entry.slug}: status is required`);
   }
-  return entries.sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
+  entries.sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
+  cache.set(collection, entries);
+  return entries;
+}
+
+/** Find one entry by slug, or undefined when no file matches. */
+export function getContentEntry(collection: Collection, slug: string): ContentEntry | undefined {
+  return getContentEntries(collection).find(entry => entry.slug === slug);
 }

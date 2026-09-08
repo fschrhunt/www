@@ -1,5 +1,6 @@
 ---
 title: "Diffuse"
+indexLabel: "diffuse"
 date: "2026-07-23"
 status: "In development"
 ---

@@ -48,6 +48,8 @@ export function ContactReview(props: Props) {
   const card = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const handingOff = useRef(false);
+  // A field no real visitor sees or tabs to; automated form-fillers tend to complete it.
+  const honeypot = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const modal = dialog.current;
@@ -90,7 +92,7 @@ export function ContactReview(props: Props) {
     try {
       const response = await fetch("/api/contact", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: props.name, email: props.email, subject: props.subject, note: props.note, id: submissionId.current }),
+        body: JSON.stringify({ name: props.name, email: props.email, subject: props.subject, note: props.note, id: submissionId.current, company: honeypot.current?.value ?? "" }),
         signal: AbortSignal.timeout(20000),
       });
       const result = await response.json();
@@ -142,6 +144,7 @@ export function ContactReview(props: Props) {
           </div></div>
           <label className="contact-subject"><span>Subject</span><input aria-label="Email subject" value={props.subject} maxLength={120} onChange={event => props.setSubject(event.target.value)} /></label>
           <textarea className="contact-letter-body" aria-label="Email message" spellCheck value={props.note} maxLength={2000} onChange={event => props.setNote(event.target.value)} />
+          <div className="contact-honeypot" aria-hidden="true"><label>Company<input ref={honeypot} type="text" tabIndex={-1} autoComplete="off" defaultValue="" /></label></div>
         </div>
         {error && <p className="contact-send-error" role="alert">{error}</p>}
         <footer className="contact-review-actions">

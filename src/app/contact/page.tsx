@@ -5,7 +5,7 @@ import { ReturnArrow } from "@/components/social-hub";
 import { ContactConversation } from "@/components/contact-conversation";
 import { ContactViewport } from "@/components/contact-viewport";
 
-export const metadata: Metadata = { title: "Contact · Fischer Hunt" };
+export const metadata: Metadata = { title: "Contact", alternates: { canonical: "/contact" } };
 
 /** A quiet, message-style contact form with a name, reply address, and note. */
 export default function Contact() {

@@ -29,7 +29,7 @@ export default function Home() {
       <h2 id="products-heading">Products</h2>
       <ul>
         {products.map(product => <li key={product.slug}>
-          <ScrambleLink href={`/products/${product.slug}`} className={product.slug === "e" ? "product-e" : undefined}>{product.slug === "flip" || product.slug === "diffuse" ? product.title.toLowerCase() : product.title}</ScrambleLink>
+          <ScrambleLink href={`/products/${product.slug}`} className={product.slug === "e" ? "product-e" : undefined}>{product.indexLabel ?? product.title}</ScrambleLink>
           <time dateTime={product.date} title="Repository created">{new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(product.date))}</time>
         </li>)}
       </ul>
