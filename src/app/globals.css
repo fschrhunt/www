@@ -3,6 +3,8 @@
   --paper: #fafafa;
   --fill: #ebebed;
   --wash: #f5f5f5;
+  --modal-backdrop: rgb(30 30 30 / .16);
+  --modal-backdrop-blur: 3px;
   /* Ink, from strongest to lightest */
   --ink: #262626;
   --ink-soft: #484848;
@@ -351,7 +353,7 @@ textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; m
 /* The draft rises out of the composer while the conversation stays behind it. */
 .contact-review-modal { position: fixed; inset: var(--conversation-top, 0px) 0 auto; width: 100%; max-width: none; height: var(--conversation-height, 100dvh); max-height: none; margin: 0; padding: 24px 16px; border: 0; background: transparent; overflow: hidden; color: #303030; }
 .contact-review-modal[open] { display: flex; align-items: center; justify-content: center; }
-.contact-review-modal::backdrop { background: rgb(30 30 30 / .16); backdrop-filter: blur(3px); animation: contact-dim 220ms ease-out; }
+.contact-review-modal::backdrop { background: var(--modal-backdrop); backdrop-filter: blur(var(--modal-backdrop-blur)); animation: contact-dim 220ms ease-out; }
 .contact-review-modal[data-leaving="true"]::backdrop { background: transparent; backdrop-filter: blur(0); transition: background 440ms, backdrop-filter 440ms; }
 .contact-review-frame { display: flex; flex-direction: column; gap: 18px; width: 490px; max-width: 100%; max-height: 100%; }
 .contact-review-sheet { min-height: 0; display: flex; flex-direction: column; width: 490px; max-width: 100%; max-height: 100%; border: 1px solid rgb(0 0 0 / .06); border-radius: 22px; background: #fdfdfd; box-shadow: 0 24px 80px rgb(0 0 0 / .12), 0 2px 8px rgb(0 0 0 / .04); overflow: hidden; }
