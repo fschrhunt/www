@@ -29,6 +29,10 @@ jobs:
       - run: npm ci
       # Glob so every scripts/*.test.mjs runs, including content.test.mjs and any test added later.
       - run: node --test scripts/*.test.mjs
+      - name: Test usage operations
+        env:
+          PYTHONPATH: ops/token-usage/runtime:ops/token-usage/setup
+        run: python3 -B -m unittest discover -s ops/token-usage/tests -p 'test_*.py'
       - name: Require a site update timestamp
         if: github.event_name == 'pull_request'
         env:

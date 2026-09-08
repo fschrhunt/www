@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Privately connect the existing OpenCode console session to the server over SSH."""
+import argparse
 import getpass
 import json
 from pathlib import Path
@@ -49,24 +50,29 @@ print('OpenCode console verified from the server. Session saved privately; the p
 '''
 
 
-def usage_page():
+def usage_page(capture):
     """Find only the console usage URL in the local capture, excluding headers and bodies."""
-    capture = Path.home() / 'Downloads/opencode.ai.har'
     if capture.exists():
         entries = json.loads(capture.read_text())['log']['entries']
         for entry in entries:
             url = urlsplit(entry['request']['url'])
             if url.scheme == 'https' and url.netloc == 'opencode.ai' and re.fullmatch(r'/workspace/wrk_[A-Za-z0-9]+/usage', url.path):
                 return 'https://opencode.ai' + url.path
-    raise ValueError('The OpenCode Usage-page HAR was not found in Downloads.')
+    raise ValueError('No OpenCode Usage-page URL was found in the supplied capture.')
 
 
 def main():
     """Ask for one hidden cookie value, verify server access, then persist it mode 0600."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--host', required=True, help='Authorized receiver SSH alias')
+    parser.add_argument('--capture', type=Path, required=True, help='Private Usage-page HAR outside the repository')
+    args = parser.parse_args()
+    if not re.fullmatch(r'[A-Za-z0-9_][A-Za-z0-9_.@:-]*', args.host):
+        raise ValueError('Provide an SSH alias, not SSH options.')
     if not sys.stdin.isatty():
         raise ValueError('Run this interactively in your terminal so input stays hidden.')
-    url = usage_page()
-    print('This gives SSH host server your OpenCode console session, including its account access.')
+    url = usage_page(args.capture)
+    print('This gives the selected SSH destination your OpenCode console session, including its account access.')
     print('The value goes over SSH and is stored root-only under /srv/apps/token-usage/shared/env.')
     cookie = getpass.getpass('Paste the VALUE of the OpenCode auth cookie, then press Enter (hidden): ').strip()
     if cookie.startswith('auth='):
@@ -74,7 +80,8 @@ def main():
     if not cookie or len(cookie) > 32768 or any(ord(ch) < 33 or ord(ch) > 126 or ch == ';' for ch in cookie):
         raise ValueError('Expected one auth cookie value, without other cookies or whitespace.')
     command = 'sudo -n python3 -c ' + shlex.quote(REMOTE)
-    result = subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10', 'server', command],
+    result = subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
+                             '-o', 'ForwardAgent=no', '-o', 'ConnectTimeout=10', args.host, command],
                             input=json.dumps({'url': url, 'cookie': cookie}).encode(), timeout=60)
     return result.returncode
 

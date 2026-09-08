@@ -1,8 +1,7 @@
 # Publishing token usage
 
 The server combines the three private aggregate snapshots into a single public
-JSON object in the dedicated Vercel Blob store `token-usage`, connected to
-`fschrhunt/fschrhunt`. No additional database or Vercel Cron job is needed.
+JSON object in a dedicated public Vercel Blob store. No additional database or Vercel Cron job is needed.
 
 `token-usage-publish.timer` runs every fifteen minutes, two minutes after the
 quarter hour plus up to fifteen seconds of jitter. It calls a restricted oneshot
@@ -52,14 +51,14 @@ metadata stays in the JSON and this document.
   are priced separately. Fable 5.1's cache-hit rate differs from Fable 5's.
   These standard-mode values do not apply optional fast-mode or regional premiums.
 
-`ops/token-usage/pricing.json` records the rates and verification date. Rates are
+`ops/token-usage/runtime/pricing.json` records the rates and verification date. Rates are
 explicitly reviewed source, not scraped at every poll. Adding a previously unseen
 Claude or Codex model requires adding its verified rate. Unknown prices or unknown cache
 durations remain unavailable, not guessed or treated as free. Some Claude logs
 omit the combined cache-write counter while retaining the duration-specific
 counters; pricing uses the known duration counters in that case.
 
-The cache-duration upgrade reread retained Claude logs on all three devices and
+The cache-duration upgrade reread retained Claude logs on authorized senders and
 replayed their records without duplicating messages. Old seven-field uploads are
 still accepted during rolling upgrades; nine-field records include both cache
 write durations. The publisher merges the former `ox-alpha-free` alias into `glm-5.3-flash`,
@@ -86,16 +85,14 @@ client.
 
 The object is overwritten at the same URL only after successful validation. A
 failed poll, validation, or upload leaves the previous public object available.
-Private `shared/data/publish-status.json` records publisher health;
+Private `publish-status.json` records publisher health;
 `published-snapshot.json` retains the most recently confirmed upload. Source
 freshness timestamps remain unchanged when a source stops reporting. The publisher
 does not mistake its own successful upload for fresh source data.
 
-```sh
-ssh server 'systemctl list-timers token-usage-publish.timer --no-pager'
-ssh server 'sudo systemctl start token-usage-publish.service'
-ssh server 'sudo cat /srv/apps/token-usage/shared/data/publish-status.json'
-```
+Inspect the configured publisher timer, service result, and private status file
+on the authorized host. Connection details belong in the private runbook, not
+in this document.
 
 To pause publication without touching collectors or deleting the last public
 snapshot, disable `token-usage-publish.timer`. Credential renewal and external failure alerts remain separate operational work.
@@ -143,15 +140,14 @@ must be refreshed to pick up new formatting, but its next data poll removes empt
 model rows without waiting for a refresh.
 
 `token-usage-backup.timer` archives the four aggregate snapshots and pricing daily
-at 06:10 UTC in the separate private Blob store `token-usage-backups`. Dated gzip
+in a separate private Blob store. The timer template defines the schedule. Dated gzip
 objects include a content hash in their filename, preserving distinct archive
 versions and avoiding stale reads after overwrites. The job
 verifies an authenticated read before recording success in `backup-status.json`.
 The archive includes token counters, model IDs, dates, and device freshness but no
 transcripts or provider credentials. Its store-scoped token stays root-only on
-the server, supplied to the restricted job through systemd credentials. The store
-is connected only to the project's development environment with a distinct
-`USAGE_BACKUP` prefix; it is not included in production deployment credentials.
+the server, supplied to the restricted job through systemd credentials. Keep backup credentials separate from public publishing credentials and exclude
+them from website deployments. Record the actual store binding privately.
 
 These are aggregate archives, not full SQLite backups. They retain daily data for
 repricing and chart recovery. For request-level deduplication recovery, replay the

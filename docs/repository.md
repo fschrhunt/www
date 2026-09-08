@@ -25,7 +25,8 @@ PR code. Triage becomes active after its workflow reaches the default branch.
 Labels distinguish `area:ui`, `area:infra`, `documentation`, `dependencies`, and
 `security-surface`, alongside the usual issue labels. Automatic labels describe
 changed paths, not a security verdict. The workflow adds labels; it does not
-remove manually applied labels. Keep its path rules current when files move.
+remove manually applied labels. Operations changes receive infrastructure and security labels; operations
+READMEs also receive the documentation label. Keep path rules current when files move.
 
 GitHub settings are remote state, not enforced by this document. Verify them
 through the API when changing protections. Keep stronger existing controls;
@@ -47,10 +48,10 @@ time. Check locally with `npm run site:check -- origin/main`.
 
 ## Deployment
 
-The Vercel project is `fschrhunt/fschrhunt`. Verified on September 7, 2026,
-it is connected to `fschrhunt/www` with `main` as its production branch. A PR
-push triggered a preview deployment. Deployment protection was still set to
-`all_except_custom_domains`; verify public access on the intended domain.
+Production follows `main`. Keep the actual Vercel project binding, deployment
+protection settings, and access notes in the private operator runbook. Verify
+those settings on the authorized account before publishing; do not infer current
+configuration from a historical deployment record in this public repository.
 
 Before publishing, verify the Git connection to `fschrhunt/www`, production
 branch `main`, domain, and deployment protection. Once connected, changes to

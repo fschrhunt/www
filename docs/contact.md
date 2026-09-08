@@ -10,44 +10,40 @@ The optional `CONTACT_FROM` defaults to `fschrhunt.com <contact@fschrhunt.com>`.
 That domain must be verified in Resend. Gmail cannot be the From domain through
 Resend because we cannot authenticate gmail.com's DNS.
 
-All notes go to `fschrhunt@gmail.com`. The visitor's address is Reply-To, so a
-normal Gmail reply goes to them. Their name and address also appear below the
-message. The server sends plain text, an `X-Contact-Source: fschrhunt.com` header,
-and a Resend source tag. No automatic visitor receipt is sent.
-
-## Gmail label
-
-In Gmail settings, create a filter with From `contact@fschrhunt.com` and To
-`fschrhunt@gmail.com`. Choose Apply the label, then create `fschrhunt.com`.
-This keeps the reviewed subject unchanged. Metadata cannot create a Gmail label;
-the filter is an inbox setting. If CONTACT_FROM changes, update the filter too.
+All notes go to a fixed server-side recipient. The visitor's address is Reply-To.
+The server sends plain text with source metadata. No automatic visitor receipt
+is sent. Inbox routing and filtering instructions belong in the private operator
+runbook.
 
 ## Sending behavior
 
-The server bounds and validates fields, refuses cross-origin browser requests,
-fixes the recipient, and limits each IP to five attempts per ten minutes. The
-in-app bot gate is the conversation's human check (a small arithmetic question in
-the browser), not a server field.
+The server reads at most 16,000 bytes before parsing JSON, cancels oversized
+request streams, validates fields, refuses cross-origin browser requests, and
+fixes the recipient. Each IP is limited to five attempts per ten minutes.
 
-The rate limit is shared across serverless instances when a store is configured:
-set `KV_REST_API_URL` + `KV_REST_API_TOKEN` (Vercel KV) or
-`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` (Upstash Redis). The
-endpoint calls the store's Upstash-compatible REST API directly, with no added
-dependency, using `INCR` and a first-hit `EXPIRE` for a fixed ten-minute window.
-If the store is absent or briefly unreachable, it falls back to a per-instance
-in-memory limit that resets on cold starts and is not shared across instances.
-A Vercel firewall rate-limit rule on `/api/contact` remains the deployment-level
-backstop. The browser human check and the origin check are the only in-app
-defenses, and origin checks alone are not bot protection, so keep the firewall
-rule for direct API abuse.
+Production builds and Vercel deployments require a shared rate-limit store.
+Set `KV_REST_API_URL` + `KV_REST_API_TOKEN` or
+`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`. The endpoint calls the
+Upstash-compatible REST API directly using `INCR` and a first-hit `EXPIRE`.
+Missing configuration, store outages, and invalid counter or expiry responses
+return 503 before DNS or email requests. The visitor's draft remains available.
+Only local development and tests can use a per-process memory limit when no
+store is configured. Configure and verify the store before deploying this change.
+
+The arithmetic question is browser-side interaction only. It must not be relied
+on for server authorization or bot verification. Deployment controls and security
+follow-up work belong in the private operator runbook.
+
+The baseline Content Security Policy restricts object embeds, base URLs, framing,
+and form actions. It does not define a script policy.
 
 A draft UUID and payload hash form the Resend idempotency key. Retrying an
 unchanged note cannot duplicate it within Resend's idempotency window. Editing
 the note changes that key. Timeouts and provider errors keep the card open.
 Only provider acceptance triggers success, flight, and the original swoosh.
 Acceptance is not inbox delivery; check Resend delivery events and the actual
-Gmail inbox when verifying. DNS authentication helps but cannot guarantee that
-Gmail will never classify a note as spam.
+destination inbox when verifying. DNS authentication helps but cannot guarantee that
+the receiving provider will never classify a note as spam.
 
 Suggested subjects use three to five words, such as "Bug report for Flip" or
 "A potential collaboration". The rules rank explicit requests above generic questions and thanks, and prefer
@@ -75,9 +71,9 @@ the review open so the visitor can correct their email. DNS runs only when the
 reviewed note is submitted.
 
 Run `node --test scripts/contact-send.test.mjs` for validation, domain checks, fixed routing,
-retry keys, missing configuration, and provider failures. These tests stub DNS and the provider and send no mail. A real end-to-end check requires the API key and a
+retry keys, streamed body limits, shared-store failures, missing configuration, and provider failures. These tests stub DNS and the provider and send no mail. A real end-to-end check requires the API key and a
 verified domain. Send a clearly labeled test only when authorized, then check
-Resend's delivery status and the Gmail label. Local changes must be deployed
+Resend's delivery status and the destination inbox. Local changes must be deployed
 before they change the public contact page.
 
 The conversation takes the name exactly as typed. There is no name parsing,
@@ -98,8 +94,7 @@ without rewriting the message. Test the browser rules with
 The final step is a human check: one small arithmetic question ("what's 5 plus
 4?") answered as a digit or a spelled-out word. A wrong answer asks again with the
 same sum; a correct answer opens the review. It is the visible, in-character bot
-gate and is not verified server-side, so it stands alongside the rate limit,
-origin check, and firewall rather than replacing them.
+interaction and is not verified server-side. See the sending requirements above.
 
 The review keeps sender fields together under From on desktop. On phones, Name
 and Email have separate aligned labels and single-line inputs. Long values scroll

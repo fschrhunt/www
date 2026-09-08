@@ -41,7 +41,7 @@ class PricingTests(unittest.TestCase):
 
     def test_opencode_alias_costs_merge(self):
         now=dt.datetime.now(dt.timezone.utc)
-        prices=json.loads((Path(__file__).parent/'pricing.json').read_text())
+        prices=json.loads((Path(__file__).resolve().parents[1]/'runtime/pricing.json').read_text())
         prices.pop('syntheticClaude', None)
         cloud={'unit':'credit','updatedAt':now.isoformat(),'days':[]}
         opencode={'unit':'USD','updatedAt':now.isoformat(),'days':[{'date':'2026-09-08','models':[
@@ -59,7 +59,7 @@ class PricingTests(unittest.TestCase):
         self.assertIsNone(claude_cost(tokens,['5','25','.5','6.25','10']))
 
     def test_subscription_credits_are_not_treated_as_usage_value(self):
-        prices=json.loads((Path(__file__).parent/'pricing.json').read_text())
+        prices=json.loads((Path(__file__).resolve().parents[1]/'runtime/pricing.json').read_text())
         prices.pop('syntheticClaude', None)
         now=dt.datetime.now(dt.timezone.utc)
         a={'unit':'credit','updatedAt':now.isoformat(),'account':'PRIVATE',

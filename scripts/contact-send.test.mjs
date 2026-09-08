@@ -2,6 +2,14 @@ import test, { beforeEach } from 'node:test';
 import { Resolver } from 'node:dns/promises';
 
 beforeEach(t => {
+  const names = ['NODE_ENV', 'VERCEL', 'KV_REST_API_URL', 'KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'];
+  const saved = names.map(name => [name, process.env[name]]);
+  for (const name of names) delete process.env[name];
+  process.env.NODE_ENV = 'test';
+  t.after(() => {
+    for (const [name, value] of saved)
+      if (value === undefined) delete process.env[name]; else process.env[name] = value;
+  });
   t.mock.method(Resolver.prototype, 'resolveMx', async () => [{priority:10, exchange:'mx.example.test'}]);
 });
 let requestNumber = 0;
@@ -140,14 +148,15 @@ test('the fallback limit allows five notes per IP and blocks the sixth', async t
 });
 
 // With a store configured, the endpoint rejects on the store's count, not per-instance memory.
-test('a configured shared store enforces the limit on its own count', async t => {
+test('a configured shared store enforces the production limit on its own count', async t => {
+  process.env.NODE_ENV = 'production';
   const saved = {key:process.env.RESEND_API_KEY, url:process.env.KV_REST_API_URL, token:process.env.KV_REST_API_TOKEN};
   process.env.RESEND_API_KEY = 'test-only';
   process.env.KV_REST_API_URL = 'https://store.test';
   process.env.KV_REST_API_TOKEN = 'token';
   let count = 0;
   const fetches = t.mock.method(globalThis, 'fetch', async url => {
-    if (String(url).includes('store.test')) return Response.json([{result: ++count}, {result: 1}]);
+    if (String(url).includes('store.test')) return Response.json([{result: ++count}, {result: count === 1 ? 1 : 0}]);
     return Response.json({id:'test-id'});
   });
   try {
@@ -158,4 +167,77 @@ test('a configured shared store enforces the limit on its own count', async t =>
     for (const [name, value] of [['RESEND_API_KEY',saved.key],['KV_REST_API_URL',saved.url],['KV_REST_API_TOKEN',saved.token]])
       if (value === undefined) delete process.env[name]; else process.env[name] = value;
   }
+});
+
+
+test('oversized streams are cancelled before their remaining chunks are read', async t => {
+  let reads = 0;
+  let cancelled = false;
+  const body = new ReadableStream({
+    pull(controller) { reads++; controller.enqueue(new Uint8Array(9000)); },
+    cancel() { cancelled = true; },
+  }, {highWaterMark: 0});
+  const req = new Request('https://fschrhunt.com/api/contact', {
+    method: 'POST', duplex: 'half', body,
+    headers: {origin: 'https://fschrhunt.com', 'content-type': 'application/json'},
+  });
+  await withSending(t, async send => {
+    assert.equal((await POST(req)).status, 413);
+    assert.equal(reads, 2);
+    assert.equal(cancelled, true);
+    assert.equal(send.mock.callCount(), 0);
+  });
+});
+
+test('the body limit counts UTF-8 bytes, including otherwise ignored fields', async t => {
+  await withSending(t, async send => {
+    assert.equal((await POST(request({...draft, extra: '😀'.repeat(4000)}))).status, 413);
+    assert.equal(send.mock.callCount(), 0);
+  });
+});
+
+test('valid JSON remains readable across chunk boundaries', async t => {
+  const bytes = new TextEncoder().encode(JSON.stringify({...draft, name: 'Zoë'}));
+  let index = 0;
+  const body = new ReadableStream({pull(controller) {
+    if (index < bytes.length) controller.enqueue(bytes.slice(index, ++index));
+    else controller.close();
+  }});
+  await withSending(t, async () => {
+    const req = new Request('https://fschrhunt.com/api/contact', {
+      method: 'POST', duplex: 'half', body,
+      headers: {origin: 'https://fschrhunt.com', 'content-type': 'application/json'},
+    });
+    assert.equal((await POST(req)).status, 200);
+  });
+});
+
+test('production and Vercel previews refuse sends without a shared store', async t => {
+  await withSending(t, async send => {
+    process.env.NODE_ENV = 'production';
+    assert.equal((await POST(request())).status, 503);
+    process.env.NODE_ENV = 'development';
+    process.env.VERCEL = '1';
+    assert.equal((await POST(request())).status, 503);
+    assert.equal(send.mock.callCount(), 0);
+  });
+});
+
+test('store outages and malformed counter or expiry results cannot bypass the limit', async t => {
+  process.env.NODE_ENV = 'production';
+  process.env.KV_REST_API_URL = 'https://store.test';
+  process.env.KV_REST_API_TOKEN = 'test-only';
+  await withSending(t, async send => {
+    for (const result of [null, [{result: null}, {result: 1}], [{result: 1}, {error: 'private store detail'}], [{result: -1}, {result: 1}]]) {
+      send.mock.mockImplementation(async url => {
+        assert.equal(url, 'https://store.test/pipeline');
+        return Response.json(result);
+      });
+      const response = await POST(request());
+      assert.equal(response.status, 503);
+      assert.ok(!(await response.text()).includes('private store detail'));
+    }
+    send.mock.mockImplementation(async () => { throw new Error('private network detail'); });
+    assert.equal((await POST(request())).status, 503);
+  });
 });

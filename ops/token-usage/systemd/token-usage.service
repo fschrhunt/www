@@ -8,7 +8,7 @@ Type=oneshot
 User=token-usage
 Group=token-usage
 WorkingDirectory=/srv/apps/token-usage/current
-LoadCredential=codex-auth:/home/fischer/.codex/auth.json
+# Supply codex-auth from the approved login path in a private systemd drop-in.
 LoadCredential=collector-config:/srv/apps/token-usage/shared/env/config.json
 ExecStart=/usr/bin/python3 -B /srv/apps/token-usage/current/collector.py --auth %d/codex-auth --config %d/collector-config --data /srv/apps/token-usage/shared/data
 UMask=0077
