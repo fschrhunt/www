@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { isContactEmail } from "@/lib/contact-rules";
 
 type Props = {
   name: string; email: string; subject: string; note: string;
@@ -48,6 +49,8 @@ export function ContactReview(props: Props) {
   const card = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const handingOff = useRef(false);
+  // Enable Send only with a name, a valid reply email, and a message — the card can open blank ("im boring").
+  const ready = Boolean(props.name.trim() && isContactEmail(props.email.trim()) && props.note.trim());
 
   useEffect(() => {
     const modal = dialog.current;
@@ -146,7 +149,7 @@ export function ContactReview(props: Props) {
         {error && <p className="contact-send-error" role="alert">{error}</p>}
         <footer className="contact-review-actions">
           {sending && <span role="status">sending…</span>}
-          <button className="reply-send" type="button" aria-label="Send note" disabled={sending || leaving} onClick={() => void handoff()}>
+          <button className="reply-send" type="button" aria-label="Send note" disabled={sending || leaving || !ready} onClick={() => void handoff()}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
         </footer>

@@ -3,19 +3,17 @@
 import { ContactReview } from "./contact-review";
 import { suggestContactSubject } from "@/lib/contact-subject";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { humanChallenge, isContactEmail, isHumanAnswer, tidyContactEmail } from "@/lib/contact-rules";
 
 type Step = "name" | "email" | "message" | "human" | "review";
-type Message = { from: "fischer" | "visitor"; text: string; link?: { label: string; href: string } };
+type Message = { from: "fischer" | "visitor"; text: string };
 const welcome: Message = { from: "fischer", text: "hey, glad ur here :)" };
 const introduction: Message[] = [
   { from: "fischer", text: "let’s put together a quick note." },
   { from: "fischer", text: "we can do this the fun way, or the boring way :)" },
 ];
-const contactEmail = "fschrhunt@gmail.com";
-const mailtoHref = `mailto:${contactEmail}?subject=${encodeURIComponent("hey fischer")}`;
 
 /** Collect a name, email, message, and one human check in a chat, then review and send the draft. */
 export function ContactConversation() {
@@ -166,16 +164,12 @@ export function ContactConversation() {
     queueReplies([{ from: "fischer", text: "knew u’d pick that :) so what do i call u?" }], "name");
   }
 
-  /** Skip the chat entirely: open the mail app and leave a clickable fallback address in the thread. */
-  function chooseEmail(event: MouseEvent<HTMLAnchorElement>) {
-    // Trigger the mailto ourselves: this handler removes the chip, which can cancel the anchor's own navigation.
-    event.preventDefault();
+  /** Skip the chat: hand over the review card as a plain, in-page form with nothing prefilled. */
+  function chooseEmail() {
     setChoice("email");
-    setMessages(current => [...current,
-      { from: "visitor", text: "im boring" },
-      { from: "fischer", text: "haha no worries :) opening ur email now — or grab it here:", link: { label: contactEmail, href: mailtoHref } },
-    ]);
-    window.location.href = mailtoHref;
+    setSubject(suggestContactSubject(""));
+    setMessages(current => [...current, { from: "visitor", text: "im boring" }]);
+    setStep("review");
   }
 
   /** Enter sends a message; Shift+Enter keeps a newline, including during IME composition. */
@@ -208,7 +202,7 @@ export function ContactConversation() {
   return <>
     <div className="conversation-thread" ref={thread} role="log" aria-label="Your contact note" aria-live="polite" aria-relevant="additions">
       {messages.map((message, index) => <div key={index} className={`message-row message-${message.from}`}>
-        <div className="message-bubble"><span className="sr-only">{message.from === "visitor" ? "You: " : "Fischer’s contact form: "}</span>{message.text}{message.link && <>{" "}<a className="message-link" href={message.link.href}>{message.link.label}</a></>}</div>
+        <div className="message-bubble"><span className="sr-only">{message.from === "visitor" ? "You: " : "Fischer’s contact form: "}</span>{message.text}</div>
       </div>)}
       {typing && <div className="typing-bubble" role="status" aria-label="Next question is coming"><i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" /></div>}
     </div>
@@ -219,7 +213,7 @@ export function ContactConversation() {
         startOver={startOver} /> : <>
         {step === "name" && choice === "" && !busy && <div className="contact-choice" role="group" aria-label="How would you like to reach Fischer?">
           <button type="button" className="contact-choice-fun" onClick={chooseFun}>fun way</button>
-          <a className="contact-choice-email" href={mailtoHref} onClick={chooseEmail}>im boring</a>
+          <button type="button" className="contact-choice-email" onClick={chooseEmail}>im boring</button>
         </div>}
         {(step !== "name" || choice === "fun") && <form ref={form} className="conversation-composer" onSubmit={submit} noValidate>
         {step === "message" ? <textarea id="contact-reply" ref={textarea} aria-label="Your message" spellCheck aria-describedby={error ? "reply-error" : undefined} aria-invalid={Boolean(error)} placeholder={placeholder} value={value} maxLength={2000} rows={1} disabled={busy} onChange={event => { setValue(event.target.value); setError(""); }} onKeyDown={messageKeyDown} /> :

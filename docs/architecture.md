@@ -135,11 +135,13 @@ The contact form walks four steps in a chat — name, email, message, and a huma
 check — through composer hints and accessible field labels. No label or navigation
 row sits above the composer. The opening ends with a choice, not a field: two
 iMessage-style reply bubbles ("fun way" / "im boring") and no composer yet.
-Picking either posts it as a sent bubble. "fun way" then reveals the name flow
-behind a humored prompt and shows the composer; "im boring" opens a `mailto:` to
-Fischer (triggered programmatically, since removing the chip would cancel the
-anchor's own navigation), leaves the address in the thread as a second, clickable
-`mailto:` link for when no mail client is set up, and shows no composer. The name is taken exactly as typed, with no parsing,
+Picking either posts it as a sent bubble. "fun way" reveals the chat flow behind a
+humored prompt and shows the composer; "im boring" skips straight to the review
+card as a plain, empty form (To: Fischer, with editable From, Subject, and
+Message). Both paths end at the same card and the same `/api/contact` send — the
+boring path just fills it in directly instead of through the chat, so it has no
+human check. The card's Send stays disabled until a name, a valid reply email, and
+a message are present. The name is taken exactly as typed, with no parsing,
 correction, or re-entry loop; the reply repeats it back. Email is checked only for
 shape (a mailbox, an `@`, a dotted domain); an unfinished one keeps the form on
 Email with a plain retry. The message is kept verbatim with outside whitespace
