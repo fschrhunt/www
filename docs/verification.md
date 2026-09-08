@@ -65,5 +65,4 @@ fallbacks, and temporary DNS failures with DNS and the mail provider stubbed.
 left/right wheel motion, keyboard dates, and pointer exit at desktop and phone
 widths. Check a date with many models for tooltip clipping. Failed refreshes must
 retain the last total; source and publisher freshness are in the total hover title.
-The prototype remains a separate fictional reference. See
-[usage publishing](usage-publishing.md) for the data contract.
+See [usage publishing](usage-publishing.md) for the data contract.

@@ -1,6 +1,6 @@
 # Private usage collector
 
-The standalone token-usage prototype is in `prototypes/token-usage/`. The `/token-usage` page consumes a public aggregate snapshot from Vercel Blob. The collector is a separate server runtime;
+The `/token-usage` page consumes a public aggregate snapshot from Vercel Blob. The collector is a separate server runtime;
 it does not add a website API route, public database, or network listener.
 
 ## Installed on server
