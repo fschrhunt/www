@@ -53,7 +53,7 @@ bracket. On mobile it sits on the right with a square bracket. Both markers draw
 once from top to bottom, with a static stroke for reduced motion.
 The invitation disappears after opening About, remembered in session storage across internal
 navigation and reloads in the same tab. A new browsing session shows it again. The footer shows the last site update date, with the
-turning mark opposite it. The floating hub belongs to
+blue crayon casino-chip link to token usage opposite it. The floating hub belongs to
 the site, while Contact has its own conversation layout.
 
 Current interaction decisions:

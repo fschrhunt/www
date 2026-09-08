@@ -207,3 +207,8 @@ units, isolation, and publishing work. Claude Code and Codex use incremental col
 the Mac, mini, and server, with durable local queues and a restricted SSH receiver.
 See [Claude collection](claude-collection.md) for its separate token ledger and
 offline recovery.
+
+The homepage footer links to `/token-usage` through a `token-usage-link` anchor and
+`public/chip.svg`, a 28px blue casino chip with a self-contained crayon grain
+filter matching About. It has a 44px tap target, keyboard focus
+outline, and a hover tilt disabled for reduced motion.

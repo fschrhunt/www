@@ -41,7 +41,7 @@ export default function Home() {
         <span className="reading-time">{writing.readingTime}</span>
       </li>)}</ul>
     </section>
-    <footer className="letter-footer"><time dateTime={siteUpdate.updatedAt}>Updated {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(siteUpdate.updatedAt))}</time><svg className="tiny-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v16M2 10h16M4.35 4.35l11.3 11.3M4.35 15.65l11.3-11.3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg></footer>
+    <footer className="letter-footer"><time dateTime={siteUpdate.updatedAt}>Updated {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(siteUpdate.updatedAt))}</time><a className="token-usage-link" href="/token-usage" aria-label="Token usage" title="Token usage"><Image src="/chip.svg" alt="" width={28} height={28} /></a></footer>
   </main>
   <SocialHub />
   </>;
