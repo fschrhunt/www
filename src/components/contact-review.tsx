@@ -8,6 +8,7 @@ type Props = {
   setName: (value: string) => void; setEmail: (value: string) => void;
   setSubject: (value: string) => void; setNote: (value: string) => void;
   startOver: () => void;
+  prompt: string;
 };
 
 /** An original, quiet upward swoosh, synthesized only after an explicit successful send. */
@@ -134,7 +135,7 @@ export function ContactReview(props: Props) {
       onClick={event => { if (event.target === event.currentTarget) dismiss(); }}>
       <div className="contact-review-frame">
         <header className="contact-review-heading">
-          <p className="message-bubble">have a look, fix anything, then send :)</p>
+          <p className="message-bubble">{props.prompt}</p>
         </header>
         <div ref={card} className="contact-review-sheet">
         <div className="contact-review-scroll" inert={leaving || sending}>

@@ -210,7 +210,7 @@ export function ContactConversation() {
     <div className="conversation-bottom">
       {step === "review" ? <ContactReview name={name} email={email} subject={subject} note={note}
         setName={setName} setEmail={setEmail} setSubject={setSubject} setNote={setNote}
-        startOver={startOver} /> : <>
+        startOver={startOver} prompt={choice === "email" ? "ok, fill this in and send it my way :)" : "have a look, fix anything, then send :)"} /> : <>
         {step === "name" && choice === "" && !busy && <div className="contact-choice" role="group" aria-label="How would you like to reach Fischer?">
           <button type="button" className="contact-choice-fun" onClick={chooseFun}>fun way</button>
           <button type="button" className="contact-choice-email" onClick={chooseEmail}>im boring</button>
