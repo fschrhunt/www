@@ -167,7 +167,6 @@ export function ContactConversation() {
   /** Skip the chat: hand over the review card as a plain, in-page form with nothing prefilled. */
   function chooseEmail() {
     setChoice("email");
-    setSubject(suggestContactSubject(""));
     setMessages(current => [...current, { from: "visitor", text: "im boring" }]);
     setStep("review");
   }

@@ -323,6 +323,8 @@ a, button { touch-action: manipulation; }
 .contact-review-sender input[type="email"] { color: #777; }
 textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; margin-top: 12px; padding: 12px 14px; border: 0; background: transparent; color: #484848; font-family: inherit; font-size: 14px; line-height: 24px; white-space: pre-wrap; overflow-wrap: anywhere; field-sizing: content; resize: none; }
 .contact-review-sheet input:focus-visible, .contact-review-sheet textarea:focus-visible { outline-offset: -1px; border-radius: 22px; outline-color: #b3b3b3; }
+/* Greyed placeholder fillers, matching the composer, shown until a field has text. */
+.contact-review-sheet input::placeholder, .contact-review-sheet textarea::placeholder { color: #959595; font-weight: 400; }
 @media (max-width: 640px) {
   .contact-review-sender input, textarea.contact-letter-body { font-size: 16px; }
   .contact-sender-address { display: block; }

@@ -94,7 +94,7 @@ export function ContactReview(props: Props) {
     try {
       const response = await fetch("/api/contact", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: props.name, email: props.email, subject: props.subject, note: props.note, id: submissionId.current }),
+        body: JSON.stringify({ name: props.name, email: props.email, subject: props.subject.trim() || "A note for Fischer", note: props.note, id: submissionId.current }),
         signal: AbortSignal.timeout(20000),
       });
       const result = await response.json();
@@ -141,11 +141,11 @@ export function ContactReview(props: Props) {
         <div className="contact-review-scroll" inert={leaving || sending}>
           <div className="contact-letter-address"><span>To</span><span>Fischer <span className="contact-letter-muted">· fschrhunt@gmail.com</span></span></div>
           <div className="contact-letter-address contact-sender-address"><span>From</span><div className="contact-review-sender">
-            <label><span>Name</span><input aria-label="Your name for this email" autoComplete="name" value={props.name} maxLength={80} onChange={event => props.setName(event.target.value)} /></label>
-            <label><span>Email</span><input aria-label="Your reply email" type="email" autoComplete="email" inputMode="email" value={props.email} maxLength={254} onChange={event => props.setEmail(event.target.value)} /></label>
+            <label><span>Name</span><input aria-label="Your name for this email" placeholder="name here" autoComplete="name" value={props.name} maxLength={80} onChange={event => props.setName(event.target.value)} /></label>
+            <label><span>Email</span><input aria-label="Your reply email" placeholder="email here" type="email" autoComplete="email" inputMode="email" value={props.email} maxLength={254} onChange={event => props.setEmail(event.target.value)} /></label>
           </div></div>
-          <label className="contact-subject"><span>Subject</span><input aria-label="Email subject" value={props.subject} maxLength={120} onChange={event => props.setSubject(event.target.value)} /></label>
-          <textarea className="contact-letter-body" aria-label="Email message" spellCheck value={props.note} maxLength={2000} onChange={event => props.setNote(event.target.value)} />
+          <label className="contact-subject"><span>Subject</span><input aria-label="Email subject" placeholder="you know what goes here" value={props.subject} maxLength={120} onChange={event => props.setSubject(event.target.value)} /></label>
+          <textarea className="contact-letter-body" aria-label="Email message" placeholder="go ahead, rant" spellCheck value={props.note} maxLength={2000} onChange={event => props.setNote(event.target.value)} />
         </div>
         {error && <p className="contact-send-error" role="alert">{error}</p>}
         <footer className="contact-review-actions">
