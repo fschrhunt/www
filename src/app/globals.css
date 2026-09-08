@@ -90,8 +90,10 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .about-annotation path { stroke-dasharray: 1; stroke-dashoffset: 0; }
 .about-annotation[data-visible="true"] path { animation: annotation-draw 450ms 100ms cubic-bezier(.4,0,.2,1) both; }
 @keyframes annotation-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@media (max-width: 900px) {
-  .about-annotation { position: static; width: auto; margin-right: 18px; gap: 12px; transform: rotate(-3deg); font-size: 19px; text-align: left; }
+/* Below 820px, the 540px letter leaves too little margin for the invitation and edge spacing. */
+@media (max-width: 820px) {
+  .about-annotation { position: static; order: 2; flex-direction: row-reverse; width: auto; margin-left: 18px; gap: 12px; transform: rotate(-3deg); font-size: 19px; text-align: left; }
+  .about-annotation svg { transform: scaleX(-1); }
 }
 .about-reveal { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 550ms cubic-bezier(.22,1,.36,1), visibility 550ms; }
 .about-reveal[data-open="true"] { grid-template-rows: 1fr; visibility: visible; }
