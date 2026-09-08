@@ -54,8 +54,8 @@ need tests that assert their wording. Docs-only changes need link and format
 checks, not a production build. Report any verification limits.
 
 Contact name and email helpers have focused regression coverage.
-`node --test scripts/contact-send.test.mjs` checks domain rejection, address-record
-fallbacks, and temporary DNS failures with DNS and the mail provider stubbed.
+`node --test scripts/contact-send.test.mjs` checks streamed body limits, production rate-limit failures, domain rejection,
+address-record fallbacks, and temporary DNS failures with external calls stubbed.
 `node --test scripts/contact-subject.test.mjs` checks subject intent and product selection. Run
 `node --test scripts/contact-rules.test.mjs` on Node 22.18 or newer.
 
@@ -68,3 +68,16 @@ animated column finishes. Reduced motion allows immediate inspection. Check a
 date with many models for tooltip clipping. Failed refreshes must
 retain the last total; source and publisher freshness are in the total hover title.
 See [usage publishing](usage-publishing.md) for the data contract.
+
+## Usage operations
+
+Changes to `ops/token-usage/` run Python regression tests in the required CI job:
+
+```sh
+PYTHONPATH=ops/token-usage/runtime:ops/token-usage/setup python3 -B -m unittest discover -s ops/token-usage/tests -p 'test_*.py'
+```
+
+Tests use temporary ledgers and synthetic records, without real credentials or
+SSH access. Follow the [operations deployment boundary](../ops/token-usage/README.md)
+when staging a release; local tests do not prove that an installed service or
+private credential override is configured correctly.

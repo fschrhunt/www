@@ -62,7 +62,7 @@ class ClaudeCollectionTests(unittest.TestCase):
             self.assertEqual(db.execute('SELECT dirty FROM records').fetchone()[0], 1)
             rows = [list(r[:7]) for r in db.execute('SELECT * FROM records')]
             raw = json.dumps({'version': 1, 'records': rows}).encode()
-            for device in ['mac', 'mac', 'mini']:
+            for device in ['sender-a', 'sender-a', 'sender-b']:
                 reply = ingest(p, device, raw)
                 self.assertEqual(reply['ack'], hashlib.sha256(raw).hexdigest())
             with closing(connect(p/'claude.sqlite')) as receiver:
@@ -74,15 +74,15 @@ class ClaudeCollectionTests(unittest.TestCase):
             p = Path(folder)
             good = ['a'*64,'2026-09-08','claude-opus-4-8',1,2,3,4]
             with self.assertRaises(ValueError):
-                ingest(p, 'mac', json.dumps({'version':1,'records':[good,good+['secret']]}).encode())
+                ingest(p, 'sender-a', json.dumps({'version':1,'records':[good,good+['secret']]}).encode())
             self.assertFalse((p/'claude.sqlite').exists())
 
     def test_offline_device_history_is_preserved(self):
         with tempfile.TemporaryDirectory() as folder:
             p = Path(folder)
-            for device, key in [('mac','a'),('mini','b')]:
+            for device, key in [('sender-a','a'),('sender-b','b')]:
                 ingest(p, device, json.dumps({'version':1,'records':[[key*64,'2026-09-08','claude-opus-4-8',1,2,3,4]]}).encode())
-            ingest(p, 'mini', json.dumps({'version':1,'records':[]}).encode())
+            ingest(p, 'sender-b', json.dumps({'version':1,'records':[]}).encode())
             result = json.loads((p/'claude-snapshot.json').read_text())
             self.assertEqual(result['days'][0]['models'][0]['tokens']['output_tokens'],4)
             self.assertEqual(len(result['devices']),2)

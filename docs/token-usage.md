@@ -3,44 +3,26 @@
 The `/token-usage` page consumes a public aggregate snapshot from Vercel Blob. The collector is a separate server runtime;
 it does not add a website API route, public database, or network listener.
 
-## Installed on server
+## Runtime layout
 
-On September 8, 2026, the Codex and OpenCode collectors were installed on SSH host
-`server`. Codex uses these paths:
+The [operations README](../ops/token-usage/README.md) documents source folders,
+flat installed releases, service templates, and private setup configuration.
+Each collector runs as a restricted service account with its own SQLite ledger,
+aggregate snapshot, and status file. The templates collect every five minutes.
+Exact host aliases, operator login paths, account identifiers, and installation
+history belong in the private operator runbook, outside this repository.
 
-- Source: `ops/token-usage/collector.py` and adjacent systemd units.
-- Runtime: `/srv/apps/token-usage/current`, pointing to a root-owned release.
-- Service account: `token-usage`, with no login shell, sudo, or Docker membership.
-- Private configuration: `/srv/apps/token-usage/shared/env/config.json`.
-- Database: `/srv/apps/token-usage/shared/data/usage.sqlite`.
-- Sanitized snapshot: `/srv/apps/token-usage/shared/data/snapshot.json`.
-- Collection status: `/srv/apps/token-usage/shared/data/status.json`.
-- Schedule: `token-usage.timer`, every five minutes with up to 20 seconds of jitter.
-
-The first backfill requested February 23 through September 8, 2026 in 28-day
-chunks. The endpoint returned 112 dates spanning May 10 through September 8,
-with 347 model/day rows across nine model IDs. Dates omitted by the provider
-are not invented or treated as confirmed zero usage. The normal poll refreshes
-today and the preceding seven UTC dates. Longer backfills can reconcile older
-provider corrections.
-
-OpenCode uses `opencode_collector.py` in the same release and service account, with
-its own `token-usage-opencode.service` and five-minute `token-usage-opencode.timer`.
-Its private data files are `opencode.sqlite`, `opencode-snapshot.json`, and
-`opencode-status.json` in the same data directory. Systemd supplies `opencode-auth`
-and `opencode-config.json` from the root-only environment directory.
-
-The OpenCode backfill requested January through September 2026 and returned 43
-model/day rows across 12 models on 21 dates, August 19 through September 8. A
-repeat poll left every stored model cost unchanged. The initial SQLite backup
-`opencode.initial-backup.sqlite` passed an integrity check.
+Normal Codex polls refresh today and the preceding seven UTC dates. Missing
+provider dates are not invented or treated as confirmed zero usage. Longer
+backfills can reconcile older provider corrections. OpenCode has a separate
+ledger and schedule, so its USD values never enter the Codex credit ledger.
 
 ## Source and units
 
 The collector reads the authenticated ChatGPT dashboard endpoint
 `GET /backend-api/wham/analytics/daily-workspace-usage-counts`, with `start_date`,
 `end_date`, `group_by=day`, and a specific `workspace_user` filter. That filter
-was taken from Fischer's own dashboard request. It is private runtime configuration,
+comes from the authorized account dashboard request. It is private runtime configuration,
 not checked into Git.
 
 This is an internal dashboard endpoint, not a stable public API contract. Its
@@ -59,20 +41,18 @@ private database; the snapshot omits identities, API keys, prompts, and sessions
 
 ## Authentication and boundaries
 
-The working login is on the server at `/home/fischer/.codex/auth.json`. No MacBook
-credentials were copied for Codex. OpenCode uses the console cookie explicitly
-transferred by the interactive helper described below. On every service invocation, systemd reads that existing
-file through `LoadCredential` and supplies a private, temporary credential file.
-The collector cannot browse Fischer's home directory or modify the original login.
-Systemd likewise supplies the private collector configuration.
+Systemd supplies the approved Codex login through `LoadCredential`, using a
+private drop-in that names its source path. The collector cannot browse the
+operator's home directory or modify the original login. OpenCode uses a console
+cookie transferred by the interactive helper described below. Collector settings
+also arrive through private systemd credentials.
 
 The collector uses the current access token and **does not refresh or rotate it**.
 A subsequent Codex login refresh on the server is picked up at the next invocation.
 If the provider rejects an expired login, status becomes `codex_login_expired` and
 the last successful snapshot remains intact. To renew the server login, use the
-normal Codex login flow on that server, for example `ssh -t server codex login
---device-auth`. Never paste a token into chat, a shell argument, or the website.
-An independent, unattended credential-renewal workflow is still outstanding.
+normal Codex login flow on the authorized host. Never paste a token into chat, a shell argument, or the website.
+Record credential-renewal procedures in the private operator runbook.
 
 The service has a read-only filesystem apart from its data directory, hidden home
 directories, no Linux capabilities, restricted system calls, and a private temporary
@@ -82,42 +62,29 @@ so credentials cannot follow a redirect to another origin. Logs contain success
 counts and safe failure categories, not response bodies or credentials.
 
 HTTP 429 backs off for one hour, login failures for 30 minutes, and other failures
-for ten minutes. `status.json` and the snapshot's `updatedAt` allow a future publisher
-to detect stale data. The snapshot publisher runs separately; external alerting is not configured.
+for ten minutes. `status.json` and the snapshot's `updatedAt` allow the publisher
+to detect stale data. The snapshot publisher runs separately; verify external alerting in the private deployment runbook.
 
 ## Operations
 
-```sh
-ssh server 'systemctl list-timers token-usage.timer --no-pager'
-ssh server 'sudo systemctl start token-usage.service'
-ssh server 'sudo journalctl -u token-usage.service -n 20 --no-pager'
-ssh server 'sudo cat /srv/apps/token-usage/shared/data/status.json'
-ssh server 'systemctl list-timers token-usage-opencode.timer --no-pager'
-ssh server 'sudo systemctl start token-usage-opencode.service'
-ssh server 'sudo cat /srv/apps/token-usage/shared/data/opencode-status.json'
-```
+Use the configured SSH destination from the private runbook. Inspect the relevant
+systemd timer, service result, and sanitized status file. Check collection and
+publisher freshness separately; a successful publisher cannot make an offline
+source current. Do not paste raw host status or journal output into public issues.
 
-The source uses only Python's standard library. Local verification:
+Run local tests using the command in the
+[operations README](../ops/token-usage/README.md). Deployment copies the contents
+of `runtime/` into a new immutable release, validates it, and switches `current`.
+Install reviewed units from `systemd/` with the required private credential
+overrides, then reload systemd. Never edit live source in place or overwrite an
+existing host's private configuration from a repository template.
 
-```sh
-python3 -B -m unittest discover -s ops/token-usage -p 'test_*.py'
-```
-
-Deployment copies reviewed source into a new immutable release directory, flips
-`current`, installs the systemd units, and reloads systemd. Never edit runtime
-source in place. Stop the timer before maintenance or another backfill. Use the
-same service restrictions and add `--start YYYY-MM-DD` for historical Codex
-collection, or `--start YYYY-MM` for OpenCode.
-
-An initial SQLite backup is stored privately beside the database as
-`usage.initial-backup.sqlite`; opening that backup and running `integrity_check`
-verified it after the initial backfill. This is an on-server recovery copy, not an
-off-server or recurring backup. Backup retention and recovery automation remain
-unconfigured. Stop collection before restoring. Disabling collection is reversible:
-
-```sh
-ssh server 'sudo systemctl disable --now token-usage.timer'
-```
+Stop affected schedules for ledger maintenance or a backfill. Preserve service
+restrictions and use `--start YYYY-MM-DD` for Codex or `--start YYYY-MM` for
+OpenCode. Stop collection before restoring SQLite, retain a verified recovery
+copy, and follow the [device replay procedure](claude-collection.md) when needed.
+Disabling a timer does not require deleting its ledger or the public snapshot.
+Verify backup retention and recovery on the actual installation.
 
 ## OpenCode source and login
 
@@ -142,30 +109,26 @@ last successful snapshot, with backoff recorded in `opencode-status.json`.
 Sanitized HAR files are diagnostic captures, not reusable login sessions. No raw
 HAR file is part of this repository or runtime.
 
-To connect the existing OpenCode console session, run
-`python3 ops/token-usage/connect-opencode.py` interactively on the Mac. It reads
-only the Usage-page URL from `~/Downloads/opencode.ai.har`, then prompts with hidden
-input for the `auth` cookie value from Helium's Developer Tools, Application,
-Cookies, `https://opencode.ai`. The cookie grants console-session account access;
-it is not a read-only API key. The helper sends it over SSH stdin, verifies the
-Usage page from the server without following redirects, and only then stores it
-as root-owned mode 0600 in `shared/env/opencode-auth`. Its associated usage-page
-URL goes in `shared/env/opencode-config.json`. No credential is printed or placed
-in command arguments. The helper preserves existing function configuration and does not change the
-OpenCode timer. Replace an expired or revoked session through the same procedure;
-the next poll after backoff reads the replacement credential. Session renewal is
-manual.
-The helper identifies itself as `token-usage/1.0`; the console returned HTTP 403
-for Python’s default user agent even on its public homepage during verification.
+To connect an authorized console session, run the interactive
+`ops/token-usage/setup/connect-opencode.py` helper with an explicit SSH alias and
+private HAR path, as documented in the operations README. It reads only the usage
+URL from the capture and prompts for the `auth` cookie with hidden input. The
+cookie grants console-session account access; it is not a read-only API key.
+
+The helper sends the credential over SSH stdin, verifies the console page without
+following redirects, and stores it in a root-owned private directory with mode
+0600. It preserves existing function configuration and does not change schedules.
+Replace expired or revoked sessions through the same procedure. Session renewal
+is manual. Raw HAR files can contain credentials and must stay outside Git.
 
 ## Claude and website delivery
 
 Claude's server login retrieves quota percentages and resets, but an account-wide
 cloud source for daily model token history has not been verified. Separate
-incremental Claude Code and Codex log collectors now run on the Mac, mini, and server every
+incremental Claude Code and Codex log collectors run on authorized senders every
 five minutes. They upload counters through restricted SSH keys into a private
 central ledger, with durable local queues for offline recovery. See
-[Claude collection](claude-collection.md) for deployment, measurements, and recovery.
+[Claude collection](claude-collection.md) for transport and recovery.
 Quotas are not substituted for token counts.
 
 The publisher converts model usage into dollar values and writes only allowlisted

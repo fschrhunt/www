@@ -9,9 +9,17 @@ import json
 import os
 from pathlib import Path
 import resource
+import re
 import signal
 import sys
 from claude_records import atomic_json, connect, merge, snapshot, validate
+
+
+def device_id(value):
+    """Accept an opaque device label supplied by the root-owned SSH forced command."""
+    if not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,63}", value):
+        raise argparse.ArgumentTypeError("Invalid device ID.")
+    return value
 
 
 def ingest(data, device, raw):
@@ -42,7 +50,7 @@ if __name__ == '__main__':
     signal.alarm(60)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data', type=Path, required=True)
-    parser.add_argument('--device', choices=('mac', 'mini', 'server'), required=True)
+    parser.add_argument('--device', type=device_id, required=True)
     args = parser.parse_args()
     try:
         raw = sys.stdin.buffer.read(2*1024*1024+1)

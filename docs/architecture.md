@@ -1,8 +1,9 @@
 # Architecture
 
 Next.js App Router with TypeScript and React. Routes are statically rendered;
-small client components handle the interactions. There is no database, CMS,
-server-side contact delivery, or required environment configuration.
+small client components handle the interactions. Contact delivery uses a
+server-only API route and environment credentials. There is no website database
+or CMS.
 
 ## Routes and shared files
 
@@ -62,9 +63,9 @@ no manual index, sitemap, or metadata edit.
 
 - `about-passage.tsx` remembers its first opening in session storage for the current
   tab. Internal navigation and reloads keep its handwritten invitation hidden.
-  Memory provides a fallback when storage is unavailable. The annotation uses Benji Script and a locally drawn bracket on desktop.
-  At narrower widths it sits to the right with a square bracket. Both markers
-  draw once from top to bottom; reduced motion shows the complete stroke. The invitation resets in a new browsing session.
+  Memory provides a fallback when storage is unavailable. The annotation uses
+  Benji Script and a drawn chevron. The responsive placement and arrow direction
+  are defined in `globals.css`; reduced motion shows the complete stroke. The invitation resets in a new browsing session.
 - `reader-index.tsx` follows benji.org's reading layout: fixed 80px from the
   desktop top and left, inline above the article at 1080px and below. Its outline
   lists article h2/h3 headings and tracks the current section at a 128px offset,
@@ -158,12 +159,11 @@ inference, and does not parse names or guess provider typos. No data goes to the
 contact endpoint until the visitor sends the reviewed note. That endpoint checks
 reply-domain DNS before sending, rejecting explicit no-mail domains and missing
 mail routes while allowing temporary DNS failures. It cannot verify a mailbox
-exists or belongs to the visitor. The visible human check is the in-app bot gate;
-a rate limit (shared across instances when a store is configured, else
-per-instance) and the same-origin check back it up, but the deployment firewall
-remains the defense against direct API abuse. `next.config.ts` sets conservative
-response headers (`nosniff`, `DENY` framing, a strict referrer policy, and a
-restrictive permissions policy) on every route.
+exists or belongs to the visitor. The arithmetic question is browser-side
+interaction. Deployed sends require a working shared rate-limit store; failures
+preserve the draft and return 503. See [contact setup](contact.md).
+`next.config.ts` sets a baseline Content Security Policy, `nosniff`, framing
+restrictions, a strict referrer policy, and a restrictive permissions policy.
 
 The contact reply queue switches the composer hint to the next accepted field
 immediately, then enables that field after the reply finishes. The hints are
@@ -195,7 +195,7 @@ appears in the bottom row. Escape or clicking the dimmed area dismisses the moda
 the email does the card fly upward with an original synthesized swoosh. Reduced
 motion skips travel. Errors preserve edits and allow a retry with the same
 idempotency key. Acceptance does not guarantee inbox placement. See
-[contact setup](contact.md) for credentials, delivery, limits, and Gmail labeling.
+[contact setup](contact.md) for configuration, delivery, and limits.
 
 ## Private usage collection
 
@@ -204,7 +204,7 @@ the private server. Each writes its own SQLite ledger and sanitized JSON snapsho
 keeping Codex credits separate from OpenCode USD usage costs. The publisher prices local model token counts for Codex and Claude, uses OpenCode USD costs, and publishes a small public JSON
 snapshot to Vercel Blob; `/token-usage` reads it directly. See [token usage operations](token-usage.md) for authentication,
 units, isolation, and publishing work. Claude Code and Codex use incremental collectors on
-the Mac, mini, and server, with durable local queues and a restricted SSH receiver.
+authorized sender devices, with durable local queues and a restricted SSH receiver.
 See [Claude collection](claude-collection.md) for its separate token ledger and
 offline recovery.
 

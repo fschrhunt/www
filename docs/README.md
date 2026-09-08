@@ -10,7 +10,8 @@
 
 Start commands and a brief overview are in the root [README](../README).
 
-- [Contact email](contact.md): Resend setup, sending behavior, and Gmail labels.
+- [Contact email](contact.md): mail setup, sending behavior, and validation.
+- [Operations source](../ops/README.md): source layout and the boundary between public guidance and private deployment notes.
 - [Token usage](token-usage.md): private server collection, authentication, units, and remaining integrations.
 
 - [Claude collection](claude-collection.md): incremental device collection, private uploads, and offline recovery.

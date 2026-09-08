@@ -36,3 +36,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 config.bat
+
+# Private operational material and Python output
+/ops/private/
+__pycache__/
+*.pyc
+*.har
+*.sqlite
+*.sqlite-*

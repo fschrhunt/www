@@ -1,21 +1,16 @@
-# Claude and Codex usage on three devices
+# Device usage collection
 
-Claude Code log collection is installed on this Mac, SSH host `mini`, and SSH host
-`server`. It collects existing Claude Code assistant usage records and Codex session token events. It makes no
-model requests and consumes no subscription tokens. It does not cover Claude.ai
-browser chats or history that has already been deleted from all three devices.
-
-The first import on September 8, 2026 merged 5,962 distinct response records over
-16 UTC dates and five model IDs. All three queues drained without skipped records.
-The server's aggregate snapshot was about 4.7 KB. The website consumes a separately priced aggregate snapshot. See
-[usage publishing](usage-publishing.md).
+Authorized senders collect retained Claude Code and Codex session usage records.
+Collection makes no model requests and consumes no subscription tokens. It does
+not cover browser chats, cloud-only sessions, or deleted history. The website
+consumes a separately priced aggregate snapshot; see [publishing](usage-publishing.md).
 
 ## Collection and resource limits
 
-Each machine runs `claude_local.py` once every five minutes, then exits. The
-Macs use `com.fischer.token-usage.claude` LaunchAgents, which run at login and do
-not request system wake. They resume after sleep while the user is logged in.
-The server uses the persistent `token-usage-claude-local.timer`, which starts again
+Each machine runs `claude_local.py` once every five minutes, then exits. macOS
+senders use `com.fischer.token-usage.claude` LaunchAgents, which run at login and
+do not request system wake. They resume after sleep while the user is logged in.
+Linux senders use the persistent `token-usage-claude-local.timer`, which starts again
 after reboot. None of these jobs keeps Python running between executions.
 
 The local runtime and state live under `~/.local/share/token-usage/claude/`:
@@ -38,25 +33,19 @@ cursors.
 
 Each pass has a 32 MiB scan budget, a 20-second scan deadline, a 16 MiB per-line
 limit, and a 2,000-record upload batch. Budget exhaustion leaves the remaining
-work for a later pass. Jobs cannot overlap on a device. The server sender has a
+work for a later pass. Jobs cannot overlap on a device. The Linux sender service has a
 128 MiB memory limit, 10% CPU quota, low scheduling priority, and a 90-second
-service timeout. The Macs run with background priority and low-priority I/O.
+service timeout. macOS senders run with background priority and low-priority I/O.
 A pathological oversized record fails the scan and is reported through status;
 it is not silently discarded. Malformed complete records are counted as skipped.
 
-Measured post-import runs used about 26.5 MiB peak RSS on this Mac while uploading
-its final queued batch, 19.5 MiB on the mini with unchanged logs, and 13 MiB on the
-server with unchanged logs. CPU time was approximately 60, 80, and 50 milliseconds,
-respectively. These are individual measurements, not permanent bounds or power
-measurements. The Linux sender's configured limits apply independently.
-
 ## Private transport and merging
 
-`usage-ingest` is a dedicated server account. Its root-owned SSH authorized keys
+The receiver uses a dedicated ingestion account. Its root-owned SSH authorized keys
 force a fixed `claude_ingest.py` command for each device. The keys cannot open a
 shell, forward ports, allocate a terminal, or choose another device identity.
-The account cannot alter its authorized keys or the deployed source. No new
-network listener or firewall rule was added. Uploads use the existing SSH server.
+The account cannot alter its authorized keys or the deployed source. Uploads use
+the existing SSH server without a separate network listener.
 The keys confer write access to usage collection, not access to Claude accounts.
 
 The receiver accepts only a bounded schema containing a SHA-256 hash of the
@@ -80,27 +69,25 @@ each local ledger after acknowledgement so they can be replayed for recovery.
 
 ## Offline behavior and recovery
 
-An offline Mac or mini does not interrupt the other collectors. Its existing
+An offline sender does not interrupt the other collectors. Its existing
 history stays in the central snapshot; its last-seen timestamp stops advancing.
 When it returns, complete new log records and pending uploads are collected.
 
-If the server is offline, both Macs keep collecting into their local SQLite
+If the server is offline, senders keep collecting into their local SQLite
 queues. Network attempts have short timeouts and retry at the next scheduled
 run, with no busy retry loop. Uploads are acknowledged only after the receiver
 commits and replaces the snapshot. If a connection drops after commit, retrying
-the same batch is safe. The previous snapshot remains available wherever a future
-website publisher has copied it. Central collection necessarily pauses while the server is off; the website keeps
+the same batch is safe. Central collection pauses while the receiver is offline; the website keeps
 reading its last published Blob snapshot.
 
 Tested recovery covers unreachable transport, lost acknowledgements, duplicate
 uploads from different devices, partial log lines, incremental scan budgets,
-truncated logs, and preservation of offline-device history. The actual machines
-were not rebooted or put to sleep during verification.
+truncated logs, and preservation of offline-device history. These tests simulate
+transport failures; they do not establish suspend or reboot behavior on a
+particular deployment.
 
-An initial private backup, `claude.initial-backup.sqlite`, passed an integrity
-check. Like the other collectors' initial backups, it is on the same server, not
-an off-server backup. A separate daily private aggregate archive now protects
-all providers; see [usage publishing](usage-publishing.md). After restoring an older central ledger, stop
+A separate private aggregate archive can protect published history; see
+[usage publishing](usage-publishing.md). After restoring an older central ledger, stop
 the local jobs and mark `records.dirty=1` in each local `queue.sqlite` to resend
 its retained counters. This does not require rereading transcripts. Restart the
 jobs afterward. Never reset the local queue or delete source logs as part of
@@ -108,27 +95,14 @@ ordinary retry handling.
 
 ## Operations
 
-```sh
-# This Mac; the same commands work through ssh mini.
-cat ~/.local/share/token-usage/claude/status.json
-launchctl print gui/$(id -u)/com.fischer.token-usage.claude
+Source lives in `ops/token-usage/runtime/claude_{local,records,ingest}.py`.
+The [operations README](../ops/token-usage/README.md) covers private inventory
+configuration, installation, source layout, and test commands. Keep actual host
+aliases and device names in the private operator runbook.
 
-# Server sender and other provider schedules.
-ssh server 'cat ~/.local/share/token-usage/claude/status.json'
-ssh server 'systemctl list-timers token-usage-claude-local.timer token-usage.timer token-usage-opencode.timer --no-pager'
-```
-
-Source lives in `ops/token-usage/claude_{local,records,ingest}.py`.
-`install_claude.py` provisions the three authorized devices, preserves their keys
-and queues, checks the first upload, and installs their schedules. It uses the
-existing `mini` and `server` SSH aliases. Installing while logged out of the
-Mac graphical session requires loading its LaunchAgent after login.
-
-Run focused verification with:
-
-```sh
-python3 -B -m unittest discover -s ops/token-usage -p 'test_*.py'
-```
+Check the local `status.json`, pending queue, and configured scheduler on each
+authorized sender. Check receiver freshness independently from publishing health.
+Do not publish raw status output, login paths, SSH configuration, or device IDs.
 
 Codex scans `~/.codex/sessions` and `~/.codex/archived_sessions` within the same
 32 MiB pass budget and SSH batch. It persists session/model context across reads.

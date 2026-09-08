@@ -5,9 +5,10 @@ import { domainToASCII } from "node:url";
 export const runtime = "nodejs";
 const WINDOW_MS = 600000;
 const MAX_ATTEMPTS = 5;
+const MAX_BODY_BYTES = 16000;
 const attempts = new Map<string, { count: number; until: number }>();
 
-/** Per-instance fallback counter: bounded and self-expiring, but not shared across serverless instances. */
+/** Development-only counter, bounded and self-expiring within one process. */
 function memoryRateLimited(ip: string): boolean {
   const now = Date.now();
   for (const [key, entry] of attempts) if (entry.until < now) attempts.delete(key);
@@ -30,20 +31,20 @@ async function durableRateLimited(url: string, token: string, ip: string): Promi
   });
   if (!response.ok) throw new Error(`rate-limit store responded ${response.status}`);
   const result = await response.json();
-  const count = Number(result?.[0]?.result);
-  if (!Number.isFinite(count)) throw new Error("rate-limit store returned no count");
+  const count = result?.[0]?.result;
+  const expiry = result?.[1]?.result;
+  if (result?.[0]?.error || result?.[1]?.error || !Number.isSafeInteger(count) || count < 1 ||
+    (expiry !== 0 && expiry !== 1)) throw new Error("rate-limit store returned an invalid result");
   return count > MAX_ATTEMPTS;
 }
 
-/** Prefer the shared store when configured; fall back to per-instance memory if it is absent or unreachable. */
+/** Require a working shared store in production; allow memory only during local development and tests. */
 async function rateLimited(ip: string): Promise<boolean> {
-  const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) {
-    try { return await durableRateLimited(url, token, ip); }
-    catch { /* A store outage must not take the form down; fall back to the in-memory limit. */ }
-  }
-  return memoryRateLimited(ip);
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_URL ? process.env.KV_REST_API_TOKEN : process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token) return durableRateLimited(url, token, ip);
+  if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) return memoryRateLimited(ip);
+  throw new Error("rate-limit store is not configured");
 }
 
 /** Reject only definite DNS failures; a two-second deadline leaves uncertain domains usable. */
@@ -79,12 +80,28 @@ export async function POST(request: Request) {
     if (!origin || new URL(origin).host !== (request.headers.get("host") || new URL(request.url).host)) return fail("Please send this from the contact page.", 403);
   } catch { return fail("Please send this from the contact page.", 403); }
   if (!request.headers.get("content-type")?.startsWith("application/json")) return fail("That request format isn't supported.", 415);
-  if (Number(request.headers.get("content-length")) > 16000) return fail("That note is too long.", 413);
+  if (Number(request.headers.get("content-length")) > MAX_BODY_BYTES) return fail("That note is too long.", 413);
   let data;
   try {
-    const raw = await request.text();
-    if (raw.length > 16000) return fail("That note is too long.", 413);
-    data = JSON.parse(raw);
+    // Bound the bytes while reading, including requests without Content-Length.
+    const reader = request.body?.getReader();
+    const buffer = new Uint8Array(MAX_BODY_BYTES);
+    let size = 0;
+    if (reader) {
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (size + value.byteLength > MAX_BODY_BYTES) {
+            void reader.cancel().catch(() => {});
+            return fail("That note is too long.", 413);
+          }
+          buffer.set(value, size);
+          size += value.byteLength;
+        }
+      } finally { reader.releaseLock(); }
+    }
+    data = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(buffer.subarray(0, size)));
   } catch { return fail("I couldn't read that note. Please try again.", 400); }
   if (!data || typeof data !== "object") return fail("Please check your note.", 400);
   const { name, email, subject, note, id } = data;
@@ -100,9 +117,11 @@ export async function POST(request: Request) {
   const key = process.env.RESEND_API_KEY;
   if (!key) return fail("Sending isn't connected yet. Your note is still here.", 503);
 
-  // Shared per-IP limit when a store is configured, else a per-instance fallback; both back up the firewall.
+  // Apply the shared limit before DNS or mail provider requests.
   const ip = request.headers.get("x-vercel-forwarded-for") ?? request.headers.get("x-forwarded-for")?.split(",")[0] ?? "local";
-  if (await rateLimited(ip)) return fail("A few too many notes at once. Try again in ten minutes.", 429);
+  try {
+    if (await rateLimited(ip)) return fail("A few too many notes at once. Try again in ten minutes.", 429);
+  } catch { return fail("Sending is temporarily unavailable. Your note is still here. Please try again shortly.", 503); }
   const domainError = await emailDomainError(domain);
   if (domainError) return fail(domainError, 400);
   const payload = {
