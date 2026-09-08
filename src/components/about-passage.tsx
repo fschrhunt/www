@@ -52,10 +52,9 @@ export function AboutPassage() {
     </svg>
     <h2 id="about-heading">
       <span className="about-annotation" data-visible={!hasOpened} aria-hidden="true">
-        <span>click me</span>
-        <svg width="14" height="46" viewBox="0 0 14 46" fill="none">
-          <path className="annotation-bracket" pathLength="1" d="M2 3.5c3 .6 6 .1 9-.4-.6 13 .6 27-.1 40.5-3-.4-6-.3-9 .4" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" />
-          <path className="annotation-mobile-bracket" pathLength="1" d="M12 3.5c-3 .6-6 .1-9-.4.6 13-.6 27 .1 40.5 3-.4 6-.3 9 .4" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" />
+        <span>click this</span>
+        <svg width="14" height="24" viewBox="0 0 14 24" fill="none">
+          <path pathLength="1" d="M2 3c3 2.5 6 5.7 9 9-3 2.8-6 5.5-9 9" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
       <button className="about-trigger" type="button" data-unopened={!hasOpened} aria-expanded={open} aria-controls="about-content" onClick={toggleAbout}>
@@ -68,8 +67,8 @@ export function AboutPassage() {
       <div className="about-clip">
         <div className="about-body">
           <p>My favorite color is blue, the one up there. I&apos;m 16. There, the small talk&apos;s out of the way.</p>
-          <p>My whole life was tech. Eventually I noticed the one system I&apos;d never tried to optimize was my own body, so I took up running, cycling, and swimming. It fixed things I hadn&apos;t even filed a bug for. Now I have Strava activities to post.</p>
-          <p>I started coding young, if Roblox scripts to cheat at games count. Then I shelved it, figuring the weird kid was first in line to get bullied, and spent a while trying to be likeable instead. Bad trade, in hindsight.</p>
+          <p>My hobbies, let&apos;s see. I like to <ScrambleLink href="/token-usage" className="about-inline-link">spend tokens</ScrambleLink>, go on runs, swim (even though I&apos;m bad at it), and last but not least, cycle. Tech used to be my whole life, until I picked up those hobbies. Now I have Strava activities to post and tokens to spend tinkering with AI.</p>
+          <p>I started coding young, if Roblox scripts to cheat at games count. Then I shelved it, figuring the &quot;weird&quot; kid was first in line to get bullied, and spent a while trying to be likeable instead. Bad trade, in hindsight.</p>
           <p><ScrambleLink href="https://openclaw.ai" className="about-inline-link">OpenClaw</ScrambleLink> got me back into it. What happened to them btw? The idea of AGI, and how different life might look in five years, made me want to build some part of it.</p>
           <p>It&apos;s been hell ever since. Mostly reading a <ScrambleLink href="/writings/damn-you-agents" className="about-inline-link">400-line function</ScrambleLink> an agent wrote for something that needed five.</p>
           <p className="about-postscript">Anyway, that&apos;s the tour.</p>
