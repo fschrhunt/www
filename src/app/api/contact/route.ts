@@ -1,7 +1,34 @@
 import { createHash } from "node:crypto";
+import { Resolver } from "node:dns/promises";
+import { domainToASCII } from "node:url";
 
 export const runtime = "nodejs";
 const attempts = new Map<string, { count: number; until: number }>();
+
+/** Reject only definite DNS failures; a two-second deadline leaves uncertain domains usable. */
+async function emailDomainError(domain: string): Promise<string | null> {
+  const resolver = new Resolver({ timeout: 800, tries: 1 });
+  const timer = setTimeout(() => resolver.cancel(), 2000);
+  const missing = (error: unknown) => ["ENODATA", "ENOTFOUND"].includes((error as NodeJS.ErrnoException)?.code ?? "");
+  try {
+    const mx = await resolver.resolveMx(domain).catch(error => {
+      if (missing(error)) return [];
+      throw error;
+    });
+    if (mx.some(record => record.exchange && record.exchange !== ".")) return null;
+    if (mx.length === 1 && mx[0].priority === 0 && ["", "."].includes(mx[0].exchange)) {
+      return "That email domain does not accept mail. Please edit your reply email.";
+    }
+    // SMTP permits A/AAAA delivery when MX is absent. DNS errors are not evidence of an invalid inbox.
+    const addresses = await Promise.allSettled([resolver.resolve4(domain), resolver.resolve6(domain)]);
+    if (addresses.some(result => result.status === "fulfilled" && result.value.length)) return null;
+    if (addresses.every(result => result.status === "fulfilled" || missing(result.reason))) {
+      return "That email domain could not be found. Please check the part after @.";
+    }
+    return null;
+  } catch { return null; }
+  finally { clearTimeout(timer); }
+}
 
 /** Validate and send one reviewed note to Fischer, never to a caller-selected recipient. */
 export async function POST(request: Request) {
@@ -23,6 +50,10 @@ export async function POST(request: Request) {
   if ([name, email, subject, note, id].some(value => typeof value !== "string")) return fail("Please fill in every field.", 400);
   if (!name.trim() || name.length > 80 || /[\r\n\x00]/.test(name)) return fail("Please check your name.", 400);
   if (email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) return fail("Please check your reply email.", 400);
+  const [mailbox, rawDomain] = email.split("@");
+  const domain = domainToASCII(rawDomain);
+  if (!domain || domain.length > 253 || !domain.split(".").every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label)) ||
+    mailbox.startsWith(".") || mailbox.endsWith(".") || mailbox.includes("..") || /[\x00-\x1f\x7f]/.test(email)) return fail("Please check your reply email.", 400);
   if (!subject.trim() || subject.length > 120 || /[\r\n\x00]/.test(subject)) return fail("Please check the subject.", 400);
   if (!note.trim() || note.length > 2000 || !/^[\da-f-]{36}$/i.test(id)) return fail("Please check your message.", 400);
   const key = process.env.RESEND_API_KEY;
@@ -36,6 +67,8 @@ export async function POST(request: Request) {
   if (entry.count >= 5 || attempts.size >= 10000) return fail("A few too many notes at once. Try again in ten minutes.", 429);
   entry.count++;
   attempts.set(ip, entry);
+  const domainError = await emailDomainError(domain);
+  if (domainError) return fail(domainError, 400);
   const payload = {
     from: process.env.CONTACT_FROM || "fschrhunt.com <contact@fschrhunt.com>",
     to: ["fschrhunt@gmail.com"],

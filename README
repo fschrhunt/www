@@ -20,7 +20,7 @@ CHECK:
 
 MAP:
  src/app/        pages
- src/app/writings/  one folder per writing
+ src/content/    Markdown and MDX writings and product descriptions
  public/writings/   media grouped by writing
  docs/           how things work
  AGENTS.md       where agents start

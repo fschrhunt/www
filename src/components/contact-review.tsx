@@ -136,9 +136,9 @@ export function ContactReview(props: Props) {
         <div ref={card} className="contact-review-sheet">
         <div className="contact-review-scroll" inert={leaving || sending}>
           <div className="contact-letter-address"><span>To</span><span>Fischer <span className="contact-letter-muted">· fschrhunt@gmail.com</span></span></div>
-          <div className="contact-letter-address"><span>From</span><div className="contact-review-sender">
-            <textarea rows={1} aria-label="Your name for this email" autoComplete="name" value={props.name} maxLength={80} onChange={event => props.setName(event.target.value.replace(/[\r\n]/g, ""))} />
-            <textarea rows={1} aria-label="Your reply email" autoComplete="email" inputMode="email" value={props.email} maxLength={254} onChange={event => props.setEmail(event.target.value.replace(/[\r\n]/g, ""))} />
+          <div className="contact-letter-address contact-sender-address"><span>From</span><div className="contact-review-sender">
+            <label><span>Name</span><input aria-label="Your name for this email" autoComplete="name" value={props.name} maxLength={80} onChange={event => props.setName(event.target.value)} /></label>
+            <label><span>Email</span><input aria-label="Your reply email" type="email" autoComplete="email" inputMode="email" value={props.email} maxLength={254} onChange={event => props.setEmail(event.target.value)} /></label>
           </div></div>
           <label className="contact-subject"><span>Subject</span><input aria-label="Email subject" value={props.subject} maxLength={120} onChange={event => props.setSubject(event.target.value)} /></label>
           <textarea className="contact-letter-body" aria-label="Email message" spellCheck value={props.note} maxLength={2000} onChange={event => props.setNote(event.target.value)} />

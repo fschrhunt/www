@@ -9,25 +9,32 @@ server-side contact delivery, or required environment configuration.
 | Path | Responsibility |
 | --- | --- |
 | `src/app/page.tsx` | Introduction, expandable About passage, product and note indexes, update date |
-| `src/app/products/{e,flip,diffuse}/page.tsx` | Product descriptions and demos |
-| `src/app/writings/welcome-who-dis/page.tsx` | First note and its metadata |
-| `src/app/writings/big-bro/page.tsx` | Thank-you to Fischer’s brother, with an interactive family photo album |
-| `src/app/writings/damn-you-agents/page.tsx` | Long note on reviewing agent changes, with section anchors |
-| `src/app/writings/i-aquired-a-color/page.tsx` | Fischer blue note, color swatch, and metadata |
+| `src/app/products/[slug]/page.tsx` | Static product routes rendered from Markdown and MDX |
+| `src/app/writings/[slug]/page.tsx` | Static writing routes rendered from Markdown and MDX |
+| `src/content/{writings,products}/` | Prose files with YAML frontmatter and local components |
+| `src/lib/content.ts` | Metadata validation, file discovery, date ordering, and reading-time estimates |
+| `src/components/content-page.tsx` | Shared article shell, title, date, and navigation |
+| `src/mdx-components.tsx` | Markdown links mapped to the site's link treatment |
 | `src/app/contact/page.tsx` | Contact layout and navigation |
 | `src/app/layout.tsx` | Local font, document metadata, favicon links |
 | `src/app/template.tsx` | Route remount boundary for entrance effects |
 | `src/site-updated.json` | UTC update timestamp rendered in the homepage footer |
 | `src/app/globals.css` | Current shared styles and motion |
 
-New notes currently need a route and a homepage index entry. Keep route metadata
-and reading time consistent with the text. No content framework is needed yet.
+New notes need only a `.md` or `.mdx` file in `src/content/writings/`. Product
+prose lives in `src/content/products/`. The homepage discovers both collections
+and orders them by date. Writings require title, date, and description; products
+require title, date, and status. Reading time is estimated from prose at 200 words
+per minute. `@next/mdx` compiles content at build time, `remark-frontmatter` removes
+the metadata block from the rendered body, and `gray-matter` reads it for listings
+and page metadata. Content imports and interactive components remain normal React
+code; there is no runtime content evaluation or CMS. Unknown slugs return 404.
 New page directions can use scoped CSS or their own components without changing
 the accepted homepage. Read the agent kit for creative decisions.
 
 ## Client behavior
 
-- `src/app/writings/big-bro/_components/photo-album.tsx` spreads a family photo pile on mouse hover, or pins it open
+- `src/content/writings/_components/photo-album.tsx` spreads a family photo pile on mouse hover, or pins it open
   with a keyboard/touch button. On phones the open row scrolls horizontally.
   Full photo aspect ratios are preserved; reduced motion skips the transition.
 
@@ -57,7 +64,10 @@ the accepted homepage. Read the agent kit for creative decisions.
 - `social-hub.tsx` contains the profile links and the shared return-arrow icon.
 - `contact-viewport.tsx` fits the contact frame to the visual viewport above
   mobile keyboards and keeps the latest message in view when already at the
-  bottom. Pinch zoom is not disabled.
+  bottom. The review card uses the same height and offset in portrait and landscape.
+  Focus and viewport changes reveal obscured review inputs by scrolling the card
+  body; tall message fields retain native caret scrolling. Short viewports hide
+  the review introduction while retaining the send footer. Pinch zoom is not disabled.
 - `contact-conversation.tsx` validates name, email, and message locally, then
   opens an editable review and sends through `/api/contact` using Resend.
   Conversation replies are not persisted. Pressing `/` outside an editable
@@ -85,7 +95,8 @@ Product illustrations are not real captures. Product dates are repository
 creation dates, and Diffuse's private repository is not linked publicly.
 
 The footer mark is an inline SVG, not a Unicode character that can become an
-emoji. Portrait links keep their hit area stationary while only the image tilts.
+emoji. The homepage portrait has no link; the contact portrait links home.
+Portrait containers stay stationary while only the image tilts.
 Touch layouts provide 44px targets for index links, navigation, and form actions.
 Links and buttons suppress the native tap highlight; keyboard focus remains visible.
 
@@ -98,49 +109,45 @@ photos change. Its frame follows the photo aspect ratio, with Back centered abov
 arrows beside the vertical midpoint, and the count centered below. On narrow
 screens the arrows sit inside the photo edges to leave more room for the image.
 
-Contact name recognition lives in `src/lib/contact-rules.ts`. It handles greetings,
-questions, addresses, and conversational introductions locally, without a model
-or network request. Name guesses are advisory: visitors can use the questioned
-answer anyway. Rejected replies appear in the conversation with normal typing
-pacing. International names and nicknames are accepted. Invalid email replies
-keep the flow on email unless the visitor explicitly chooses the override; the server requires a valid reply email before sending. Start over clears both the draft and the name override.
+The contact form collects name, email, and message through composer hints and
+accessible field labels. No label or navigation row sits above the composer.
+Names preserve spelling and case. Explicit introductions are extracted locally;
+ambiguous conversational answers prompt clarification, with repeat entry accepted
+as confirmation. Messages retain their content with outside whitespace trimmed.
+There is no spelling repair, general chatbot, or typed-command interpretation. Replies never interpolate the entered name. Reloading starts a fresh draft. The review
+lets visitors edit every field and closes with Escape or a click on the dimmed area.
 
-Contact conversation memory counts small-talk topics for the current component
-session and varies repeated replies. Whole-reply matching avoids intercepting a
-longer message just because it contains a question. Every third aside returns to
-the pending prompt. Explicit name corrections update the draft in place; `back`
-restores the previous field for editing, and `start over` clears draft and memory.
-The review modal closes with Escape or a click on the dimmed area. If a message matches small talk, its override
-can use that exact reply as the message. No conversation memory is persisted or
-sent to a service.
+`src/lib/contact-rules.ts` handles browser-only name parsing, email cleanup, and
+optional provider typo suggestions. It uses no model or external inference service. Invalid email syntax keeps the form on Email. A proposed correction
+can be accepted or declined; the server still validates the chosen address.
+No data goes to the contact endpoint until the visitor sends the reviewed note.
+That endpoint checks reply-domain DNS before sending, rejecting explicit no-mail
+domains and missing mail routes while allowing temporary DNS failures. It cannot
+verify a mailbox exists or belongs to the visitor.
 
-Contact overrides use the same handwriting as About with a pen-drawn square
-bracket. They attach to the questioned visitor message and scroll with it. On wide
-screens the annotation sits beside the message on one tilted line; on phones
-a suggested-reply button appears above the composer instead, preserving message
-alignment and keeping the action within thumb reach.
-Name, email, and message overrides accept the questioned reply verbatim.
-
-The contact reply queue cancels superseded timers and records only unsent
-bubbles. Development effect restarts resume that queue without replaying the
+The contact reply queue switches the composer hint to the next accepted field
+immediately, then enables that field after the reply finishes. The hints are
+"your name", "you@example.com", and "your message". Visitor bubbles share the
+send button's blue; Fischer replies and the review prompt stay gray.
+The queue cancels superseded timers and records only unsent bubbles. Development effect restarts resume that queue without replaying the
 introduction or resetting the active question. A synchronous busy guard blocks
 duplicate submissions before React renders the disabled composer.
 
 ## Writing folders
 
-Routes live in `src/app/writings/<slug>/page.tsx`. Components belonging to one
-writing stay in its `_components/` folder; shared navigation stays in
-`src/components/`. Static media mirrors the slug under `public/writings/`.
-Only writings with media need an asset folder. See
-[the writing guide](../src/app/writings/README.md) for adding a page.
+Content lives in `src/content/writings/<slug>.md` or `.mdx`; its static route is
+rendered by `src/app/writings/[slug]/page.tsx`. Note-specific components stay in
+`src/content/writings/_components/`. Static media mirrors the slug under
+`public/writings/`. Only writings with media need an asset folder. See
+[the writing guide](../src/content/README.md) for adding a page.
 Legacy `/notes/` routes and image paths redirect to `/writings/`; the previous
 `five-lines` slug redirects to `damn-you-agents`.
 
 `contact-review.tsx` opens a native modal above the transcript, showing recipient,
 editable visitor details, subject, and complete message. The card scrolls
-independently of the final action. `src/lib/contact-subject.ts` suggests a bounded
-subject using product/topic matches or the first sentence. It never rewrites the
-message. The server uses the reviewed subject.
+independently of the final action. `src/lib/contact-subject.ts` suggests an editable subject of three to five
+words using product and topic matches. Unrecognized topics use a short generic
+label instead of copying the first sentence. It never rewrites the message. The server uses the reviewed subject.
 The card begins with the recipient. A soft grey Fischer chat bubble sits above it, outside the card. Only the send arrow
 appears in the bottom row. Escape or clicking the dimmed area dismisses the modal. The card rises from the composer over a lightly dimmed, blurred background. Dismissal preserves edits and returns focus to the review control. The up arrow posts the reviewed fields to `/api/contact`. Only after Resend accepts
 the email does the card fly upward with an original synthesized swoosh. Reduced

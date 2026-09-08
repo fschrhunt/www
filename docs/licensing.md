@@ -20,7 +20,7 @@ are reserved by Fischer Hunt, subject to applicable law:
 - `public/portrait.png` and its derived portrait artwork in `public/favicon*`
   and `public/safari-pinned-tab.svg`.
 - Fischer's personal prose displayed by `src/app/page.tsx`, the product pages
-  in `src/app/products/`, and the notes in `src/app/writings/`, including their
+  in `src/content/products/`, and the notes in `src/content/writings/`, including their
   titles and descriptions. This exclusion covers the prose, not the surrounding
   components, markup, styling, interaction logic, or other software.
 
