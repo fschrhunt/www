@@ -1,4 +1,4 @@
-"""Validate and merge anonymous Claude and Codex request counters shared by sender and receiver."""
+"""Validate and merge anonymous local model counters shared by sender and receiver."""
 import datetime as dt
 import hashlib
 import json
@@ -9,7 +9,7 @@ FIELDS = ('input_tokens', 'output_tokens', 'cache_read_input_tokens', 'cache_cre
 
 
 def connect(path):
-    """Keep one monotonic counter record per provider message, plus incremental scan state."""
+    """Keep one monotonic counter record per response or local message, plus scan state."""
     db = sqlite3.connect(path, timeout=20)
     db.executescript('''CREATE TABLE IF NOT EXISTS records (
       id TEXT PRIMARY KEY, day TEXT NOT NULL, model TEXT NOT NULL,
@@ -74,7 +74,7 @@ def extract(row):
 
 
 def merge(db, row):
-    """Merge progressive or copied response records once, preserving the greatest observed counters."""
+    """Merge progressive or copied usage records once, preserving the greatest observed counters."""
     previous = db.execute('SELECT day,model FROM records WHERE id=?', (row[0],)).fetchone()
     if previous and previous[1] != row[2]:
         raise ValueError('message_model_conflict')
@@ -143,3 +143,96 @@ def extract_codex(row, context):
         return validate([identity, stamp.astimezone(dt.timezone.utc).date().isoformat(),
                          context['model'], count-cached, output, cached, 0, 0, 0])
     return None
+
+
+def extract_pi(row, context):
+    """Read persisted Pi response, summary, and tool usage from direct OpenAI or Anthropic providers."""
+    kind = row.get('type')
+    if kind == 'session':
+        context['session'] = row.get('id')
+        return None
+    if kind == 'model_change':
+        if isinstance(row.get('provider'), str) and isinstance(row.get('modelId'), str):
+            context.update({'provider': row['provider'], 'model': row['modelId']})
+        return None
+
+    message = row.get('message') or {}
+    if kind == 'message' and message.get('role') == 'assistant':
+        usage = message.get('usage')
+        provider, model = message.get('provider'), message.get('model')
+        context.update({'provider': provider, 'model': model})
+        raw_identity = 'response:'+str(message.get('responseId')) if message.get('responseId') else None
+    elif kind == 'message' and message.get('role') == 'toolResult':
+        usage = message.get('usage')
+        details = message.get('details') or {}
+        model = details.get('model') if isinstance(details, dict) else None
+        provider = ('anthropic' if str(model).startswith('claude-') else
+                    'openai-codex' if re.match(r'^(?:gpt-|codex-|o[134](?:-|$))', str(model)) else None)
+        raw_identity = 'tool:'+str(message.get('toolCallId')) if message.get('toolCallId') else None
+    elif kind in ('compaction', 'branch_summary'):
+        usage = row.get('usage')
+        provider, model = context.get('provider'), context.get('model')
+        raw_identity = None
+    else:
+        return None
+
+    # OpenCode's account snapshot already includes Pi traffic. Adding its local
+    # session counters here would count the same requests twice.
+    if provider not in ('anthropic', 'openai-codex') or not isinstance(usage, dict):
+        return None
+    if provider == 'anthropic' and not str(model).startswith('claude-'):
+        return None
+    if provider == 'openai-codex' and not re.match(r'^(?:gpt-|codex-|o[134](?:-|$))', str(model)):
+        return None
+
+    values = [usage.get(name, 0) for name in ('input', 'output', 'cacheRead', 'cacheWrite')]
+    one_hour = usage.get('cacheWrite1h', 0)
+    if any(type(value) is not int or value < 0 for value in values + [one_hour]) or one_hour > values[3]:
+        raise ValueError('invalid_pi_counters')
+    if sum(values) == 0:
+        return None
+    if not isinstance(raw_identity, str) or not raw_identity:
+        safe = {key: row.get(key) for key in ('type', 'id', 'parentId', 'timestamp')}
+        safe.update({'model': model, 'usage': usage})
+        raw_identity = json.dumps(safe, sort_keys=True, separators=(',', ':'))
+    identity = hashlib.sha256(('pi:'+raw_identity).encode()).hexdigest()
+    stamp = dt.datetime.fromisoformat(row['timestamp'].replace('Z', '+00:00'))
+    if stamp.tzinfo is None:
+        raise ValueError('timestamp_without_timezone')
+    return validate([identity, stamp.astimezone(dt.timezone.utc).date().isoformat(), model,
+                     values[0], values[1], values[2], values[3], values[3]-one_hour, one_hour])
+
+
+def extract_e(row, context):
+    """Read e's persisted per-step usage, using its session model when no per-message model exists."""
+    kind = row.get('type')
+    if kind == 'session':
+        context.update({'session': row.get('id'), 'model': row.get('model')})
+        return None
+    message = row.get('message') or {}
+    if kind != 'message' or message.get('role') != 'assistant' or not isinstance(message.get('usage'), dict):
+        return None
+
+    usage = message['usage']
+    slug = usage.get('model', context.get('model'))
+    if not isinstance(slug, str) or '/' not in slug:
+        return None
+    provider, model = slug.split('/', 1)
+    # OpenCode is collected account-wide. e's current Anthropic records do not
+    # retain cache-write counters, so only OpenAI records can be priced safely.
+    if provider != 'openai-codex':
+        return None
+    count, output, cached = (usage.get(name, 0) for name in ('input', 'output', 'cache_read'))
+    if any(type(value) is not int or value < 0 for value in (count, output, cached)) or cached > count:
+        raise ValueError('invalid_e_counters')
+    if count + output == 0:
+        return None
+    entry = usage.get('id') or row.get('id')
+    if not isinstance(entry, str) or not entry:
+        raise ValueError('missing_e_usage_id')
+    milliseconds = row.get('timestamp')
+    if type(milliseconds) is not int or milliseconds <= 0:
+        raise ValueError('invalid_e_timestamp')
+    day = dt.datetime.fromtimestamp(milliseconds / 1000, dt.timezone.utc).date().isoformat()
+    identity = hashlib.sha256(('e:'+entry).encode()).hexdigest()
+    return validate([identity, day, model, count-cached, output, cached, 0, 0, 0])

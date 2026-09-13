@@ -38,16 +38,18 @@ These are usage values, not Fischer's subscription payments. The unchanged chart
 displays dollar amounts without an extra estimate label, as requested. Calculation
 metadata stays in the JSON and this document.
 
-- Codex uses recorded model-level input, output, and cached-input tokens at
+- OpenAI uses recorded model-level input, output, and cached-input tokens from
+  Codex CLI, Pi, and `e` at
   [OpenAI's standard API rates](https://developers.openai.com/api/docs/pricing).
-  Cached input is subtracted from the input total before pricing. Charged cloud
-  credits exclude included subscription use and are never used as its price.
-  Standard rates approximate usage value; fast-mode, long-context, regional,
-  and cache-write premiums are not reconstructed by this calculation.
+  Cached input is subtracted from inclusive counters before pricing. Charged
+  cloud credits exclude included subscription use and are never used as its
+  price. Standard rates approximate usage value; fast-mode, long-context,
+  regional, and cache-write premiums are not reconstructed by this calculation.
 - OpenCode contributes the console's reported USD usage costs, already grouped by
   model and date. Subscription payments are not added on top.
-- Claude uses actual collected token counters with current standard global API
-  rates from [Anthropic's pricing table](https://platform.claude.com/docs/en/about-claude/pricing).
+- Claude uses actual collected Claude Code and Pi token counters with current
+  standard global API rates from
+  [Anthropic's pricing table](https://platform.claude.com/docs/en/about-claude/pricing).
   Input, output, cache hits, five-minute cache writes, and one-hour cache writes
   are priced separately. Fable 5.1's cache-hit rate differs from Fable 5's.
   These standard-mode values do not apply optional fast-mode or regional premiums.

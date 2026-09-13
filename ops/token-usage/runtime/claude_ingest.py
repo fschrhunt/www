@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Receive bounded usage-only SSH uploads; no shell commands or transcript data are accepted."""
+"""Receive bounded local usage uploads; no shell commands or transcript data are accepted."""
 import argparse
 from contextlib import closing
 import datetime as dt

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Incrementally queue Claude log counters and upload through a dedicated restricted SSH key."""
+"""Incrementally queue local model counters and upload through a dedicated restricted SSH key."""
 import argparse
 from contextlib import closing
 import datetime as dt
@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 import subprocess
 import time
-from claude_records import FIELDS, atomic_json, connect, extract, extract_codex, merge
+from claude_records import FIELDS, atomic_json, connect, extract, extract_codex, extract_e, extract_pi, merge
 
 MAX_LINE = 16 * 1024 * 1024
 SCAN_BUDGET = 32 * 1024 * 1024
@@ -50,7 +50,15 @@ def scan(db, root, budget=SCAN_BUDGET, provider="claude"):
                     if not line.endswith(b'\n'):
                         break
                     try:
-                        item = extract_codex(json.loads(line), context) if provider=='codex' else extract(json.loads(line))
+                        parsed = json.loads(line)
+                        if provider == 'codex':
+                            item = extract_codex(parsed, context)
+                        elif provider == 'pi':
+                            item = extract_pi(parsed, context)
+                        elif provider == 'e':
+                            item = extract_e(parsed, context)
+                        else:
+                            item = extract(parsed)
                         if item:
                             merge(db, item)
                     except (ValueError, KeyError, TypeError, AttributeError):
@@ -97,9 +105,15 @@ def run(state, root):
         try:
             with closing(connect(state/'queue.sqlite')) as db:
                 read, skipped = scan(db, root)
-                for codex_root in [Path.home()/'.codex/sessions', Path.home()/'.codex/archived_sessions']:
-                    if codex_root.is_dir() and read < SCAN_BUDGET:
-                        count, invalid = scan(db, codex_root, budget=SCAN_BUDGET-read, provider='codex')
+                local_roots = [
+                    (Path.home()/'.codex/sessions', 'codex'),
+                    (Path.home()/'.codex/archived_sessions', 'codex'),
+                    (Path.home()/'.pi/agent/sessions', 'pi'),
+                    (Path.home()/'.e/sessions', 'e'),
+                ]
+                for local_root, provider in local_roots:
+                    if local_root.is_dir() and read < SCAN_BUDGET:
+                        count, invalid = scan(db, local_root, budget=SCAN_BUDGET-read, provider=provider)
                         read += count
                         skipped += invalid
                 status.update({'bytesRead': read, 'skippedRecords': skipped})
