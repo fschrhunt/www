@@ -151,6 +151,29 @@ class PiCollectionTests(unittest.TestCase):
 
 
 class ECollectionTests(unittest.TestCase):
+    def test_response_envelope_is_deduplicated_and_keeps_its_original_day(self):
+        response = {'id':'response-a','timestamp':1788951146329,
+                    'provider':'openai-codex','model':'gpt-6-astra','purpose':'turn',
+                    'usage':{'input':20,'output':9,'cache_read':80,
+                             'cache_write_5m':0,'cache_write_1h':0}}
+        first = {'type':'message','id':'entry-a','timestamp':1788951147000,
+                 'response':response,'message':{'role':'assistant','content':'PRIVATE'}}
+        copied = {**first, 'id':'entry-b', 'timestamp':1789037547000}
+        record = extract_e(first, {})
+        self.assertEqual(record[1:], ['2026-09-09','gpt-6-astra',20,9,80,0,0,0])
+        self.assertEqual(record[0], extract_e(copied, {})[0])
+
+    def test_compaction_response_preserves_anthropic_cache_writes(self):
+        row = {'type':'message','id':'seed','timestamp':1788951147000,
+               'response':{'id':'response-b','timestamp':1788951146329,
+                           'provider':'anthropic','model':'claude-sonnet-5',
+                           'purpose':'compaction',
+                           'usage':{'input':7,'output':3,'cache_read':11,
+                                    'cache_write_5m':10,'cache_write_1h':20}},
+               'message':{'role':'user','content':'PRIVATE SUMMARY'}}
+        self.assertEqual(extract_e(row, {})[2:],
+                         ['claude-sonnet-5',7,3,11,30,10,20])
+
     def test_openai_usage_subtracts_cached_input(self):
         context = {}
         extract_e({'type':'session','id':'e-session','model':'openai-codex/gpt-6-astra'}, context)
@@ -160,20 +183,15 @@ class ECollectionTests(unittest.TestCase):
         record = extract_e(row, context)
         self.assertEqual(record[2:], ['gpt-6-astra',20,9,80,0,0,0])
 
-    def test_usage_identity_and_model_survive_copied_compaction_history(self):
-        usage = {'input':100,'output':9,'cache_read':80,'id':'request-a',
-                 'model':'openai-codex/gpt-6-astra'}
-        first = {'type':'message','id':'entry-a','timestamp':1788951146329,
-                 'message':{'role':'assistant','usage':usage}}
-        copied = {'type':'message','id':'entry-b','timestamp':1788952146329,
-                  'message':{'role':'assistant','usage':usage}}
-        self.assertEqual(extract_e(first, {})[0], extract_e(copied, {})[0])
-
-    def test_opencode_and_incomplete_anthropic_records_are_not_duplicated_or_guessed(self):
+    def test_opencode_and_incomplete_legacy_anthropic_records_are_not_imported(self):
         row = {'type':'message','id':'018f-entry','timestamp':1788951146329,
                'message':{'role':'assistant','usage':{'input':100,'output':9,'cache_read':80}}}
         for model in ('opencode-go/glm-5.3-flash', 'anthropic/claude-opus-5'):
             self.assertIsNone(extract_e(row, {'model':model}))
+        row['response'] = {'id':'response-c','timestamp':1788951146329,
+                           'provider':'opencode-go','model':'glm-5.3-flash',
+                           'usage':{'input':100,'output':9,'cache_read':80}}
+        self.assertIsNone(extract_e(row, {}))
 
 
 class CodexCollectionTests(unittest.TestCase):

@@ -204,22 +204,54 @@ def extract_pi(row, context):
 
 
 def extract_e(row, context):
-    """Read e's persisted per-step usage, using its session model when no per-message model exists."""
+    """Read e response envelopes, falling back to its earlier inline OpenAI usage."""
     kind = row.get('type')
     if kind == 'session':
         context.update({'session': row.get('id'), 'model': row.get('model')})
         return None
-    message = row.get('message') or {}
-    if kind != 'message' or message.get('role') != 'assistant' or not isinstance(message.get('usage'), dict):
+    if kind != 'message':
         return None
 
+    response = row.get('response')
+    if isinstance(response, dict):
+        usage = response.get('usage')
+        provider, model = response.get('provider'), response.get('model')
+        # OpenCode remains account-wide; direct Anthropic and Codex requests
+        # have complete, disjoint counters in e's response envelope.
+        if provider not in ('anthropic', 'openai-codex') or not isinstance(usage, dict):
+            return None
+        if provider == 'anthropic' and not str(model).startswith('claude-'):
+            return None
+        if provider == 'openai-codex' and not re.match(r'^(?:gpt-|codex-|o[134](?:-|$))', str(model)):
+            return None
+        values = [usage.get(name, 0) for name in
+                  ('input', 'output', 'cache_read', 'cache_write_5m', 'cache_write_1h')]
+        if any(type(value) is not int or value < 0 for value in values):
+            raise ValueError('invalid_e_counters')
+        if sum(values) == 0:
+            return None
+        entry = response.get('id')
+        milliseconds = response.get('timestamp')
+        if not isinstance(entry, str) or not entry:
+            raise ValueError('missing_e_response_id')
+        if type(milliseconds) is not int or milliseconds <= 0:
+            raise ValueError('invalid_e_timestamp')
+        day = dt.datetime.fromtimestamp(milliseconds / 1000, dt.timezone.utc).date().isoformat()
+        identity = hashlib.sha256(('e-response:'+entry).encode()).hexdigest()
+        count, output, cached, five_minute, one_hour = values
+        return validate([identity, day, model, count, output, cached,
+                         five_minute+one_hour, five_minute, one_hour])
+
+    message = row.get('message') or {}
+    if message.get('role') != 'assistant' or not isinstance(message.get('usage'), dict):
+        return None
     usage = message['usage']
-    slug = usage.get('model', context.get('model'))
+    slug = context.get('model')
     if not isinstance(slug, str) or '/' not in slug:
         return None
     provider, model = slug.split('/', 1)
-    # OpenCode is collected account-wide. e's current Anthropic records do not
-    # retain cache-write counters, so only OpenAI records can be priced safely.
+    # Older Anthropic records lack cache-write counters. Older OpenCode usage
+    # is already in its account snapshot, leaving only Codex safe to import.
     if provider != 'openai-codex':
         return None
     count, output, cached = (usage.get(name, 0) for name in ('input', 'output', 'cache_read'))
@@ -227,7 +259,7 @@ def extract_e(row, context):
         raise ValueError('invalid_e_counters')
     if count + output == 0:
         return None
-    entry = usage.get('id') or row.get('id')
+    entry = row.get('id')
     if not isinstance(entry, str) or not entry:
         raise ValueError('missing_e_usage_id')
     milliseconds = row.get('timestamp')

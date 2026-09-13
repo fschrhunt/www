@@ -129,14 +129,15 @@ the current subagent configuration. OpenAI Codex and Anthropic records enter the
 corresponding local aggregates. OpenCode records do not, because its account
 snapshot already contains them.
 
-`e` scans persisted JSONL below `~/.e/sessions`. Its OpenAI records retain inclusive
-input, cached input, and output, so the collector subtracts the cached subset
-before pricing. New records also retain a request identity and model. This keeps
-history copied during compaction deduplicated and preserves attribution after a
-model switch. Older records fall back to their message identity and session
-model. OpenCode records again stay with the account collector. Current `e`
-Anthropic records omit cache-write counters and are not imported rather than
-priced from a guess. `e` compaction-summary requests are not persisted with
-usage yet and remain outside this collector. Only retained local sessions are
-covered for all four harnesses; cloud-only, ephemeral, and deleted sessions
-cannot be recovered through this collector.
+`e` scans persisted JSONL below `~/.e/sessions`. Version 2 response envelopes
+retain a stable response identity and timestamp, provider, model, purpose, and
+disjoint input, output, cache-read, and cache-write counters. The envelope sits
+outside replayable message content and survives when compaction copies recent
+history, so ordinary turns and compaction requests deduplicate and price against
+the model that handled them. Direct OpenAI Codex and Anthropic responses are
+imported; OpenCode responses again stay with the account collector. Earlier `e`
+records use their local message identity and session model. Their OpenAI counters
+are usable after subtracting cached input, but Anthropic records omit cache-write
+detail and remain excluded rather than priced from a guess. Only retained local
+sessions are covered for all four harnesses; cloud-only, ephemeral, and deleted
+sessions cannot be recovered through this collector.
