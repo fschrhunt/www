@@ -174,6 +174,16 @@ class ECollectionTests(unittest.TestCase):
         self.assertEqual(extract_e(row, {})[2:],
                          ['claude-sonnet-5',7,3,11,30,10,20])
 
+    def test_standalone_blank_response_is_imported(self):
+        row = {'type':'response',
+               'response':{'id':'response-blank','timestamp':1788951146329,
+                           'provider':'openai-codex','model':'gpt-6-astra',
+                           'purpose':'turn',
+                           'usage':{'input':9,'output':0,'cache_read':0,
+                                    'cache_write_5m':0,'cache_write_1h':0}}}
+        self.assertEqual(extract_e(row, {})[2:],
+                         ['gpt-6-astra',9,0,0,0,0,0])
+
     def test_openai_usage_subtracts_cached_input(self):
         context = {}
         extract_e({'type':'session','id':'e-session','model':'openai-codex/gpt-6-astra'}, context)
