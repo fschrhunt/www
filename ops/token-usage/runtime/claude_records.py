@@ -204,7 +204,7 @@ def extract_pi(row, context):
 
 
 def extract_e(row, context):
-    """Read e's persisted per-step usage, using its session model when no per-message model exists."""
+    """Read e's persisted per-step usage using the model recorded for its session."""
     kind = row.get('type')
     if kind == 'session':
         context.update({'session': row.get('id'), 'model': row.get('model')})
@@ -214,7 +214,7 @@ def extract_e(row, context):
         return None
 
     usage = message['usage']
-    slug = usage.get('model', context.get('model'))
+    slug = context.get('model')
     if not isinstance(slug, str) or '/' not in slug:
         return None
     provider, model = slug.split('/', 1)
@@ -227,7 +227,7 @@ def extract_e(row, context):
         raise ValueError('invalid_e_counters')
     if count + output == 0:
         return None
-    entry = usage.get('id') or row.get('id')
+    entry = row.get('id')
     if not isinstance(entry, str) or not entry:
         raise ValueError('missing_e_usage_id')
     milliseconds = row.get('timestamp')

@@ -131,10 +131,10 @@ snapshot already contains them.
 
 `e` scans persisted JSONL below `~/.e/sessions`. Its OpenAI records retain inclusive
 input, cached input, and output, so the collector subtracts the cached subset
-before pricing. New records also retain a request identity and model. This keeps
-history copied during compaction deduplicated and preserves attribution after a
-model switch. Older records fall back to their message identity and session
-model. OpenCode records again stay with the account collector. Current `e`
+before pricing. Records use their local message identity and the model from the
+session header. Because `e` does not retain per-turn model provenance or a usage
+identity across compaction, copied history and mid-session model switches remain
+best-effort. OpenCode records again stay with the account collector. Current `e`
 Anthropic records omit cache-write counters and are not imported rather than
 priced from a guess. `e` compaction-summary requests are not persisted with
 usage yet and remain outside this collector. Only retained local sessions are

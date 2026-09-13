@@ -160,15 +160,6 @@ class ECollectionTests(unittest.TestCase):
         record = extract_e(row, context)
         self.assertEqual(record[2:], ['gpt-6-astra',20,9,80,0,0,0])
 
-    def test_usage_identity_and_model_survive_copied_compaction_history(self):
-        usage = {'input':100,'output':9,'cache_read':80,'id':'request-a',
-                 'model':'openai-codex/gpt-6-astra'}
-        first = {'type':'message','id':'entry-a','timestamp':1788951146329,
-                 'message':{'role':'assistant','usage':usage}}
-        copied = {'type':'message','id':'entry-b','timestamp':1788952146329,
-                  'message':{'role':'assistant','usage':usage}}
-        self.assertEqual(extract_e(first, {})[0], extract_e(copied, {})[0])
-
     def test_opencode_and_incomplete_anthropic_records_are_not_duplicated_or_guessed(self):
         row = {'type':'message','id':'018f-entry','timestamp':1788951146329,
                'message':{'role':'assistant','usage':{'input':100,'output':9,'cache_read':80}}}
