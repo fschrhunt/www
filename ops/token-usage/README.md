@@ -43,8 +43,10 @@ services. See [collector operations](../../docs/token-usage.md).
 
 ## Setup tools
 
-`setup/install_claude.py --config /private/path/devices.json` reads a private
-inventory. It contains a receiver SSH alias and the complete sender list:
+`setup/install_claude.py --config /private/path/devices.json` installs the local
+device collector for Claude Code, Codex CLI, Pi, and `e`. Its retained name
+predates the extra sources. It reads a private inventory containing a receiver
+SSH alias and the complete sender list:
 
 ```json
 {

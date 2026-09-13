@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-09-08",
+  "verifiedAt": "2026-09-13",
   "claudeSource": "https://platform.claude.com/docs/en/about-claude/pricing",
   "codexSource": "https://developers.openai.com/api/docs/pricing",
   "claudeUsdPerMillion": {
@@ -30,6 +30,13 @@
       "0.5",
       "6.25",
       "10"
+    ],
+    "claude-sonnet-5": [
+      "2",
+      "10",
+      "0.2",
+      "2.5",
+      "4"
     ],
     "claude-haiku-4-5": [
       "1",

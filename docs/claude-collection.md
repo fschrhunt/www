@@ -1,17 +1,22 @@
 # Device usage collection
 
-Authorized senders collect retained Claude Code and Codex session usage records.
-Collection makes no model requests and consumes no subscription tokens. It does
-not cover browser chats, cloud-only sessions, or deleted history. The website
-consumes a separately priced aggregate snapshot; see [publishing](usage-publishing.md).
+Authorized senders collect retained session usage from Claude Code, Codex CLI,
+Pi, and `e`. Collection makes no model requests and consumes no subscription
+tokens. It does not cover browser chats, cloud-only sessions, ephemeral local
+sessions, or deleted history. OpenCode-backed Pi and `e` requests are deliberately
+left to the account-wide OpenCode collector, so those requests are not counted
+twice. The website consumes a separately priced aggregate snapshot; see
+[publishing](usage-publishing.md).
 
 ## Collection and resource limits
 
-Each machine runs `claude_local.py` once every five minutes, then exits. macOS
-senders use `com.fischer.token-usage.claude` LaunchAgents, which run at login and
-do not request system wake. They resume after sleep while the user is logged in.
-Linux senders use the persistent `token-usage-claude-local.timer`, which starts again
-after reboot. None of these jobs keeps Python running between executions.
+Each machine runs `claude_local.py` once every five minutes, then exits. The
+filename and service labels predate the extra local sources and remain stable for
+installed releases. macOS senders use `com.fischer.token-usage.claude`
+LaunchAgents, which run at login and do not request system wake. They resume after
+sleep while the user is logged in. Linux senders use the persistent
+`token-usage-claude-local.timer`, which starts again after reboot. None of these
+jobs keeps Python running between executions.
 
 The local runtime and state live under `~/.local/share/token-usage/claude/`:
 
@@ -49,8 +54,10 @@ the existing SSH server without a separate network listener.
 The keys confer write access to usage collection, not access to Claude accounts.
 
 The receiver accepts only a bounded schema containing a SHA-256 hash of the
-provider message ID, UTC day, raw model ID, and six token counters, including separate five-minute and one-hour cache writes. No
-prompts, code, project paths, account cookies, or raw session IDs are uploaded.
+provider response or local message identity, UTC day, raw model ID, and six token
+counters, including separate five-minute and one-hour cache writes. No prompts,
+code, project paths, account cookies, harness names, or raw session IDs are
+uploaded.
 The receiver has a 128 MiB address-space limit, fifteen seconds of CPU time, a
 sixty-second lifetime limit, and low scheduling priority.
 
@@ -61,11 +68,11 @@ model counters and each device's last successful upload appear in the snapshot.
 They use token units; they are not dollar charges or subscription quota estimates.
 
 Repeated assistant content blocks, resumed sessions, and copies on another
-machine merge by the provider message ID hash. Each counter takes its greatest
-observed value, so progressive usage updates replace earlier partial counters.
-This relies on Claude's cumulative per-response usage convention. Conflicting
-models for one message ID are rejected by the receiver. Source records stay in
-each local ledger after acknowledgement so they can be replayed for recovery.
+machine merge by a stable response or message identity hash. Each counter takes
+its greatest observed value, so progressive Claude usage updates replace earlier
+partial counters. Conflicting models for one identity are rejected by the
+receiver. Source records stay in each local ledger after acknowledgement so they
+can be replayed for recovery.
 
 ## Offline behavior and recovery
 
@@ -96,7 +103,8 @@ ordinary retry handling.
 ## Operations
 
 Source lives in `ops/token-usage/runtime/claude_{local,records,ingest}.py`.
-The [operations README](../ops/token-usage/README.md) covers private inventory
+Those retained filenames now cover every device source. The
+[operations README](../ops/token-usage/README.md) covers private inventory
 configuration, installation, source layout, and test commands. Keep actual host
 aliases and device names in the private operator runbook.
 
@@ -104,10 +112,31 @@ Check the local `status.json`, pending queue, and configured scheduler on each
 authorized sender. Check receiver freshness independently from publishing health.
 Do not publish raw status output, login paths, SSH configuration, or device IDs.
 
-Codex scans `~/.codex/sessions` and `~/.codex/archived_sessions` within the same
-32 MiB pass budget and SSH batch. It persists session/model context across reads.
-Repeated cumulative checkpoints are ignored; session plus checkpoint hashes
-merge copied logs across machines. Per-response token events keep input, cached
-input, and output distinct. Reasoning tokens are already included in output and
-are not charged twice. Only retained local sessions are covered; cloud-only
-sessions and deleted logs cannot be recovered through this collector.
+Codex CLI scans `~/.codex/sessions` and `~/.codex/archived_sessions` within the
+same 32 MiB pass budget and SSH batch. It persists session and model context
+across reads. Repeated cumulative checkpoints are ignored; session plus
+checkpoint hashes merge copied logs across machines. Per-response token events
+keep input, cached input, and output distinct. Reasoning tokens are already
+included in output and are not charged twice.
+
+Pi scans persisted JSONL below `~/.pi/agent/sessions`. Assistant responses retain
+provider, model, response identity, and separate input, output, cache-read, and
+cache-write counters. Pi's compaction, branch-summary, and usage-reporting tool
+records are included too. Tool records need a single reported model; ambiguous
+multi-model aggregates stay out. They currently retain total cache writes but no
+one-hour split, so unspecified writes use the ordinary five-minute rate, matching
+the current subagent configuration. OpenAI Codex and Anthropic records enter the
+corresponding local aggregates. OpenCode records do not, because its account
+snapshot already contains them.
+
+`e` scans persisted JSONL below `~/.e/sessions`. Its OpenAI records retain inclusive
+input, cached input, and output, so the collector subtracts the cached subset
+before pricing. New records also retain a request identity and model. This keeps
+history copied during compaction deduplicated and preserves attribution after a
+model switch. Older records fall back to their message identity and session
+model. OpenCode records again stay with the account collector. Current `e`
+Anthropic records omit cache-write counters and are not imported rather than
+priced from a guess. `e` compaction-summary requests are not persisted with
+usage yet and remain outside this collector. Only retained local sessions are
+covered for all four harnesses; cloud-only, ephemeral, and deleted sessions
+cannot be recovered through this collector.

@@ -124,12 +124,15 @@ is manual. Raw HAR files can contain credentials and must stay outside Git.
 ## Claude and website delivery
 
 Claude's server login retrieves quota percentages and resets, but an account-wide
-cloud source for daily model token history has not been verified. Separate
-incremental Claude Code and Codex log collectors run on authorized senders every
-five minutes. They upload counters through restricted SSH keys into a private
-central ledger, with durable local queues for offline recovery. See
-[Claude collection](claude-collection.md) for transport and recovery.
-Quotas are not substituted for token counts.
+cloud source for daily model token history has not been verified. An incremental
+device collector scans retained Claude Code, Codex CLI, Pi, and `e` sessions on
+authorized senders every five minutes. It uploads counters through restricted
+SSH keys into a private central ledger, with durable local queues for offline
+recovery. OpenCode-backed Pi and `e` requests stay with the existing account-wide
+OpenCode source to avoid duplicates. Current `e` Anthropic records are omitted
+because they do not retain enough cache-write detail to price safely. See
+[device collection](claude-collection.md) for transport, source coverage, and
+recovery. Quotas are not substituted for token counts.
 
 The publisher converts model usage into dollar values and writes only allowlisted
 aggregate fields to the dedicated Vercel Blob store every fifteen minutes. Private

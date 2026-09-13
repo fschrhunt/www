@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install usage collection for a private device inventory over existing SSH trust."""
+"""Install local model-usage collection for a private device inventory over existing SSH trust."""
 import argparse
 import hashlib
 import json
@@ -96,7 +96,7 @@ import json,pathlib,subprocess,sys
 p=json.load(sys.stdin)
 state=p['state']
 service=''' + repr('''[Unit]
-Description=Queue and upload local Claude token counters
+Description=Queue and upload local model token counters
 After=network-online.target
 [Service]
 Type=oneshot
@@ -120,7 +120,7 @@ StandardOutput=null
 service=service.replace('STATE',state).replace('COLLECTOR_USER',p['user'])
 root=pathlib.Path('/etc/systemd/system')
 (root/'token-usage-claude-local.service').write_text(service)
-(root/'token-usage-claude-local.timer').write_text('[Unit]\nDescription=Collect local Claude usage every five minutes\n[Timer]\nOnCalendar=*:0/5\nRandomizedDelaySec=30\nPersistent=true\n[Install]\nWantedBy=timers.target\n')
+(root/'token-usage-claude-local.timer').write_text('[Unit]\nDescription=Collect local model usage every five minutes\n[Timer]\nOnCalendar=*:0/5\nRandomizedDelaySec=30\nPersistent=true\n[Install]\nWantedBy=timers.target\n')
 subprocess.run(['systemctl','daemon-reload'],check=True)
 subprocess.run(['systemctl','enable','--now','token-usage-claude-local.timer'],check=True,stderr=subprocess.DEVNULL)
 print(json.dumps({'scheduled':True}))
