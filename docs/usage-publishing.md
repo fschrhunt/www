@@ -47,8 +47,8 @@ metadata stays in the JSON and this document.
   regional, and cache-write premiums are not reconstructed by this calculation.
 - OpenCode contributes the console's reported USD usage costs, already grouped by
   model and date. Subscription payments are not added on top.
-- Claude uses actual collected Claude Code and Pi token counters with current
-  standard global API rates from
+- Claude uses actual collected Claude Code, Pi, and version 2 `e` token counters
+  with current standard global API rates from
   [Anthropic's pricing table](https://platform.claude.com/docs/en/about-claude/pricing).
   Input, output, cache hits, five-minute cache writes, and one-hour cache writes
   are priced separately. Fable 5.1's cache-hit rate differs from Fable 5's.

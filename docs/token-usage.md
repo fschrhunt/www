@@ -129,8 +129,9 @@ device collector scans retained Claude Code, Codex CLI, Pi, and `e` sessions on
 authorized senders every five minutes. It uploads counters through restricted
 SSH keys into a private central ledger, with durable local queues for offline
 recovery. OpenCode-backed Pi and `e` requests stay with the existing account-wide
-OpenCode source to avoid duplicates. Current `e` Anthropic records are omitted
-because they do not retain enough cache-write detail to price safely. See
+OpenCode source to avoid duplicates. New `e` response envelopes make direct
+Anthropic usage complete; older Anthropic records remain omitted because they do
+not retain enough cache-write detail to price safely. See
 [device collection](claude-collection.md) for transport, source coverage, and
 recovery. Quotas are not substituted for token counts.
 
