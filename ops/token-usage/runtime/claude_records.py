@@ -209,7 +209,7 @@ def extract_e(row, context):
     if kind == 'session':
         context.update({'session': row.get('id'), 'model': row.get('model')})
         return None
-    if kind != 'message':
+    if kind not in ('message', 'response'):
         return None
 
     response = row.get('response')

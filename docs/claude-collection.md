@@ -132,9 +132,10 @@ snapshot already contains them.
 `e` scans persisted JSONL below `~/.e/sessions`. Version 2 response envelopes
 retain a stable response identity and timestamp, provider, model, purpose, and
 disjoint input, output, cache-read, and cache-write counters. The envelope sits
-outside replayable message content and survives when compaction copies recent
-history, so ordinary turns and compaction requests deduplicate and price against
-the model that handled them. Direct OpenAI Codex and Anthropic responses are
+outside replayable message content; billed blank replies use standalone response
+records, while copied history retains the original response identity. Ordinary
+turns and compaction requests therefore deduplicate and price against the model
+that handled them. Direct OpenAI Codex and Anthropic responses are
 imported; OpenCode responses again stay with the account collector. Earlier `e`
 records use their local message identity and session model. Their OpenAI counters
 are usable after subtracting cached input, but Anthropic records omit cache-write
