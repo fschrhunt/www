@@ -20,32 +20,14 @@ function memoryRateLimited(ip: string): boolean {
   return entry.count > MAX_ATTEMPTS;
 }
 
-/** Shared fixed-window counter across instances via an Upstash-compatible REST store (Vercel KV or Upstash). */
-async function durableRateLimited(url: string, token: string, ip: string): Promise<boolean> {
-  const key = `contact:rl:${ip}`;
-  // INCR returns the post-increment count; EXPIRE ... NX sets the window only on the first hit.
-  const response = await fetch(`${url}/pipeline`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify([["INCR", key], ["EXPIRE", key, String(WINDOW_MS / 1000), "NX"]]),
-    signal: AbortSignal.timeout(1500),
-  });
-  if (!response.ok) throw new Error(`rate-limit store responded ${response.status}`);
-  const result = await response.json() as ({ result?: unknown; error?: unknown } | null)[] | null;
-  const count = result?.[0]?.result;
-  const expiry = result?.[1]?.result;
-  if (result?.[0]?.error || result?.[1]?.error || typeof count !== "number" || !Number.isSafeInteger(count) || count < 1 ||
-    (expiry !== 0 && expiry !== 1)) throw new Error("rate-limit store returned an invalid result");
-  return count > MAX_ATTEMPTS;
-}
+/** The Worker's RateLimiter Durable Object namespace, as far as the send needs it. */
+export type Limiter = { getByName(key: string): { hit(max: number, windowMs: number): Promise<number | null> } };
 
-/** Require a working shared store in production; allow memory only during local development and tests. */
-async function rateLimited(ip: string, settings: ContactSettings, allowMemory: boolean): Promise<boolean> {
-  const url = settings.KV_REST_API_URL || settings.UPSTASH_REDIS_REST_URL;
-  const token = settings.KV_REST_API_URL ? settings.KV_REST_API_TOKEN : settings.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) return durableRateLimited(url, token, ip);
+/** Require the Durable Object counter when deployed; allow memory only during local development and tests. */
+async function rateLimited(ip: string, limiter: Limiter | undefined, allowMemory: boolean): Promise<boolean> {
+  if (limiter) return (await limiter.getByName(`contact:${ip}`).hit(MAX_ATTEMPTS, WINDOW_MS)) !== null;
   if (allowMemory) return memoryRateLimited(ip);
-  throw new Error("rate-limit store is not configured");
+  throw new Error("rate limiter is not configured");
 }
 
 /** Reject only definite DNS failures; a two-second deadline leaves uncertain domains usable. */
@@ -75,9 +57,10 @@ async function emailDomainError(domain: string): Promise<string | null> {
 
 /**
  * Validate and send one reviewed note to Fischer, never to a caller-selected recipient.
- * `allowMemory` lets a local run count attempts in memory instead of a shared store.
+ * `limiter` is the Worker's RateLimiter binding; without it, `allowMemory` lets a
+ * local run count attempts in memory, and anything else refuses to send.
  */
-export async function handleContact(request: Request, settings: ContactSettings, allowMemory: boolean): Promise<Response> {
+export async function handleContact(request: Request, settings: ContactSettings, allowMemory: boolean, limiter?: Limiter): Promise<Response> {
   const fail = (error: string, status: number) => Response.json({ error }, { status });
   const origin = request.headers.get("origin");
   try {
@@ -125,7 +108,7 @@ export async function handleContact(request: Request, settings: ContactSettings,
   // Cloudflare sets CF-Connecting-IP on every request and a client cannot override it.
   const ip = request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0] ?? "local";
   try {
-    if (await rateLimited(ip, settings, allowMemory)) return fail("A few too many notes at once. Try again in ten minutes.", 429);
+    if (await rateLimited(ip, limiter, allowMemory)) return fail("A few too many notes at once. Try again in ten minutes.", 429);
   } catch { return fail("Sending is temporarily unavailable. Your note is still here. Please try again shortly.", 503); }
   const domainError = await emailDomainError(domain);
   if (domainError) return fail(domainError, 400);

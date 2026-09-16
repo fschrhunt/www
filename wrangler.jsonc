@@ -2,11 +2,11 @@
   // fschrhunt.com on Cloudflare Workers: prerendered pages served as static assets,
   // with the contact API and the token-usage snapshot run by the Worker.
   // The Astro build fills in the entry and assets; `npm run deploy` builds and ships
-  // it, and CI deploys main. Secrets (RESEND_API_KEY,
-  // KV_REST_API_URL, KV_REST_API_TOKEN) are set once with `wrangler secret put`.
+  // it, and CI deploys main. The one secret, RESEND_API_KEY, is set once with
+  // `wrangler secret put`.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "fschrhunt",
-  "main": "@astrojs/cloudflare/entrypoints/server",
+  "main": "src/worker.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "routes": [
@@ -15,5 +15,8 @@
   ],
   // The public usage snapshot the token-usage publisher writes; /token-usage/data.json serves it.
   "r2_buckets": [{ "binding": "TOKEN_USAGE", "bucket_name": "token-usage" }],
+  // Contact attempts per IP, counted across every Worker instance (src/lib/rate-limiter.ts).
+  "durable_objects": { "bindings": [{ "name": "RATE_LIMITER", "class_name": "RateLimiter" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RateLimiter"] }],
   "observability": { "enabled": true }
 }

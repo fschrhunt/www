@@ -22,14 +22,12 @@ The server reads at most 16,000 bytes before parsing JSON, cancels oversized
 request streams, validates fields, refuses cross-origin browser requests, and
 fixes the recipient. Each IP is limited to five attempts per ten minutes.
 
-Deployed sites require a shared rate-limit store.
-Set `KV_REST_API_URL` + `KV_REST_API_TOKEN` or
-`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`. The endpoint calls the
-Upstash-compatible REST API directly using `INCR` and a first-hit `EXPIRE`.
-Missing configuration, store outages, and invalid counter or expiry responses
-return 503 before DNS or email requests. The visitor's draft remains available.
-Only local development and tests can use a per-process memory limit when no
-store is configured. Configure and verify the store before deploying this change.
+The deployed Worker counts attempts in the `RateLimiter` Durable Object
+(`src/lib/rate-limiter.ts`), one object per IP, so the limit holds across every
+Worker instance. The window opens at the first attempt and an alarm clears it.
+A missing binding or a limiter error returns 503 before DNS or email requests,
+and the visitor's draft remains available. Only local development and tests
+count in per-process memory.
 
 The arithmetic question is browser-side interaction only. It must not be relied
 on for server authorization or bot verification. Deployment controls and security
