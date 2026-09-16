@@ -81,17 +81,25 @@ stored root-only in `shared/env/publish-config.json` and never reaches browser
 code:
 
 ```json
-{ "accountId": "<Cloudflare account ID>", "bucket": "token-usage", "token": "<API token>" }
+{
+  "accountId": "<Cloudflare account ID>",
+  "bucket": "token-usage",
+  "accessKeyId": "<R2 token ID>",
+  "secretAccessKey": "<SHA-256 of the R2 token value>"
+}
 ```
 
-The token is a Cloudflare API token with R2 write access to this one bucket, not
-the whole account.
+The key pair belongs to an R2 API token with Object Read & Write on this one
+bucket, not the whole account. Bucket-scoped R2 tokens authenticate only through
+R2's S3 API, where the access key ID is the token's ID and the secret is the
+SHA-256 hex digest of the token value; the dashboard shows the same pair when
+the token is created.
 
 `publish_usage.py` validates and builds an allowlisted public schema. The only
 record fields are date, model ID, and USD value, plus source freshness, missing
 price metadata, and the pricing verification date. Account IDs, message hashes,
 API key IDs, machine names, and private file paths are excluded. It uploads through
-the Cloudflare API's R2 object endpoint, validates the account ID, bucket, and
+R2's S3 API with a Signature V4 request, validates the account ID, bucket, and
 object key before building the URL, and refuses redirects. An upload counts only
 when the API confirms it.
 

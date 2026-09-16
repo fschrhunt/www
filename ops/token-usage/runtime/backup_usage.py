@@ -8,9 +8,8 @@ import json
 import os
 from pathlib import Path
 import sys
-import urllib.request
-from collector import NoRedirect, atomic_json
-from publish_usage import r2_object_url, r2_put
+from collector import atomic_json
+from publish_usage import r2_get, r2_put
 
 
 def run(args):
@@ -25,10 +24,7 @@ def run(args):
         config = json.loads(Path(args.config).read_text())
         path = now.date().isoformat() + '-' + hashlib.sha256(raw).hexdigest()[:16] + '.json.gz'
         r2_put(config, path, raw, 'application/gzip')
-        request = urllib.request.Request(r2_object_url(config, path), headers={
-            'Authorization': 'Bearer ' + config['token'], 'User-Agent': 'token-usage/1.0'})
-        with urllib.request.build_opener(NoRedirect).open(request, timeout=30) as response:
-            restored = response.read(2 * 1024 * 1024 + 1)
+        restored = r2_get(config, path, 2 * 1024 * 1024 + 1)
         if restored != raw:
             raise ValueError('archive_verification_failed')
         atomic_json(Path(args.data)/'backup-status.json', {'state':'ok', 'lastSuccess':now.isoformat(),

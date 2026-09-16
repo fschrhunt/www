@@ -80,35 +80,49 @@ class PricingTests(unittest.TestCase):
         self.assertEqual(model_id('claude-haiku-4-5-20251001'),'claude-haiku-4-5')
 
     def test_r2_object_url_refuses_identifiers_that_could_leave_the_bucket(self):
-        config = {'accountId': '0' * 32, 'bucket': 'token-usage', 'token': 't'}
+        config = {'accountId': '0' * 32, 'bucket': 'token-usage'}
         self.assertEqual(publish_usage.r2_object_url(config, 'usage.json'),
-                         'https://api.cloudflare.com/client/v4/accounts/' + '0' * 32 +
-                         '/r2/buckets/token-usage/objects/usage.json')
+                         'https://' + '0' * 32 + '.r2.cloudflarestorage.com/token-usage/usage.json')
         for bad in [{'bucket': '../x'}, {'bucket': 'token-usage/objects'}, {'accountId': 'x'}]:
             with self.assertRaises(ValueError):
                 publish_usage.r2_object_url({**config, **bad}, 'usage.json')
         with self.assertRaises(ValueError):
             publish_usage.r2_object_url(config, '../usage.json')
 
+    def test_r2_requests_carry_a_scoped_signature_and_never_the_secret(self):
+        config = {'accountId': '0' * 32, 'bucket': 'token-usage', 'accessKeyId': 'a' * 32, 'secretAccessKey': 'b' * 64}
+        now = dt.datetime(2026, 9, 16, 12, 0, tzinfo=dt.timezone.utc)
+        request = publish_usage.r2_request(config, 'PUT', 'usage.json', b'{}', 'application/json', now)
+        auth = request.get_header('Authorization')
+        self.assertTrue(auth.startswith('AWS4-HMAC-SHA256 Credential=' + 'a' * 32 + '/20260916/auto/s3/aws4_request, '))
+        self.assertIn('SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date, Signature=', auth)
+        self.assertNotIn('b' * 64, json.dumps(dict(request.header_items())))
+        # Same inputs, same signature; a different body changes it.
+        self.assertEqual(auth, publish_usage.r2_request(config, 'PUT', 'usage.json', b'{}', 'application/json', now).get_header('Authorization'))
+        self.assertNotEqual(auth, publish_usage.r2_request(config, 'PUT', 'usage.json', b'[]', 'application/json', now).get_header('Authorization'))
+        with self.assertRaises(ValueError):
+            publish_usage.r2_request({**config, 'secretAccessKey': 'not-hex'}, 'GET', 'usage.json')
+
     def test_r2_upload_counts_only_a_confirmed_write(self):
-        config = {'accountId': '0' * 32, 'bucket': 'token-usage', 'token': 'secret'}
+        config = {'accountId': '0' * 32, 'bucket': 'token-usage', 'accessKeyId': 'a' * 32, 'secretAccessKey': 'b' * 64}
         sent = []
 
         class Response(io.BytesIO):
+            def __init__(self, status): super().__init__(b''); self.status = status
             def __enter__(self): return self
             def __exit__(self, *args): return False
 
         class Opener:
-            def __init__(self, body): self.body = body
+            def __init__(self, status): self.status = status
             def open(self, request, timeout):
                 sent.append(request)
-                return Response(self.body)
+                return Response(self.status)
 
-        with mock.patch.object(publish_usage.urllib.request, 'build_opener', return_value=Opener(b'{"success":true}')):
+        with mock.patch.object(publish_usage.urllib.request, 'build_opener', return_value=Opener(200)):
             self.assertEqual(publish_usage.put({'days': []}, config), 'r2://token-usage/usage.json')
         self.assertEqual(sent[0].get_method(), 'PUT')
-        self.assertEqual(sent[0].get_header('Authorization'), 'Bearer secret')
-        with mock.patch.object(publish_usage.urllib.request, 'build_opener', return_value=Opener(b'{"success":false}')):
+        self.assertEqual(sent[0].full_url, 'https://' + '0' * 32 + '.r2.cloudflarestorage.com/token-usage/usage.json')
+        with mock.patch.object(publish_usage.urllib.request, 'build_opener', return_value=Opener(204 + 200)):
             with self.assertRaises(ValueError):
                 publish_usage.put({'days': []}, config)
 

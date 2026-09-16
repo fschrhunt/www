@@ -3,6 +3,8 @@
 import argparse
 import datetime as dt
 from decimal import Decimal
+import hashlib
+import hmac
 import json
 import os
 from pathlib import Path
@@ -142,25 +144,55 @@ def build(codex, opencode, claude, prices, now, codex_local=None):
 
 
 def r2_object_url(config, key):
-    """Build the R2 object URL from validated identifiers; nothing from config reaches the path unchecked."""
+    """Build the R2 S3 object URL from validated identifiers; nothing from config reaches the path unchecked."""
     if not re.fullmatch(r'[0-9a-f]{32}', config['accountId']):
         raise ValueError('invalid_account_id')
     if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,61}[a-z0-9]', config['bucket']):
         raise ValueError('invalid_bucket')
     if not re.fullmatch(r'[A-Za-z0-9._-]{1,200}', key):
         raise ValueError('invalid_key')
-    return ('https://api.cloudflare.com/client/v4/accounts/'+config['accountId']+'/r2/buckets/'+
-            config['bucket']+'/objects/'+key)
+    return 'https://'+config['accountId']+'.r2.cloudflarestorage.com/'+config['bucket']+'/'+key
+
+
+def r2_request(config, method, key, raw=b'', content_type=None, now=None):
+    """Sign one S3 request (AWS Signature V4, region auto) with the bucket-scoped key pair from config.
+
+    R2's bucket-scoped API tokens authenticate only through the S3 API: the access key ID is the token's
+    ID and the secret is the SHA-256 of the token value. Config: {accountId, bucket, accessKeyId, secretAccessKey}.
+    """
+    if not re.fullmatch(r'[0-9a-f]{32}', config['accessKeyId']) or not re.fullmatch(r'[0-9a-f]{64}', config['secretAccessKey']):
+        raise ValueError('invalid_r2_credentials')
+    url = r2_object_url(config, key)
+    stamp = (now or dt.datetime.now(dt.timezone.utc)).strftime('%Y%m%dT%H%M%SZ')
+    payload = hashlib.sha256(raw).hexdigest()
+    headers = {'host': config['accountId']+'.r2.cloudflarestorage.com', 'x-amz-content-sha256': payload, 'x-amz-date': stamp}
+    if content_type:
+        headers['content-type'] = content_type
+    names = ';'.join(sorted(headers))
+    canonical = '\n'.join([method, '/'+config['bucket']+'/'+key, '', ''.join(k+':'+headers[k]+'\n' for k in sorted(headers)), names, payload])
+    scope = stamp[:8]+'/auto/s3/aws4_request'
+    signing = ('AWS4'+config['secretAccessKey']).encode()
+    for part in (stamp[:8], 'auto', 's3', 'aws4_request'):
+        signing = hmac.new(signing, part.encode(), hashlib.sha256).digest()
+    signature = hmac.new(signing, '\n'.join(['AWS4-HMAC-SHA256', stamp, scope, hashlib.sha256(canonical.encode()).hexdigest()]).encode(),
+                         hashlib.sha256).hexdigest()
+    headers['authorization'] = ('AWS4-HMAC-SHA256 Credential='+config['accessKeyId']+'/'+scope+
+                                ', SignedHeaders='+names+', Signature='+signature)
+    headers['user-agent'] = 'token-usage/1.0'
+    return urllib.request.Request(url, data=raw if method == 'PUT' else None, method=method, headers=headers)
 
 
 def r2_put(config, key, raw, content_type):
-    """Replace one object through the Cloudflare API with a bucket-scoped token, refusing redirects."""
-    request = urllib.request.Request(r2_object_url(config, key), data=raw, method='PUT', headers={
-        'Authorization':'Bearer '+config['token'], 'Content-Type':content_type, 'User-Agent':'token-usage/1.0'})
-    with urllib.request.build_opener(NoRedirect).open(request, timeout=30) as response:
-        result = json.loads(response.read(65536))
-    if not result.get('success'):
-        raise ValueError('r2_upload_rejected')
+    """Replace one object, refusing redirects; any non-2xx answer raises, so only a confirmed write returns."""
+    with urllib.request.build_opener(NoRedirect).open(r2_request(config, 'PUT', key, raw, content_type), timeout=30) as response:
+        if not 200 <= response.status < 300:
+            raise ValueError('r2_upload_rejected')
+
+
+def r2_get(config, key, limit):
+    """Read back at most `limit` bytes of one object, refusing redirects."""
+    with urllib.request.build_opener(NoRedirect).open(r2_request(config, 'GET', key), timeout=30) as response:
+        return response.read(limit)
 
 
 def put(snapshot, config):
