@@ -1,6 +1,6 @@
 # Private usage collector
 
-The `/token-usage` page consumes a public aggregate snapshot from Vercel Blob. The collector is a separate server runtime;
+The `/token-usage` page consumes an aggregate snapshot from Cloudflare R2. The collector is a separate server runtime;
 it does not add a website API route, public database, or network listener.
 
 ## Runtime layout
@@ -136,7 +136,7 @@ not retain enough cache-write detail to price safely. See
 recovery. Quotas are not substituted for token counts.
 
 The publisher converts model usage into dollar values and writes only allowlisted
-aggregate fields to the dedicated Vercel Blob store every fifteen minutes. Private
+aggregate fields to the dedicated R2 bucket every fifteen minutes. Private
 SQLite files, credentials, and raw provider responses remain on the server. See
 [usage publishing](usage-publishing.md) for pricing, delivery, and freshness.
 

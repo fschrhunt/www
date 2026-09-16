@@ -37,12 +37,12 @@ jobs:
           if printf '%s\n' "$files" | grep -Eq '^(docs/|ops/.*README\.md$|README$|AGENTS.md$|\.agents/)'; then
             add_label documentation 0075ca 'Documentation and agent guidance'
           fi
-          if printf '%s\n' "$files" | grep -Eq '^(\.github/|ops/|scripts/|next.config.ts$|package(-lock)?\.json$)'; then
+          if printf '%s\n' "$files" | grep -Eq '^(\.github/|ops/|scripts/|astro.config.mjs$|package(-lock)?\.json$)'; then
             add_label area:infra 6f42c1 'Build, CI, release, or repository automation'
           fi
           if printf '%s\n' "$files" | grep -Eq '^(package(-lock)?\.json$|\.github/dependabot.yml$)'; then
             add_label dependencies 0366d6 'Dependency or toolchain changes'
           fi
-          if printf '%s\n' "$files" | grep -Eq '^(src/app/api/|src/components/contact-conversation.tsx$|next.config.ts$|ops/|scripts/|\.github/(CODEOWNERS$|workflows/))'; then
+          if printf '%s\n' "$files" | grep -Eq '^(src/pages/api/|src/lib/contact-send.ts$|src/components/contact-conversation.tsx$|astro.config.mjs$|ops/|scripts/|\.github/(CODEOWNERS$|workflows/))'; then
             add_label security-surface b60205 'Contact handling, build execution, or repository permissions'
           fi

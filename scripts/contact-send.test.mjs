@@ -14,7 +14,9 @@ beforeEach(t => {
 });
 let requestNumber = 0;
 import assert from 'node:assert/strict';
-import { POST } from '../src/app/api/contact/route.ts';
+import { handleContact } from '../src/lib/contact-send.ts';
+// The route passes Worker settings; here the environment stands in, and memory counting is allowed only outside production.
+const POST = req => handleContact(req, process.env, process.env.NODE_ENV !== 'production' && !process.env.VERCEL);
 const draft = {name:'Alex',email:'alex@example.com',subject:'A question',note:'Can I ask about Flip?',id:'71c1469a-14ee-4f70-bf61-7b67e179b1c3'};
 const request = (body=draft, origin='https://fschrhunt.com') => new Request('https://fschrhunt.com/api/contact',{method:'POST',headers:{origin,'content-type':'application/json','x-forwarded-for':`test-${++requestNumber}`},body:JSON.stringify(body)});
 
@@ -212,7 +214,7 @@ test('valid JSON remains readable across chunk boundaries', async t => {
   });
 });
 
-test('production and Vercel previews refuse sends without a shared store', async t => {
+test('production refuses sends without a shared store', async t => {
   await withSending(t, async send => {
     process.env.NODE_ENV = 'production';
     assert.equal((await POST(request())).status, 503);

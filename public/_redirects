@@ -1,0 +1,4 @@
+# Preserve shared writing URLs after the folder migration.
+/notes/five-lines /writings/damn-you-agents 308
+/writings/five-lines /writings/damn-you-agents 308
+/notes/* /writings/:splat 308

@@ -1,12 +1,13 @@
 # Publishing token usage
 
 The server combines the three private aggregate snapshots into a single public
-JSON object in a dedicated public Vercel Blob store. No additional database or Vercel Cron job is needed.
+JSON object, `usage.json`, in the dedicated Cloudflare R2 bucket `token-usage`. No
+additional database or scheduled Worker is needed.
 
 `token-usage-publish.timer` runs every fifteen minutes, two minutes after the
 quarter hour plus up to fifteen seconds of jitter. It calls a restricted oneshot
 service and exits. The page fetches the public snapshot when opened and once per
-minute while visible. Blob's browser/CDN cache lasts sixty seconds. Collection
+minute while visible. The response's browser cache lasts sixty seconds. Collection
 and publishing schedules mean this is periodic freshness, not a live event stream.
 Device changes can take roughly twenty minutes to appear if they just miss a device
 collection and publisher cycle. Offline sources take longer.
@@ -21,16 +22,17 @@ sound behavior. A small, non-underlined source link stays in the bottom-right
 corner and opens the chart asset directory on GitHub. The only visible numbers remain the total and hovered model costs.
 The chart tries to start its audio context on load. When browser autoplay policy
 blocks it, a click, tap, or keypress retries; hover alone cannot grant permission.
-The chart reads the snapshot from the same-origin `/token-usage/data.json`, which
-`next.config.ts` rewrites to the public Blob; that Blob URL is public, not a
-credential. Other page favicons are unchanged.
+The chart reads the snapshot from the same-origin `/token-usage/data.json`.
+`src/app/token-usage/data.json/route.ts` streams it from the Worker's
+`TOKEN_USAGE` R2 binding, so the bucket itself stays private. Other page
+favicons are unchanged.
 
 The client validates a new snapshot before replacing the current chart. A failed
 refresh leaves the last loaded numbers visible. Freshness and missing-value details
 are available in the total's native hover title and the chart's accessible
 description, without an extra permanent label. A first visit cannot load data if
-both the network and Blob are unavailable. If only the collection server is down,
-Blob continues serving the previously published snapshot.
+both the network and R2 are unavailable. If only the collection server is down,
+the route keeps serving the previously published snapshot.
 
 ## Dollar calculation
 
@@ -72,19 +74,26 @@ labels such as `GPT 5.5` and `Opus 4.8`.
 
 The publisher runs as `token-usage` with a 96 MiB memory limit, 10% CPU quota, a
 read-only system, hidden home directories, and no Linux capabilities. Systemd
-provides copies of only the aggregate snapshots and the dedicated Blob store's
-write token through `LoadCredential`. It does not receive Claude or OpenCode login
-cookies, Codex OAuth credentials, raw databases, or transcripts. The token is
+provides copies of only the aggregate snapshots and the publish configuration
+through `LoadCredential`. It does not receive Claude or OpenCode login
+cookies, Codex OAuth credentials, raw databases, or transcripts. The configuration is
 stored root-only in `shared/env/publish-config.json` and never reaches browser
-code. It grants write access to this dedicated store, not the entire Vercel account.
+code:
+
+```json
+{ "accountId": "<Cloudflare account ID>", "bucket": "token-usage", "token": "<API token>" }
+```
+
+The token is a Cloudflare API token with R2 write access to this one bucket, not
+the whole account.
 
 `publish_usage.py` validates and builds an allowlisted public schema. The only
 record fields are date, model ID, and USD value, plus source freshness, missing
 price metadata, and the pricing verification date. Account IDs, message hashes,
-API key IDs, machine names, and private file paths are excluded. It uses the fixed
-HTTPS Blob PUT endpoint and protocol version 12, as implemented by Vercel's SDK,
-and refuses redirects. A Blob protocol change can require updating this small
-client.
+API key IDs, machine names, and private file paths are excluded. It uploads through
+the Cloudflare API's R2 object endpoint, validates the account ID, bucket, and
+object key before building the URL, and refuses redirects. An upload counts only
+when the API confirms it.
 
 The object is overwritten at the same URL only after successful validation. A
 failed poll, validation, or upload leaves the previous public object available.
@@ -143,14 +152,17 @@ must be refreshed to pick up new formatting, but its next data poll removes empt
 model rows without waiting for a refresh.
 
 `token-usage-backup.timer` archives the four aggregate snapshots and pricing daily
-in a separate private Blob store. The timer template defines the schedule. Dated gzip
+in the separate private R2 bucket `token-usage-backups`, which no Worker binds. The timer template defines the schedule. Dated gzip
 objects include a content hash in their filename, preserving distinct archive
 versions and avoiding stale reads after overwrites. The job
-verifies an authenticated read before recording success in `backup-status.json`.
+reads the object back through the same API and compares the bytes before
+recording success in `backup-status.json`.
 The archive includes token counters, model IDs, dates, and device freshness but no
-transcripts or provider credentials. Its store-scoped token stays root-only on
-the server, supplied to the restricted job through systemd credentials. Keep backup credentials separate from public publishing credentials and exclude
-them from website deployments. Record the actual store binding privately.
+transcripts or provider credentials. `shared/env/backup-config.json` has the
+same shape as the publish configuration, naming the backup bucket with its own
+bucket-scoped token. It stays root-only on the server, supplied to the restricted
+job through systemd credentials. Keep backup credentials separate from public publishing credentials and exclude
+them from website deployments. Record the actual token scopes privately.
 
 These are aggregate archives, not full SQLite backups. They retain daily data for
 repricing and chart recovery. For request-level deduplication recovery, replay the

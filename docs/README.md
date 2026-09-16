@@ -15,4 +15,4 @@ Start commands and a brief overview are in the root [README](../README).
 - [Token usage](token-usage.md): private server collection, authentication, units, and remaining integrations.
 
 - [Claude collection](claude-collection.md): incremental device collection, private uploads, and offline recovery.
-- [Usage publishing](usage-publishing.md): pricing, Vercel Blob delivery, and the real-data chart.
+- [Usage publishing](usage-publishing.md): pricing, R2 delivery, and the real-data chart.

@@ -1,0 +1,9 @@
+# Conservative security headers for a static site with one server-side send endpoint.
+/*
+  Content-Security-Policy: object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

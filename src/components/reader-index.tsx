@@ -1,7 +1,4 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { ReturnArrow } from "@/components/social-hub";
 import { scrollToTop } from "@/lib/scroll-to-top";
 
@@ -55,7 +52,7 @@ export function ReaderIndex() {
   }, []);
 
   return <nav className="reader-index" aria-label="Article navigation">
-    <Link className="back-to-index" href="/"><ReturnArrow /><span>Index</span></Link>
+    <a className="back-to-index" href="/"><ReturnArrow /><span>Index</span></a>
     {sections.length > 0 && <div className="reader-outline" data-scrolled={scrolled}>
       <button className="reader-current-title" type="button" aria-label={`Back to top: ${title}`} tabIndex={scrolled ? 0 : -1} aria-hidden={!scrolled} data-active={!active} onClick={() => {
         cancelScroll.current?.();

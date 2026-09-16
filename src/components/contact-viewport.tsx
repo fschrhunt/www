@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, type ReactNode } from "react";
 
 /** Fit the chat and review above the keyboard and reveal focused fields without scrolling the page. */

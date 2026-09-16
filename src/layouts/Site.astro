@@ -1,0 +1,58 @@
+---
+/**
+ * The document shell: metadata, icons, the locally hosted type, and the
+ * entrance animation wrapper every page shares.
+ */
+import { FaviconTheme } from "../components/favicon-theme";
+import "../styles/globals.css";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  /** Canonical path, e.g. "/writings/big-bro". */
+  path: string;
+  /** Open Graph type; articles also carry their published date. */
+  type?: "website" | "article";
+  publishedTime?: string;
+  /** Pages without a canonical entry in search, like the 404. */
+  noindex?: boolean;
+  /** Entry pages share their own title and URL; other pages share the site's. */
+  share?: boolean;
+}
+
+const site = "https://fschrhunt.com";
+const defaultDescription = "Software for the terminal and the Mac. Projects and small tools by Fischer Hunt.";
+const { title, description = defaultDescription, path, type = "website", publishedTime, noindex = false, share = false } = Astro.props;
+const fullTitle = title ? `${title} · Fischer Hunt` : "Fischer Hunt";
+const url = path === "/" ? site : `${site}${path}`;
+const shareTitle = share && title ? title : "Fischer Hunt";
+const shareUrl = share ? url : site;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="description" content={description} />
+    <link rel="canonical" href={url} />
+    <meta property="og:title" content={shareTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={shareUrl} />
+    {!share && <meta property="og:site_name" content="Fischer Hunt" />}
+    <meta property="og:type" content={type} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={shareTitle} />
+    <meta name="twitter:description" content={description} />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link id="site-favicon" rel="icon" type="image/png" sizes="32x32" href="/favicon-light.png" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#262626" />
+  </head>
+  <body>
+    <FaviconTheme client:load />
+    <div class="page-entry"><slot /></div>
+  </body>
+</html>

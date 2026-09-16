@@ -3,9 +3,10 @@
 The browser posts the reviewed name, reply email, subject, and message to
 `/api/contact`. The server uses Resend's HTTPS API without an extra SDK.
 
-Set `RESEND_API_KEY` in Vercel for Production, Preview, and Development. Use a
-sending key restricted to the verified domain. Run `vercel env pull .env.local`
-for local testing. Never put this key in a `NEXT_PUBLIC_` variable or Git.
+Set `RESEND_API_KEY` as a Worker secret for the deployed site (see
+[Repository](repository.md)) and in `.dev.vars` for local testing. Use a
+sending key restricted to the verified domain. Never put this key in a
+`PUBLIC_` variable or Git.
 The optional `CONTACT_FROM` defaults to `fschrhunt.com <contact@fschrhunt.com>`.
 That domain must be verified in Resend. Gmail cannot be the From domain through
 Resend because we cannot authenticate gmail.com's DNS.
@@ -21,7 +22,7 @@ The server reads at most 16,000 bytes before parsing JSON, cancels oversized
 request streams, validates fields, refuses cross-origin browser requests, and
 fixes the recipient. Each IP is limited to five attempts per ten minutes.
 
-Production builds and Vercel deployments require a shared rate-limit store.
+Deployed sites require a shared rate-limit store.
 Set `KV_REST_API_URL` + `KV_REST_API_TOKEN` or
 `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`. The endpoint calls the
 Upstash-compatible REST API directly using `INCR` and a first-hit `EXPIRE`.
@@ -63,7 +64,7 @@ An A or AAAA record alone remains usable, as required by
 are converted for the lookup; the entered reply address stays intact. DNS failures
 and a two-second lookup deadline let the note proceed. The existing attempt limit
 also bounds these checks. No additional API key or paid verification service is used;
-DNS runs within the existing Vercel function's compute allowance.
+DNS runs within the Worker's compute allowance.
 
 This checks domain routing only, not mailbox existence or ownership. It does not
 send verification messages or attempt SMTP mailbox probes. A domain error keeps

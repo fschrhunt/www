@@ -1,0 +1,20 @@
+---
+/** A quiet, message-style contact form with a name, reply address, and note. */
+import Site from "../layouts/Site.astro";
+import Portrait from "../components/Portrait.astro";
+import ReturnArrow from "../components/ReturnArrow.astro";
+import { ContactConversation } from "../components/contact-conversation";
+import { ContactViewport } from "../components/contact-viewport";
+---
+
+<Site title="Contact" path="/contact">
+  <a class="skip-link" href="#conversation">Skip to conversation</a>
+  <ContactViewport client:load>
+    <h1 class="sr-only">Get in touch with Fischer</h1>
+    <header class="conversation-header">
+      <Portrait href="/" class="contact-portrait" />
+      <a class="back-to-index" href="/"><ReturnArrow /><span>back</span></a>
+    </header>
+    <ContactConversation client:load />
+  </ContactViewport>
+</Site>

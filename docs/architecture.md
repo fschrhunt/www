@@ -1,31 +1,35 @@
 # Architecture
 
-Next.js App Router with TypeScript and React. Routes are statically rendered;
-small client components handle the interactions. Contact delivery uses a
-server-only API route and environment credentials. There is no website database
-or CMS.
+Astro with TypeScript and React islands, deployed to Cloudflare Workers. Pages
+prerender to static files at build; the interactive parts hydrate as React
+islands. Contact delivery and the token-usage snapshot are the two on-demand
+routes, run by the Worker. There is no website database or CMS.
 
 ## Routes and shared files
 
 | Path | Responsibility |
 | --- | --- |
-| `src/app/page.tsx` | Introduction, expandable About passage, product and note indexes, update date |
-| `src/app/products/[slug]/page.tsx` | Static product routes rendered from Markdown and MDX |
-| `src/app/writings/[slug]/page.tsx` | Static writing routes rendered from Markdown and MDX |
+| `src/pages/index.astro` | Introduction, expandable About passage, product and note indexes, update date |
+| `src/pages/products/[slug].astro` | Static product routes rendered from Markdown and MDX |
+| `src/pages/writings/[slug].astro` | Static writing routes rendered from Markdown and MDX |
 | `src/content/{writings,products}/` | Prose files with YAML frontmatter and local components |
-| `src/lib/content.ts` | Metadata validation, file discovery, date ordering, and reading-time estimates |
-| `src/components/content-page.tsx` | Shared article shell, title, date, and navigation |
-| `src/mdx-components.tsx` | Markdown links mapped to the site's link treatment |
-| `src/app/token-usage/route.ts` | Static full-screen usage chart backed by the public aggregate snapshot |
-| `src/app/contact/page.tsx` | Contact layout and navigation |
-| `src/app/layout.tsx` | Local font, default metadata, OpenGraph/Twitter defaults, favicon links |
-| `src/app/template.tsx` | Route remount boundary for entrance effects |
-| `src/app/sitemap.ts`, `src/app/robots.ts` | Generated `sitemap.xml` and `robots.txt` from the canonical origin and content |
-| `src/app/not-found.tsx`, `src/app/error.tsx` | On-voice 404 and route error boundary |
+| `src/lib/content.ts` | Metadata validation, date ordering, and reading-time estimates |
+| `src/lib/collections.ts` | Pairs each authored file's metadata with its compiled body |
+| `src/lib/markdown.mjs` | Markdown links mapped to the site's link treatment |
+| `src/layouts/Reader.astro` | Shared article shell, title, date, and navigation |
+| `src/pages/token-usage.html.ts` | Static full-screen usage chart backed by the aggregate snapshot |
+| `src/pages/token-usage/data.json.ts` | The snapshot, read from the Worker's R2 binding |
+| `src/pages/api/contact.ts`, `src/lib/contact-send.ts` | The send endpoint and its validation, rate limit, and delivery |
+| `src/pages/contact.astro` | Contact layout and navigation |
+| `src/layouts/Site.astro` | Local font, default metadata, OpenGraph/Twitter defaults, favicon links, entrance wrapper |
+| `src/pages/sitemap.xml.ts`, `src/pages/robots.txt.ts` | Generated `sitemap.xml` and `robots.txt` from the canonical origin and content |
+| `src/pages/404.astro` | On-voice 404 |
+| `src/middleware.ts`, `public/_headers`, `public/_redirects` | Security headers for Worker and static responses; the preserved writing URLs |
 | `src/lib/site.ts` | Canonical production origin shared by metadata, sitemap, and robots |
 | `src/site-updated.json` | UTC update timestamp rendered in the homepage footer |
-| `src/app/globals.css` | Shared tokens, layout, utilities, entrance motion, and MDX article styles |
+| `src/styles/globals.css` | Font faces, shared tokens, layout, utilities, entrance motion, and article styles |
 | `*.module.css` | Route-local styles co-located with the component that owns them |
+| `astro.config.mjs`, `wrangler.jsonc` | The build, and the Worker's name, domains, and bindings |
 
 New notes need only a `.md` or `.mdx` file in `src/content/writings/`. Product
 prose lives in `src/content/products/`. The homepage discovers both collections
@@ -33,10 +37,8 @@ and orders them by date. Writings require title, date, and description; products
 require title, date, and status. The optional `indexLabel` frontmatter sets the
 homepage link text when it should differ from the article heading (the lowercase
 product names use it). Reading time is estimated from prose at 200 words
-per minute. `@next/mdx` compiles content at build time, `remark-frontmatter` removes
-the metadata block from the rendered body, and `gray-matter` reads it for listings
-and page metadata. `getContentEntries` caches parsed files in production and re-reads
-them in development so edits hot-reload. Content imports and interactive components
+per minute. Astro compiles content at build time and drops the metadata block
+from the rendered body; `gray-matter` reads it for listings and page metadata. Content imports and interactive components
 remain normal React code; there is no runtime content evaluation or CMS. Unknown
 slugs return 404. New page directions can use scoped CSS or their own components
 without changing the accepted homepage. Read the agent kit for creative decisions.
@@ -50,7 +52,7 @@ or MDX-targeted rules.
 
 Each page's frontmatter title and description also drive its `<title>`, canonical
 URL, and OpenGraph/Twitter tags, so shared links unfurl with a name and summary.
-Titles use the `%s · Fischer Hunt` template from `layout.tsx`; individual pages set
+Titles use the `%s · Fischer Hunt` template from `Site.astro`; individual pages set
 only the bare name. `metadataBase` and the canonical origin come from `src/lib/site.ts`.
 `sitemap.ts` and `robots.ts` regenerate from the same content, so a new file needs
 no manual index, sitemap, or metadata edit.
@@ -178,7 +180,7 @@ duplicate submissions before React renders the disabled composer.
 ## Writing folders
 
 Content lives in `src/content/writings/<slug>.md` or `.mdx`; its static route is
-rendered by `src/app/writings/[slug]/page.tsx`. Note-specific components stay in
+rendered by `src/pages/writings/[slug].astro`. Note-specific components stay in
 `src/content/writings/_components/`. Static media mirrors the slug under
 `public/writings/`. Only writings with media need an asset folder. See
 [the writing guide](../src/content/README.md) for adding a page.
@@ -202,7 +204,7 @@ idempotency key. Acceptance does not guarantee inbox placement. See
 `ops/token-usage/` contains separate Codex and OpenCode dashboard collectors on
 the private server. Each writes its own SQLite ledger and sanitized JSON snapshot,
 keeping Codex credits separate from OpenCode USD usage costs. The publisher prices local model token counts for Codex and Claude, uses OpenCode USD costs, and publishes a small public JSON
-snapshot to Vercel Blob; `/token-usage` reads it directly. See [token usage operations](token-usage.md) for authentication,
+snapshot to Cloudflare R2; `/token-usage/data.json` serves it from the Worker's R2 binding. See [token usage operations](token-usage.md) for authentication,
 units, isolation, and publishing work. Claude Code and Codex use incremental collectors on
 authorized sender devices, with durable local queues and a restricted SSH receiver.
 See [Claude collection](claude-collection.md) for its separate token ledger and

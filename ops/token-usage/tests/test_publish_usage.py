@@ -1,8 +1,11 @@
-"""Pin pricing math and prevent private snapshot fields reaching the public output."""
+"""Pin pricing math, keep private snapshot fields out of the public output, and pin the R2 upload."""
 import datetime as dt
+import io
 import json
 from pathlib import Path
 import unittest
+from unittest import mock
+import publish_usage
 from publish_usage import build, claude_cost, model_id
 
 
@@ -75,6 +78,39 @@ class PricingTests(unittest.TestCase):
         self.assertEqual(priced['days'][0]['models'][0]['usd'], '35.5')
         self.assertNotIn('PRIVATE',json.dumps(result))
         self.assertEqual(model_id('claude-haiku-4-5-20251001'),'claude-haiku-4-5')
+
+    def test_r2_object_url_refuses_identifiers_that_could_leave_the_bucket(self):
+        config = {'accountId': '0' * 32, 'bucket': 'token-usage', 'token': 't'}
+        self.assertEqual(publish_usage.r2_object_url(config, 'usage.json'),
+                         'https://api.cloudflare.com/client/v4/accounts/' + '0' * 32 +
+                         '/r2/buckets/token-usage/objects/usage.json')
+        for bad in [{'bucket': '../x'}, {'bucket': 'token-usage/objects'}, {'accountId': 'x'}]:
+            with self.assertRaises(ValueError):
+                publish_usage.r2_object_url({**config, **bad}, 'usage.json')
+        with self.assertRaises(ValueError):
+            publish_usage.r2_object_url(config, '../usage.json')
+
+    def test_r2_upload_counts_only_a_confirmed_write(self):
+        config = {'accountId': '0' * 32, 'bucket': 'token-usage', 'token': 'secret'}
+        sent = []
+
+        class Response(io.BytesIO):
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+
+        class Opener:
+            def __init__(self, body): self.body = body
+            def open(self, request, timeout):
+                sent.append(request)
+                return Response(self.body)
+
+        with mock.patch.object(publish_usage.urllib.request, 'build_opener', return_value=Opener(b'{"success":true}')):
+            self.assertEqual(publish_usage.put({'days': []}, config), 'r2://token-usage/usage.json')
+        self.assertEqual(sent[0].get_method(), 'PUT')
+        self.assertEqual(sent[0].get_header('Authorization'), 'Bearer secret')
+        with mock.patch.object(publish_usage.urllib.request, 'build_opener', return_value=Opener(b'{"success":false}')):
+            with self.assertRaises(ValueError):
+                publish_usage.put({'days': []}, config)
 
 
 if __name__=='__main__':unittest.main()

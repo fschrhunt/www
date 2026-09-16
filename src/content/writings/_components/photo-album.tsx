@@ -1,6 +1,3 @@
-"use client";
-
-import Image from "next/image";
 import { ReturnArrow } from "@/components/social-hub";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import styles from "./photo-album.module.css";
@@ -53,7 +50,7 @@ export function PhotoAlbum() {
               if (!expanded) setPinned(true);
               else { setPinned(true); setSelected(index); }
             }}>
-          <Image src={`/writings/big-bro/${photo.file}.webp`} width={photo.width} height={photo.height} alt={photo.alt} sizes="(max-width: 640px) 240px, 250px" />
+          <img src={`/writings/big-bro/${photo.file}.webp`} width={photo.width} height={photo.height} alt={photo.alt} />
           </button>
         </li>)}
       </ol>
@@ -96,9 +93,9 @@ export function PhotoAlbum() {
             if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) movePhoto(dx < 0 ? 1 : -1);
           }}>
           <button className={styles.broPhotoPrev} type="button" onClick={() => movePhoto(-1)} aria-label="Previous photo"><span aria-hidden="true">←</span></button>
-          <Image key={photos[selected].file} src={`/writings/big-bro/${photos[selected].file}.webp`}
+          <img key={photos[selected].file} src={`/writings/big-bro/${photos[selected].file}.webp`}
             width={photos[selected].width} height={photos[selected].height}
-            alt={photos[selected].alt} sizes="(max-width: 640px) 90vw, 90vw" loading="eager" />
+            alt={photos[selected].alt} />
           <button className={styles.broPhotoNext} type="button" onClick={() => movePhoto(1)} aria-label="Next photo"><span aria-hidden="true">→</span></button>
         </div>
         <footer className={styles.broPhotoNavigation}>

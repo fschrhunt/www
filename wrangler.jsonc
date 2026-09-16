@@ -1,0 +1,19 @@
+{
+  // fschrhunt.com on Cloudflare Workers: prerendered pages served as static assets,
+  // with the contact API and the token-usage snapshot run by the Worker.
+  // The Astro build fills in the entry and assets; `npm run deploy` builds and ships
+  // it, and CI deploys main. Secrets (RESEND_API_KEY,
+  // KV_REST_API_URL, KV_REST_API_TOKEN) are set once with `wrangler secret put`.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fschrhunt",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    { "pattern": "fschrhunt.com", "custom_domain": true },
+    { "pattern": "www.fschrhunt.com", "custom_domain": true }
+  ],
+  // The public usage snapshot the token-usage publisher writes; /token-usage/data.json serves it.
+  "r2_buckets": [{ "binding": "TOKEN_USAGE", "bucket_name": "token-usage" }],
+  "observability": { "enabled": true }
+}

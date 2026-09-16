@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Price private aggregate snapshots and replace one public usage-only Vercel Blob object."""
+"""Price private aggregate snapshots and replace one public usage-only object in Cloudflare R2."""
 import argparse
 import datetime as dt
 from decimal import Decimal
@@ -141,22 +141,35 @@ def build(codex, opencode, claude, prices, now, codex_local=None):
 
 
 
+def r2_object_url(config, key):
+    """Build the R2 object URL from validated identifiers; nothing from config reaches the path unchecked."""
+    if not re.fullmatch(r'[0-9a-f]{32}', config['accountId']):
+        raise ValueError('invalid_account_id')
+    if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,61}[a-z0-9]', config['bucket']):
+        raise ValueError('invalid_bucket')
+    if not re.fullmatch(r'[A-Za-z0-9._-]{1,200}', key):
+        raise ValueError('invalid_key')
+    return ('https://api.cloudflare.com/client/v4/accounts/'+config['accountId']+'/r2/buckets/'+
+            config['bucket']+'/objects/'+key)
+
+
+def r2_put(config, key, raw, content_type):
+    """Replace one object through the Cloudflare API with a bucket-scoped token, refusing redirects."""
+    request = urllib.request.Request(r2_object_url(config, key), data=raw, method='PUT', headers={
+        'Authorization':'Bearer '+config['token'], 'Content-Type':content_type, 'User-Agent':'token-usage/1.0'})
+    with urllib.request.build_opener(NoRedirect).open(request, timeout=30) as response:
+        result = json.loads(response.read(65536))
+    if not result.get('success'):
+        raise ValueError('r2_upload_rejected')
+
+
 def put(snapshot, config):
-    """Use the Blob SDK v12 PUT protocol at its fixed HTTPS origin, refusing redirects."""
+    """Replace the public usage.json object the site serves at /token-usage/data.json."""
     raw = json.dumps(snapshot,separators=(',',':')).encode()
     if len(raw) > 2*1024*1024:
         raise ValueError('snapshot_too_large')
-    request = urllib.request.Request('https://vercel.com/api/blob/?pathname=usage.json',data=raw,method='PUT',headers={
-        'Authorization':'Bearer '+config['token'], 'x-api-version':'12',
-        'x-vercel-blob-store-id':config['storeId'], 'x-vercel-blob-access':'public',
-        'x-add-random-suffix':'0', 'x-allow-overwrite':'1', 'x-content-type':'application/json',
-        'x-cache-control-max-age':'60', 'User-Agent':'token-usage/1.0'})
-    with urllib.request.build_opener(NoRedirect).open(request, timeout=30) as response:
-        result = json.loads(response.read(65536))
-    expected = 'https://'+config['storeId'].removeprefix('store_').lower()+'.public.blob.vercel-storage.com/usage.json'
-    if result.get('url') != expected:
-        raise ValueError('unexpected_blob_url')
-    return result['url']
+    r2_put(config, 'usage.json', raw, 'application/json')
+    return 'r2://'+config['bucket']+'/usage.json'
 
 
 def run(args):

@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 import urllib.request
 from collector import NoRedirect, atomic_json
+from publish_usage import r2_object_url, r2_put
 
 
 def run(args):
@@ -23,19 +24,10 @@ def run(args):
             raise ValueError('archive_too_large')
         config = json.loads(Path(args.config).read_text())
         path = now.date().isoformat() + '-' + hashlib.sha256(raw).hexdigest()[:16] + '.json.gz'
-        url = 'https://' + config['storeId'].removeprefix('store_').lower() + '.private.blob.vercel-storage.com/' + path
-        auth = {'Authorization': 'Bearer ' + config['token']}
-        headers = {**auth, 'x-api-version':'12', 'x-vercel-blob-store-id':config['storeId'],
-                   'x-vercel-blob-access':'private', 'x-add-random-suffix':'0', 'x-allow-overwrite':'1',
-                   'x-content-type':'application/gzip', 'x-cache-control-max-age':'60',
-                   'User-Agent':'token-usage/1.0'}
-        opener = urllib.request.build_opener(NoRedirect)
-        request = urllib.request.Request('https://vercel.com/api/blob/?pathname='+path, data=raw, method='PUT', headers=headers)
-        with opener.open(request, timeout=30) as response:
-            result = json.loads(response.read(65536))
-        if result.get('url') != url:
-            raise ValueError('unexpected_archive_url')
-        with opener.open(urllib.request.Request(url+'?version='+hashlib.sha256(raw).hexdigest(), headers=auth), timeout=30) as response:
+        r2_put(config, path, raw, 'application/gzip')
+        request = urllib.request.Request(r2_object_url(config, path), headers={
+            'Authorization': 'Bearer ' + config['token'], 'User-Agent': 'token-usage/1.0'})
+        with urllib.request.build_opener(NoRedirect).open(request, timeout=30) as response:
             restored = response.read(2 * 1024 * 1024 + 1)
         if restored != raw:
             raise ValueError('archive_verification_failed')

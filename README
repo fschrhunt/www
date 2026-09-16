@@ -9,17 +9,22 @@ LOCAL:
  npm ci
  npm run dev
 
- http://localhost:3000
+ http://localhost:4321
 
 CHECK:
  npm run lint
  npm run build
  npm run typecheck
+ npm run preview        the built site on the local Workers runtime
+
+DEPLOY:
+ npm run deploy         build and ship to Cloudflare; CI deploys main
 
 ///
 
 MAP:
- src/app/                   home, contact, writings, products, and route handlers
+ src/pages/                 home, contact, writings, products, and the API routes
+ src/layouts/               the document shell and the reader frame
  src/components/            shared navigation, conversations, and interactions
  src/content/               the writing and product copy, in Markdown and MDX
  public/writings/           photos and media filed with each writing

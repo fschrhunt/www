@@ -1,11 +1,6 @@
-"use client";
-
 import { useState, useSyncExternalStore } from "react";
-import localFont from "next/font/local";
 import { ScrambleLink } from "./scramble-link";
 
-const crayon = localFont({ src: "../app/fonts/caveat.ttf", variable: "--font-crayon", display: "swap", weight: "400 700" });
-const handwriting = localFont({ src: "../app/fonts/benji-script.woff", variable: "--font-annotation", display: "swap" });
 const invitationKey = "www:about-invitation-dismissed";
 let openedThisVisit = false;
 
@@ -40,7 +35,7 @@ export function AboutPassage() {
     setOpen(!open);
   }
 
-  return <section className={`about-passage ${crayon.variable} ${handwriting.variable}`} aria-labelledby="about-heading">
+  return <section className="about-passage" aria-labelledby="about-heading">
     <svg className="crayon-definitions" width="0" height="0" aria-hidden="true">
       <defs><filter id="about-crayon" x="-10%" y="-15%" width="120%" height="130%" colorInterpolationFilters="sRGB">
         <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="8" result="grain" />
