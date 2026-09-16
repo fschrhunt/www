@@ -14,20 +14,20 @@
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
-    "@next/mdx": "^16.3.4",
+    "@next/mdx": "^16.3.5",
     "gray-matter": "^4.0.3",
-    "next": "16.3.4",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
+    "next": "16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "remark-frontmatter": "^5.0.0"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.14",
-    "@types/node": "^22.20.1",
+    "@types/node": "^22.20.2",
     "@types/react": "^19",
-    "@types/react-dom": "^19.2.7",
+    "@types/react-dom": "^19.3.0",
     "eslint": "^9",
-    "eslint-config-next": "16.3.4",
+    "eslint-config-next": "16.3.5",
     "sharp": "0.35.4",
     "typescript": "^5"
   },
