@@ -39,6 +39,14 @@ run `npm run lint`, `npm run build`, and `npm run typecheck`. For visual changes
 inspect the running page at desktop and phone widths. Report what you actually
 verified. Do not call a design pixel-perfect based on source inspection alone.
 
+## Branches and pull requests
+
+- Before the first push, name the branch `<type>/<slug>`. Use the PR title's
+  conventional type or scope plus two or three lowercase words, for example
+  `bench/real-launches` or `fix/tool-tree-compaction`. Never push `main`, a bare
+  SHA, or a vague generated name.
+- Never open a PR unless the developer explicitly asks you to.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
