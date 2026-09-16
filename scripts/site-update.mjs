@@ -6,7 +6,7 @@ const record = "src/site-updated.json";
 
 /** Website changes require a valid, newer UTC timestamp; documentation alone does not. */
 export function checkSiteUpdate(files, previous, current, now = Date.now()) {
-  const websiteChanged = files.some(file => /^(src\/|public\/|next\.config\.|package(?:-lock)?\.json$|tsconfig\.json$)/.test(file));
+  const websiteChanged = files.some(file => /^(src\/|public\/|astro\.config\.|wrangler\.jsonc$|package(?:-lock)?\.json$|tsconfig\.json$)/.test(file));
   if (!websiteChanged) return;
 
   const timestamp = Date.parse(current?.updatedAt);
