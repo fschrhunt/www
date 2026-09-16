@@ -7,17 +7,17 @@ npm ci
 npm run dev
 ```
 
-The dev server uses http://localhost:3000. For a release:
+The dev server uses http://localhost:4321. For a release:
 
 ```sh
 npm run lint
 npm run build
 npm run typecheck
-npm start
+npm run preview
 ```
 
-Build before standalone typechecking on a clean checkout so generated Next.js
-route types exist. CI runs the same order. `npm audit` checks dependency
+`npm run preview` serves the build on the local Workers runtime, the closest
+thing to production. CI runs the same checks. `npm audit` checks dependency
 advisories; investigate findings rather than applying a breaking fix blindly.
 Do not run a production server and a dev server against the same output directory
 while comparing builds. Stop the server or use a separate checkout.

@@ -13,7 +13,7 @@ or type scale as limits on a creative brief.
 - `docs/contact.md`: contact email setup, sending requirements, and validation.
 - `docs/architecture.md`: routes, shared components, assets, and data boundaries.
 - `docs/verification.md`: checks and relevant browser workflows.
-- `docs/repository.md`: GitHub controls, labeling, and Vercel release behavior.
+- `docs/repository.md`: GitHub controls, labeling, and Cloudflare deployment.
 - `docs/licensing.md`: proprietary all-rights-reserved terms and third-party licenses.
 
 Read only the docs relevant to the task. Check the actual code and remote state
@@ -31,11 +31,12 @@ These are repo-local instructions, not permission to publish, push, or deploy.
 Follow the authorization already present in the conversation.
 
 Keep changes within the task and preserve unrelated work. Prefer the existing
-Next.js components and CSS to new dependencies. Comment new components and
+Astro pages, React islands, and CSS to new dependencies. Comment new components and
 helpers with their purpose; keep touched docs accurate.
 
 For code changes, run the checks appropriate to the change. Before a release,
-run `npm run lint`, `npm run build`, and `npm run typecheck`. For visual changes,
+run `npm run lint`, `npm run build`, and `npm run typecheck`, and view the build
+with `npm run preview`. For visual changes,
 inspect the running page at desktop and phone widths. Report what you actually
 verified. Do not call a design pixel-perfect based on source inspection alone.
 
@@ -46,13 +47,3 @@ verified. Do not call a design pixel-perfect based on source inspection alone.
   `bench/real-launches` or `fix/tool-tree-compaction`. Never push `main`, a bare
   SHA, or a vague generated name.
 - Never open a PR unless the developer explicitly asks you to.
-
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->

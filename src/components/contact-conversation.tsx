@@ -1,5 +1,3 @@
-"use client";
-
 import { ContactReview } from "./contact-review";
 import { suggestContactSubject } from "@/lib/contact-subject";
 

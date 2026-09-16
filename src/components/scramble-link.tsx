@@ -1,7 +1,4 @@
-"use client";
-
 import { useEffect, useRef, type AnchorHTMLAttributes } from "react";
-import Link from "next/link";
 
 type ScrambleLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "children" | "href"> & {
   children: string;
@@ -53,13 +50,13 @@ export function ScrambleLink({ children, className = "", ...props }: ScrambleLin
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
   return (
-    <Link {...props} className={`text-link ${className}`}
+    <a {...props} className={`text-link ${className}`}
       onPointerEnter={event => { if (event.pointerType === "mouse") animate(); }}
       onPointerLeave={reset} onFocus={event => { if (event.currentTarget.matches(":focus-visible")) animate(); }} onBlur={reset}>
       <span className="link-label">
         <span ref={label}>{children}</span>
         <span className="link-scramble" ref={overlay} aria-hidden="true" />
       </span>
-    </Link>
+    </a>
   );
 }

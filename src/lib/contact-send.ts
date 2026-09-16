@@ -2,7 +2,8 @@ import { createHash } from "node:crypto";
 import { Resolver } from "node:dns/promises";
 import { domainToASCII } from "node:url";
 
-export const runtime = "nodejs";
+/** The secrets and settings the send needs, whatever supplies them. */
+export type ContactSettings = Record<string, string | undefined>;
 const WINDOW_MS = 600000;
 const MAX_ATTEMPTS = 5;
 const MAX_BODY_BYTES = 16000;
@@ -19,32 +20,14 @@ function memoryRateLimited(ip: string): boolean {
   return entry.count > MAX_ATTEMPTS;
 }
 
-/** Shared fixed-window counter across instances via an Upstash-compatible REST store (Vercel KV or Upstash). */
-async function durableRateLimited(url: string, token: string, ip: string): Promise<boolean> {
-  const key = `contact:rl:${ip}`;
-  // INCR returns the post-increment count; EXPIRE ... NX sets the window only on the first hit.
-  const response = await fetch(`${url}/pipeline`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify([["INCR", key], ["EXPIRE", key, String(WINDOW_MS / 1000), "NX"]]),
-    signal: AbortSignal.timeout(1500),
-  });
-  if (!response.ok) throw new Error(`rate-limit store responded ${response.status}`);
-  const result = await response.json();
-  const count = result?.[0]?.result;
-  const expiry = result?.[1]?.result;
-  if (result?.[0]?.error || result?.[1]?.error || !Number.isSafeInteger(count) || count < 1 ||
-    (expiry !== 0 && expiry !== 1)) throw new Error("rate-limit store returned an invalid result");
-  return count > MAX_ATTEMPTS;
-}
+/** The Worker's RateLimiter Durable Object namespace, as far as the send needs it. */
+export type Limiter = { getByName(key: string): { hit(max: number, windowMs: number): Promise<number | null> } };
 
-/** Require a working shared store in production; allow memory only during local development and tests. */
-async function rateLimited(ip: string): Promise<boolean> {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_URL ? process.env.KV_REST_API_TOKEN : process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) return durableRateLimited(url, token, ip);
-  if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) return memoryRateLimited(ip);
-  throw new Error("rate-limit store is not configured");
+/** Require the Durable Object counter when deployed; allow memory only during local development and tests. */
+async function rateLimited(ip: string, limiter: Limiter | undefined, allowMemory: boolean): Promise<boolean> {
+  if (limiter) return (await limiter.getByName(`contact:${ip}`).hit(MAX_ATTEMPTS, WINDOW_MS)) !== null;
+  if (allowMemory) return memoryRateLimited(ip);
+  throw new Error("rate limiter is not configured");
 }
 
 /** Reject only definite DNS failures; a two-second deadline leaves uncertain domains usable. */
@@ -72,8 +55,12 @@ async function emailDomainError(domain: string): Promise<string | null> {
   finally { clearTimeout(timer); }
 }
 
-/** Validate and send one reviewed note to Fischer, never to a caller-selected recipient. */
-export async function POST(request: Request) {
+/**
+ * Validate and send one reviewed note to Fischer, never to a caller-selected recipient.
+ * `limiter` is the Worker's RateLimiter binding; without it, `allowMemory` lets a
+ * local run count attempts in memory, and anything else refuses to send.
+ */
+export async function handleContact(request: Request, settings: ContactSettings, allowMemory: boolean, limiter?: Limiter): Promise<Response> {
   const fail = (error: string, status: number) => Response.json({ error }, { status });
   const origin = request.headers.get("origin");
   try {
@@ -114,18 +101,19 @@ export async function POST(request: Request) {
     mailbox.startsWith(".") || mailbox.endsWith(".") || mailbox.includes("..") || /[\x00-\x1f\x7f]/.test(email)) return fail("Please check your reply email.", 400);
   if (!subject.trim() || subject.length > 120 || /[\r\n\x00]/.test(subject)) return fail("Please check the subject.", 400);
   if (!note.trim() || note.length > 2000 || !/^[\da-f-]{36}$/i.test(id)) return fail("Please check your message.", 400);
-  const key = process.env.RESEND_API_KEY;
+  const key = settings.RESEND_API_KEY;
   if (!key) return fail("Sending isn't connected yet. Your note is still here.", 503);
 
   // Apply the shared limit before DNS or mail provider requests.
-  const ip = request.headers.get("x-vercel-forwarded-for") ?? request.headers.get("x-forwarded-for")?.split(",")[0] ?? "local";
+  // Cloudflare sets CF-Connecting-IP on every request and a client cannot override it.
+  const ip = request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0] ?? "local";
   try {
-    if (await rateLimited(ip)) return fail("A few too many notes at once. Try again in ten minutes.", 429);
+    if (await rateLimited(ip, limiter, allowMemory)) return fail("A few too many notes at once. Try again in ten minutes.", 429);
   } catch { return fail("Sending is temporarily unavailable. Your note is still here. Please try again shortly.", 503); }
   const domainError = await emailDomainError(domain);
   if (domainError) return fail(domainError, 400);
   const payload = {
-    from: process.env.CONTACT_FROM || "fschrhunt.com <contact@fschrhunt.com>",
+    from: settings.CONTACT_FROM || "fschrhunt.com <contact@fschrhunt.com>",
     to: ["fschrhunt@gmail.com"],
     reply_to: email.trim(),
     subject: subject.trim(),
@@ -140,7 +128,7 @@ export async function POST(request: Request) {
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "Idempotency-Key": `contact-${id}-${fingerprint}` },
       body: JSON.stringify(payload), signal: AbortSignal.timeout(15000),
     });
-    const result = await response.json();
+    const result = await response.json() as { id?: unknown };
     if (!response.ok || typeof result.id !== "string") return fail("That didn't send. Your note is safe here. Please try again shortly.", 502);
     return Response.json({ sent: true });
   } catch { return fail("I couldn't confirm the send. Your note is still here. Please retry.", 502); }

@@ -1,0 +1,17 @@
+---
+/** A quiet, on-voice 404 that points back to the homepage instead of a bare framework page. */
+import Site from "../layouts/Site.astro";
+import SocialHub from "../components/SocialHub.astro";
+import { ScrambleLink } from "../components/scramble-link";
+---
+
+<Site path="/" noindex>
+  <main id="main" class="letter">
+    <div class="letter-note">
+      <h1>This page wandered off.</h1>
+      <p>The link may be old, or I may have moved something. The homepage is a good place to start again.</p>
+      <p><ScrambleLink client:load href="/">Back home</ScrambleLink></p>
+    </div>
+  </main>
+  <SocialHub />
+</Site>

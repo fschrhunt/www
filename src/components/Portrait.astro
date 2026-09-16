@@ -1,0 +1,8 @@
+---
+/** The illustrated portrait, plain at rest with the hover tilt the stylesheet gives it. */
+export interface Props { href?: string; class?: string }
+const { href, class: className = "" } = Astro.props;
+---
+{href
+  ? <a class={`portrait ${className}`} href={href} aria-label="Fischer’s home page"><img src="/portrait.png" alt="An illustrated portrait of Fischer" width="160" height="160" /></a>
+  : <div class={`portrait ${className}`}><img src="/portrait.png" alt="An illustrated portrait of Fischer" width="160" height="160" /></div>}

@@ -8,4 +8,7 @@
 /scripts/                 @fschrhunt
 /package.json             @fschrhunt
 /package-lock.json        @fschrhunt
-/next.config.ts           @fschrhunt
+/astro.config.mjs         @fschrhunt
+/wrangler.jsonc           @fschrhunt
+/src/pages/api/           @fschrhunt
+/src/lib/contact-send.ts  @fschrhunt

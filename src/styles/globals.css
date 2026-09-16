@@ -1,4 +1,12 @@
+/* The site's type, served from this repository. Inter for text, Caveat for the
+   About trigger's crayon, Benji Script for the handwritten annotation. */
+@font-face { font-family: "Inter"; src: url("../fonts/inter-regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Caveat"; src: url("../fonts/caveat.ttf") format("truetype"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "Benji Script"; src: url("../fonts/benji-script.woff") format("woff"); font-display: swap; }
 :root {
+  --font-inter: "Inter";
+  --font-crayon: "Caveat";
+  --font-annotation: "Benji Script";
   /* Surfaces */
   --paper: #fafafa;
   --fill: #ebebed;
@@ -75,7 +83,8 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 /* A curved line leads from About into the passage; text unfolds in reading order. */
 .about-passage { margin-top: 17px; }
 .about-passage > h2 { position: relative; display: flex; align-items: center; }
-.about-passage:has(.about-trigger[aria-expanded="false"]) + .products { margin-top: 17px; }
+/* The About island renders inside an <astro-island> wrapper, so the sibling is either the passage or its wrapper. */
+:is(.about-passage, astro-island:has(> .about-passage)):has(.about-trigger[aria-expanded="false"]) + .products { margin-top: 17px; }
 .about-trigger { position: relative; display: inline-flex; align-items: center; gap: 0; min-height: 44px; padding: 0; border: 0; background: none; color: var(--muted); font-size: 14px; transition: color 180ms; }
 .about-trigger:hover, .about-trigger[aria-expanded="true"] { color: var(--blue-deep); }
 .about-arrow { display: block; flex-shrink: 0; margin-left: -2px; }
