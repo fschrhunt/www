@@ -1,10 +1,9 @@
 ---
 /** A personal letter with an inline About passage, products, writings, and contact hub. */
 import Site from "../layouts/Site.astro";
-import Portrait from "../components/Portrait.astro";
 import SocialHub from "../components/SocialHub.astro";
 import { AboutPassage } from "../components/about-passage";
-import { ScrambleLink } from "../components/scramble-link";
+import { TextLink } from "../components/text-link";
 import { getContentEntries } from "../lib/collections";
 import siteUpdate from "../site-updated.json";
 
@@ -17,7 +16,7 @@ const day = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", y
 <Site path="/">
   <a class="skip-link" href="#main">Skip to content</a>
   <main id="main" class="letter">
-    <Portrait />
+    <div class="letter-portrait-space" aria-hidden="true"></div>
     <header class="letter-note">
       <p class="muted">Hello, I’m Fischer. <span class="name-pronunciation"><span aria-hidden="true">/'fish-er/</span><span class="sr-only">Pronounced fish-er.</span></span></p>
       <h1>I build things. What they add up to, I'm still figuring out.</h1>
@@ -27,7 +26,7 @@ const day = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", y
       <h2 id="products-heading">Products</h2>
       <ul>
         {products.map(product => <li>
-          <ScrambleLink client:load href={`/products/${product.slug}`} className={product.slug === "e" ? "product-e" : undefined}>{product.indexLabel ?? product.title}</ScrambleLink>
+          <TextLink href={`/products/${product.slug}`} className={product.slug === "e" ? "product-e" : undefined}>{product.indexLabel ?? product.title}</TextLink>
           <time datetime={product.date} title="Repository created">{month.format(new Date(product.date))}</time>
         </li>)}
       </ul>
@@ -35,7 +34,7 @@ const day = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", y
     <section class="products writings" aria-labelledby="writings-heading">
       <h2 id="writings-heading">Writings</h2>
       <ul>{writings.map(writing => <li>
-        <ScrambleLink client:load href={`/writings/${writing.slug}`}>{writing.title}</ScrambleLink>
+        <TextLink href={`/writings/${writing.slug}`}>{writing.title}</TextLink>
         <span class="reading-time">{writing.readingTime}</span>
       </li>)}</ul>
     </section>

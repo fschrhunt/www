@@ -24,8 +24,8 @@ Look for evidence, not a numerical taste score:
   the most interesting part? Identify where it could be developed, not just cut.
 - Do reading edges, text sizes, and gaps establish a clear order? Is the mobile
   composition considered? Is an illustration clearly an illustration?
-- During actual hover frames, can scrambled glyphs reach the arrow? Does any
-  text or date shift? Check keyboard focus and pointer exit as well as hover.
+- During actual hover frames, do labels remain unchanged while the underline
+  draws? Does any text or date shift? Check keyboard focus and pointer exit.
 - Does entrance motion replay on navigation without replaying on local form
   updates? With reduced motion, does the page remain visible and usable?
 - Can someone reach the last link without the floating hub blocking it? Do

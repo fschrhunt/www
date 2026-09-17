@@ -44,7 +44,8 @@ and breathing room between ideas. The current letter is 540px wide, with
 14px body text and 22–25px line heights. Read `src/app/globals.css` for actual
 values; these are a starting point, not a prohibition on a better composition.
 
-Keep the supplied portrait and its hover tilt unless asked to change them.
+The homepage leaves the portrait's band empty; the contact page keeps the
+supplied portrait and its hover tilt.
 The small serif pronunciation beside Fischer's name is intentional. The expanded
 About passage uses Inter with roomy spacing and readable body text. Its label
 and arrow are an intentional blue crayon exception, using local Caveat lettering
@@ -63,8 +64,8 @@ Current interaction decisions:
 - The current pages share one entrance treatment with a short stagger. A new
   creative direction can include its own purposeful motion or interaction.
   Design its reading and reduced-motion states as carefully as its moving state.
-- Text links stay still. The underline draws and the separate 12px arrow
-  appears. Scramble symbols must fit inside the original label width.
+- Text links stay still and their labels never scramble. The underline draws
+  and the separate 12px arrow appears.
 - Reduced motion keeps all content and controls usable.
 
 Benji is a reference for personal character and small details. References inform decisions;

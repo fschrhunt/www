@@ -25,7 +25,7 @@ function limiterStub() {
     return counts.get(key) > max ? 600 : null;
   } }) };
 }
-const draft = {name:'Alex',email:'alex@example.com',subject:'A question',note:'Can I ask about Flip?',id:'71c1469a-14ee-4f70-bf61-7b67e179b1c3'};
+const draft = {name:'Alex',email:'alex@example.com',subject:'A question',note:'Can I ask about Diffuse?',id:'71c1469a-14ee-4f70-bf61-7b67e179b1c3'};
 const request = (body=draft, origin='https://fschrhunt.com') => new Request('https://fschrhunt.com/api/contact',{method:'POST',headers:{origin,'content-type':'application/json','x-forwarded-for':`test-${++requestNumber}`},body:JSON.stringify(body)});
 
 test('rejects cross-site requests, malformed origins, and invalid reviewed fields before sending', async () => {

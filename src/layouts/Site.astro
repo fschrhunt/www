@@ -3,7 +3,6 @@
  * The document shell: metadata, icons, the locally hosted type, and the
  * entrance animation wrapper every page shares.
  */
-import { FaviconTheme } from "../components/favicon-theme";
 import "../styles/globals.css";
 
 export interface Props {
@@ -48,11 +47,19 @@ const shareUrl = share ? url : site;
     <meta name="twitter:title" content={shareTitle} />
     <meta name="twitter:description" content={description} />
     <link rel="alternate icon" href="/favicon.ico" />
-    <link id="site-favicon" rel="icon" type="image/png" sizes="32x32" href="/favicon-light.png" />
+    <link id="site-favicon" rel="icon" type="image/png" sizes="32x32" href="/favicon-light.png" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#262626" />
   </head>
   <body>
-    <FaviconTheme client:load />
     <div class="page-entry"><slot /></div>
+    {/* Safari ignores `media` on icon links, so re-point the preferred icon from the preference. */}
+    <script>
+      const scheme = window.matchMedia("(prefers-color-scheme: dark)");
+      const icon = document.querySelector<HTMLLinkElement>("#site-favicon");
+      const applyFavicon = () => { if (icon) icon.href = scheme.matches ? "/favicon-dark.png" : "/favicon-light.png"; };
+      applyFavicon();
+      scheme.addEventListener("change", applyFavicon);
+    </script>
   </body>
 </html>

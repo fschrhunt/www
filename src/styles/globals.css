@@ -58,8 +58,6 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .link-label::before { background: var(--link-rule); }
 .link-label::after { background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform 380ms cubic-bezier(.22,1,.36,1); }
 .text-link:focus-visible .link-label::after { transform: scaleX(1); }
-.link-label [data-scrambling] { color: transparent; }
-.link-scramble { position: absolute; top: 0; left: 0; width: max-content; pointer-events: none; white-space: pre; transform-origin: left center; }
 .text-link::after { content: ""; position: absolute; display: block; width: 12px; height: 12px; top: 4px; left: calc(100% + 5px); background: var(--ink); mask: url(/link-arrow.svg) center / contain no-repeat; opacity: 0; transform: translate(-3px,3px); transform-origin: center; pointer-events: none; transition: opacity 240ms, transform 420ms cubic-bezier(.22,1,.36,1); }
 .text-link:focus-visible::after { opacity: .8; transform: translate(0); }
 .skip-link { position: fixed; top: 12px; left: 12px; z-index: 20; background: white; padding: 8px 14px; transform: translateY(-160%); }
@@ -67,6 +65,8 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
 .portrait { display: block; position: relative; width: 48px; height: 58px; }
 .portrait img { pointer-events: none; transform-origin: 50% 70%; transition: transform 350ms cubic-bezier(.2,.8,.2,1); position: absolute; width: 84px; height: 84px; max-width: none; left: -19px; top: -14px; }
 .portrait:focus-visible img { transform: rotate(-9deg) translateY(-2px); }
+/* The homepage keeps the portrait's band empty so the letter below stays put. */
+.letter-portrait-space { height: 58px; }
 
 /* A personal letter with one consistent reading edge. */
 .letter { max-width: 540px; margin: 0 auto; padding: 96px 0 140px; }
@@ -237,7 +237,6 @@ input, textarea { cursor: text !important; }
    matched by class because its back link is nested inside it. */
 .page-entry { display: contents; }
 .appear,
-.page-entry .letter > .portrait,
 .page-entry .letter-note > *,
 .page-entry .about-passage,
 .page-entry .letter > .products,
@@ -393,7 +392,7 @@ textarea.contact-letter-body { display: block; width: 100%; min-height: 140px; m
 .contact-send-error { padding: 0 26px 12px; color: #a13939; font-size: 13px; }
 .contact-review-actions > span[role="status"] { margin-right: auto; color: #777; font-size: 12px; }
 
-/* Inline About links keep the scramble and underline without a trailing arrow. */
+/* Inline About links keep the underline without a trailing arrow. */
 .about-body .about-inline-link { margin-right: 0; line-height: inherit; }
 .about-body .about-inline-link::after { display: none; }
 
