@@ -54,8 +54,14 @@ Astro build supplies the pages and server code. A push to `main` runs
 `.github/workflows/deploy.yml`, which is `npm run deploy` with the
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets.
 
-Secrets are Worker secrets, set once with `npx wrangler secret put RESEND_API_KEY`
-and the two rate-limit store values. `npm run preview` serves the built site on
+Each pull request from this repository gets a preview:
+`.github/workflows/preview.yml` deploys it to its own Worker,
+`fschrhunt-pr-<number>.intuitum.workers.dev`, and keeps one comment on the PR
+with its links. Previews have no secrets, so the contact form doesn't send.
+Closing the PR deletes the Worker.
+
+The one secret is a Worker secret, set with `npx wrangler secret put RESEND_API_KEY`;
+contact rate limits live in a Durable Object and need no configuration. `npm run preview` serves the built site on
 the local Workers runtime; `.dev.vars` supplies local values. Keep token scopes and access notes in the private
 operator runbook.
 
