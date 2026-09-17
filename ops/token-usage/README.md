@@ -2,7 +2,7 @@
 
 Stdlib Python jobs feed the site's `/token-usage` page. Next.js does not import or
 execute this directory. Collectors retain private ledgers; the publisher sends
-only an allowlisted aggregate snapshot to Vercel Blob.
+only an allowlisted aggregate snapshot to Cloudflare R2.
 
 ## Source layout
 

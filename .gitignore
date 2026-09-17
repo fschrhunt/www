@@ -29,8 +29,6 @@ yarn-error.log*
 .env*
 !.env.example
 
-# vercel
-.vercel
 
 # typescript
 *.tsbuildinfo
@@ -44,3 +42,10 @@ __pycache__/
 *.har
 *.sqlite
 *.sqlite-*
+
+# Cloudflare
+.wrangler/
+.dev.vars
+dist/
+.astro/
+worker-configuration.d.ts

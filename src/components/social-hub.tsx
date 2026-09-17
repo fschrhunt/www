@@ -1,4 +1,3 @@
-import Link from "next/link";
 
 /** Curved return arrow used to enter Contact and return to the index. */
 export function ReturnArrow() {
@@ -19,9 +18,9 @@ export function SocialHub({ contact = false }: { contact?: boolean }) {
       <span className="hub-tooltip" aria-hidden="true">GitHub</span>
     </a>
     <span className="hub-divider" aria-hidden="true" />
-    <Link href="/contact" aria-label="Get in touch" aria-current={contact ? "page" : undefined}>
+    <a href="/contact" aria-label="Get in touch" aria-current={contact ? "page" : undefined}>
       <ReturnArrow />
       <span className="hub-tooltip" aria-hidden="true">Get in touch</span>
-    </Link>
+    </a>
   </nav>;
 }

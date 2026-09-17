@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect } from "react";
 
 /** Select a transparent PNG from the browser theme, avoiding SVG media-query bugs. */

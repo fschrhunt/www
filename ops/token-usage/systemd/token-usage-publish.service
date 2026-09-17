@@ -1,5 +1,5 @@
 [Unit]
-Description=Publish aggregated model usage to Vercel Blob
+Description=Publish aggregated model usage to Cloudflare R2
 Wants=network-online.target
 After=network-online.target
 

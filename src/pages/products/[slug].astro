@@ -1,0 +1,12 @@
+---
+/** One authored products page, rendered inside the shared reader layout. */
+import Reader from "../../layouts/Reader.astro";
+import { loadCollection } from "../../lib/collections";
+
+export function getStaticPaths() {
+  return loadCollection("products").map(({ entry, Content }) => ({ params: { slug: entry.slug }, props: { entry, Content } }));
+}
+const { entry, Content } = Astro.props;
+---
+
+<Reader entry={entry} collection="products"><Content /></Reader>

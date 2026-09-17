@@ -48,15 +48,16 @@ time. Check locally with `npm run site:check -- origin/main`.
 
 ## Deployment
 
-Production follows `main`. Keep the actual Vercel project binding, deployment
-protection settings, and access notes in the private operator runbook. Verify
-those settings on the authorized account before publishing; do not infer current
-configuration from a historical deployment record in this public repository.
+Production follows `main`. The site runs on Cloudflare Workers: `wrangler.jsonc`
+names the Worker, its custom domains, and the `token-usage` R2 binding, and the
+Astro build supplies the pages and server code. A push to `main` runs
+`.github/workflows/deploy.yml`, which is `npm run deploy` with the
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets.
 
-Before publishing, verify the Git connection to `fschrhunt/www`, production
-branch `main`, domain, and deployment protection. Once connected, changes to
-main should trigger a production build. A public GitHub repository does not
-make a protected Vercel deployment public.
+The one secret is a Worker secret, set with `npx wrangler secret put RESEND_API_KEY`;
+contact rate limits live in a Durable Object and need no configuration. `npm run preview` serves the built site on
+the local Workers runtime; `.dev.vars` supplies local values. Keep token scopes and access notes in the private
+operator runbook.
 
 Inspect the deployment's checks and actual URL after release. Do not claim
 that opening or merging a PR published the site without deployment evidence.

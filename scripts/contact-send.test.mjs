@@ -2,7 +2,7 @@ import test, { beforeEach } from 'node:test';
 import { Resolver } from 'node:dns/promises';
 
 beforeEach(t => {
-  const names = ['NODE_ENV', 'VERCEL', 'KV_REST_API_URL', 'KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'];
+  const names = ['NODE_ENV'];
   const saved = names.map(name => [name, process.env[name]]);
   for (const name of names) delete process.env[name];
   process.env.NODE_ENV = 'test';
@@ -14,7 +14,17 @@ beforeEach(t => {
 });
 let requestNumber = 0;
 import assert from 'node:assert/strict';
-import { POST } from '../src/app/api/contact/route.ts';
+import { handleContact } from '../src/lib/contact-send.ts';
+// The route passes Worker settings; here the environment stands in, and memory counting is allowed only outside production.
+const POST = (req, limiter) => handleContact(req, process.env, process.env.NODE_ENV !== 'production', limiter);
+/** A RateLimiter stand-in: one shared count per key, like the Durable Object. */
+function limiterStub() {
+  const counts = new Map();
+  return { getByName: key => ({ hit: async max => {
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+    return counts.get(key) > max ? 600 : null;
+  } }) };
+}
 const draft = {name:'Alex',email:'alex@example.com',subject:'A question',note:'Can I ask about Flip?',id:'71c1469a-14ee-4f70-bf61-7b67e179b1c3'};
 const request = (body=draft, origin='https://fschrhunt.com') => new Request('https://fschrhunt.com/api/contact',{method:'POST',headers:{origin,'content-type':'application/json','x-forwarded-for':`test-${++requestNumber}`},body:JSON.stringify(body)});
 
@@ -134,7 +144,7 @@ test('a stalled DNS lookup is cancelled and the note can proceed', async t => {
   });
 });
 
-// A fixed IP (no shared store configured in tests) exercises the per-instance fallback limiter.
+// A fixed IP with no limiter binding exercises the per-instance fallback limiter.
 test('the fallback limit allows five notes per IP and blocks the sixth', async t => {
   await withSending(t, async () => {
     const fromOneIp = () => new Request('https://fschrhunt.com/api/contact', {
@@ -147,26 +157,20 @@ test('the fallback limit allows five notes per IP and blocks the sixth', async t
   });
 });
 
-// With a store configured, the endpoint rejects on the store's count, not per-instance memory.
-test('a configured shared store enforces the production limit on its own count', async t => {
-  process.env.NODE_ENV = 'production';
-  const saved = {key:process.env.RESEND_API_KEY, url:process.env.KV_REST_API_URL, token:process.env.KV_REST_API_TOKEN};
-  process.env.RESEND_API_KEY = 'test-only';
-  process.env.KV_REST_API_URL = 'https://store.test';
-  process.env.KV_REST_API_TOKEN = 'token';
-  let count = 0;
-  const fetches = t.mock.method(globalThis, 'fetch', async url => {
-    if (String(url).includes('store.test')) return Response.json([{result: ++count}, {result: count === 1 ? 1 : 0}]);
-    return Response.json({id:'test-id'});
+// With the binding present, the endpoint rejects on the Durable Object's count, not per-instance memory.
+test('the RateLimiter binding enforces the production limit on its own count', async t => {
+  await withSending(t, async () => {
+    process.env.NODE_ENV = 'production';
+    const limiter = limiterStub();
+    const fromOneIp = () => new Request('https://fschrhunt.com/api/contact', {
+      method:'POST',
+      headers:{origin:'https://fschrhunt.com','content-type':'application/json','cf-connecting-ip':'203.0.113.7'},
+      body:JSON.stringify(draft),
+    });
+    for (let i = 0; i < 5; i++) assert.equal((await POST(fromOneIp(), limiter)).status, 200);
+    assert.equal((await POST(fromOneIp(), limiter)).status, 429);
+    assert.equal((await POST(request(), limiter)).status, 200);
   });
-  try {
-    for (let i = 0; i < 5; i++) assert.equal((await POST(request())).status, 200);
-    assert.equal((await POST(request())).status, 429);
-    assert.ok(fetches.mock.calls.some(call => String(call.arguments[0]).endsWith('/pipeline')));
-  } finally {
-    for (const [name, value] of [['RESEND_API_KEY',saved.key],['KV_REST_API_URL',saved.url],['KV_REST_API_TOKEN',saved.token]])
-      if (value === undefined) delete process.env[name]; else process.env[name] = value;
-  }
 });
 
 
@@ -212,32 +216,21 @@ test('valid JSON remains readable across chunk boundaries', async t => {
   });
 });
 
-test('production and Vercel previews refuse sends without a shared store', async t => {
+test('production refuses sends without the RateLimiter binding', async t => {
   await withSending(t, async send => {
     process.env.NODE_ENV = 'production';
-    assert.equal((await POST(request())).status, 503);
-    process.env.NODE_ENV = 'development';
-    process.env.VERCEL = '1';
     assert.equal((await POST(request())).status, 503);
     assert.equal(send.mock.callCount(), 0);
   });
 });
 
-test('store outages and malformed counter or expiry results cannot bypass the limit', async t => {
+test('a failing RateLimiter cannot bypass the limit', async t => {
   process.env.NODE_ENV = 'production';
-  process.env.KV_REST_API_URL = 'https://store.test';
-  process.env.KV_REST_API_TOKEN = 'test-only';
+  const broken = { getByName: () => ({ hit: async () => { throw new Error('private storage detail'); } }) };
   await withSending(t, async send => {
-    for (const result of [null, [{result: null}, {result: 1}], [{result: 1}, {error: 'private store detail'}], [{result: -1}, {result: 1}]]) {
-      send.mock.mockImplementation(async url => {
-        assert.equal(url, 'https://store.test/pipeline');
-        return Response.json(result);
-      });
-      const response = await POST(request());
-      assert.equal(response.status, 503);
-      assert.ok(!(await response.text()).includes('private store detail'));
-    }
-    send.mock.mockImplementation(async () => { throw new Error('private network detail'); });
-    assert.equal((await POST(request())).status, 503);
+    const response = await POST(request(), broken);
+    assert.equal(response.status, 503);
+    assert.ok(!(await response.text()).includes('private storage detail'));
+    assert.equal(send.mock.callCount(), 0);
   });
 });

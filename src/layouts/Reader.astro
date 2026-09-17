@@ -1,0 +1,31 @@
+---
+/** Frame authored content with the reader layout and collection-specific date label. */
+import Site from "./Site.astro";
+import SocialHub from "../components/SocialHub.astro";
+import { ReaderIndex } from "../components/reader-index";
+import type { Collection, ContentEntry } from "../lib/content";
+
+export interface Props { entry: ContentEntry; collection: Collection }
+const { entry, collection } = Astro.props;
+const writing = collection === "writings";
+const date = new Intl.DateTimeFormat("en-US", {
+  month: "long", ...(writing ? { day: "numeric" as const } : {}), year: "numeric", timeZone: "UTC",
+}).format(new Date(entry.date));
+---
+
+<Site title={entry.title} description={entry.description} path={`/${collection}/${entry.slug}`} type={writing ? "article" : "website"} publishedTime={writing ? entry.date : undefined} share>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <main id="main" class="letter reader-page">
+    <ReaderIndex client:load />
+    <article class="product-note">
+      <h1>{entry.title}</h1>
+      <div class="product-meta">
+        {!writing && <span>{entry.status}</span>}
+        <time datetime={entry.date} title={writing ? undefined : "Repository created"}>{date}</time>
+        {writing && <span>{entry.readingTime}</span>}
+      </div>
+      <slot />
+    </article>
+  </main>
+  <SocialHub />
+</Site>

@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import { isContactEmail } from "@/lib/contact-rules";
 
@@ -97,8 +95,8 @@ export function ContactReview(props: Props) {
         body: JSON.stringify({ name: props.name, email: props.email, subject: props.subject.trim() || "A note for Fischer", note: props.note, id: submissionId.current }),
         signal: AbortSignal.timeout(20000),
       });
-      const result = await response.json();
-      if (!response.ok || result.sent !== true) throw new Error(result.error || "That didn't send. Please try again.");
+      const result = await response.json() as { sent?: unknown; error?: unknown };
+      if (!response.ok || result.sent !== true) throw new Error(typeof result.error === "string" ? result.error : "That didn't send. Please try again.");
     } catch (error) {
       setError(error instanceof Error && error.name === "Error" ? error.message : "I couldn't confirm the send. Your note is still here. Please try again.");
       void audio?.close();

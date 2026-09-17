@@ -1,5 +1,3 @@
-import { readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
 import matter from "gray-matter";
 
 export type Collection = "writings" | "products";
@@ -50,17 +48,11 @@ export function parseContent(filename: string, source: string): ContentEntry {
   };
 }
 
-// Parsing every file runs three times per page (params, metadata, render). Cache the
-// result in production, where content is fixed; skip the cache in dev so edits hot-reload.
-const cache = new Map<Collection, ContentEntry[]>();
-
-/** Read local content on the server, newest first; duplicate URLs fail the build. */
-export function getContentEntries(collection: Collection): ContentEntry[] {
-  const cached = process.env.NODE_ENV === "production" ? cache.get(collection) : undefined;
-  if (cached) return cached;
-  const directory = path.join(process.cwd(), "src/content", collection);
-  const entries = readdirSync(directory).filter(file => /\.(md|mdx)$/.test(file))
-    .map(file => parseContent(file, readFileSync(path.join(directory, file), "utf8")));
+/** Parse a collection's authored sources, newest first; duplicate URLs fail the build. */
+export function collectEntries(collection: Collection, sources: Record<string, string>): ContentEntry[] {
+  const entries = Object.entries(sources)
+    .filter(([file]) => /\.(md|mdx)$/.test(file))
+    .map(([file, source]) => parseContent(file.split("/").pop() ?? file, source));
   const slugs = new Set<string>();
   for (const entry of entries) {
     if (slugs.has(entry.slug)) throw new Error(`Duplicate ${collection} slug: ${entry.slug}`);
@@ -69,11 +61,5 @@ export function getContentEntries(collection: Collection): ContentEntry[] {
     if (collection === "products" && !entry.status) throw new Error(`${entry.slug}: status is required`);
   }
   entries.sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
-  cache.set(collection, entries);
   return entries;
-}
-
-/** Find one entry by slug, or undefined when no file matches. */
-export function getContentEntry(collection: Collection, slug: string): ContentEntry | undefined {
-  return getContentEntries(collection).find(entry => entry.slug === slug);
 }
