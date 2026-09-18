@@ -30,8 +30,8 @@ Markdown and MDX file. See [the writing guide](../src/content/README.md).
 
 - Pages: inspect desktop and a narrow phone viewport. Follow links into and out
   of the page, check wrapping, and reach the last control past the floating hub.
-- Hover: inspect intermediate scramble frames, not only the settled state.
-  Symbols must not reach the arrow or move neighboring dates. Check focus,
+- Hover: check that the underline draws and the arrow appears while labels and
+  neighboring dates stay still. Labels must remain unchanged. Check focus,
   pointer exit, and reduced motion.
 - Entrance: check direct load and internal navigation. Local state changes such
   as opening About must not replay the page entrance.

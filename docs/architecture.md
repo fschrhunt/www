@@ -82,10 +82,9 @@ no manual index, sitemap, or metadata edit.
   with a curved arrow leading from the label downward into the passage.
   The passage expands with a staggered text reveal. Collapsed content is inert;
   reduced motion skips the transitions.
-- `scramble-link.tsx` scrambles the whole label, resolving left to right while
-  keeping whitespace and punctuation intact. It preserves the accessible label
-  and fits temporary symbols within the measured width. CSS draws the underline
-  and separate arrow mask.
+- `text-link.tsx` keeps link labels unchanged. CSS animates the underline and
+  separate arrow mask on hover and keyboard focus. Standalone links render
+  without client hydration. Markdown links use the same label markup.
 - `social-hub.tsx` contains the profile links and the shared return-arrow icon.
 - `contact-viewport.tsx` fits the contact frame to the visual viewport above
   mobile keyboards and keeps the latest message in view when already at the
@@ -100,14 +99,18 @@ no manual index, sitemap, or metadata edit.
   combinations, composition, loading, and the final review alone. Greetings
   arrive separately with typing dots and reading pauses; reduced motion skips
   delays and animation. Pending replies are canceled on unmount.
-- `favicon-theme.tsx` selects a PNG from the browser's color preference.
+- The document head links light and dark PNG favicons with `media` queries. A
+  script in `Site.astro` re-points the preferred link from the color preference
+  so browsers that ignore `media` on icons, Safari among them, still swap it.
 
 ## Assets
 
 `public/portrait.png` is the supplied portrait. `scripts/generate-favicons.mjs`
 traces its dark ink and exports transparent SVG, PNG, ICO, and Safari mask files.
-Run it from the repository root if the portrait changes, then inspect the result
-at tab-icon size. `public/link-arrow.svg` supplies the hover mask.
+`favicon-light.png` carries the dark ink for light browser chrome; `favicon-dark.png`
+carries the white portrait for dark chrome. Run the script from the repository
+root if the portrait changes, then inspect the result at tab-icon size.
+`public/link-arrow.svg` supplies the hover mask.
 
 The seven family photos in `public/writings/big-bro/` are web-sized WebP copies of
 the supplied JPEGs, with orientation applied and metadata stripped.
@@ -120,8 +123,8 @@ repositories. Product dates are repository creation dates. Diffuse's source is
 public under the Business Source License 1.1; its page retains the v1 development status.
 
 The footer mark is an inline SVG, not a Unicode character that can become an
-emoji. The homepage portrait has no link; the contact portrait links home.
-Portrait containers stay stationary while only the image tilts.
+emoji. The homepage leaves the portrait's band empty; the contact portrait links
+home. Portrait containers stay stationary while only the image tilts.
 Touch layouts provide 44px targets for index links, navigation, and form actions.
 Links and buttons suppress the native tap highlight; keyboard focus remains visible.
 
