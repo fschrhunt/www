@@ -44,7 +44,7 @@ Acceptance is not inbox delivery; check Resend delivery events and the actual
 destination inbox when verifying. DNS authentication helps but cannot guarantee that
 the receiving provider will never classify a note as spam.
 
-Suggested subjects use three to five words, such as "Bug report for Flip" or
+Suggested subjects use three to five words, such as "Bug report for Diffuse" or
 "A potential collaboration". The rules rank explicit requests above generic questions and thanks, and prefer
 the product in the relevant sentence. Multiple product mentions do not force an
 arbitrary choice. Common negated phrases such as "not a bug report" are ignored.

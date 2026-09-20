@@ -42,8 +42,8 @@ way home clear, and build alternatives for keyboard and reduced-motion use.
 When matching a reference, inspect the requested state in the browser. Record
 only the relevant geometry, timing, and behavior, then compare the implementation
 in the same state. For hover, check entry, midway, settled, and pointer exit.
-The initial and final screenshots alone can miss a collision during scrambling.
-Use the existing `ScrambleLink`, route template, and social hub when they suit
+The initial and final screenshots alone can miss a shift during the transition.
+Use the existing `TextLink`, route template, and social hub when they suit
 the direction. A distinct page may need a distinct navigation or motion treatment.
 
 Keep implementation scoped and simple without simplifying away the idea.

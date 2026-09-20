@@ -43,7 +43,7 @@ Their frontmatter also requires `status`, such as `"In development"`. Product
 `date` records repository creation, not a release. Descriptions are optional for
 products. Homepage product links also come from these files. Add an optional
 `indexLabel` to show different link text on the homepage than the page heading
-(the lowercase `flip` and `diffuse` labels use it); the article still shows `title`.
+(the lowercase `diffuse` label uses it); the article still shows `title`.
 
 Run `npm run site:stamp` after editing content. Verify with `npm run lint`,
 `node --test scripts/content.test.mjs`, `npm run build`, and `npm run typecheck`.
