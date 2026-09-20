@@ -89,11 +89,23 @@ code:
 }
 ```
 
-The key pair belongs to an R2 API token with Object Read & Write on this one
-bucket, not the whole account. Bucket-scoped R2 tokens authenticate only through
-R2's S3 API, where the access key ID is the token's ID and the secret is the
-SHA-256 hex digest of the token value; the dashboard shows the same pair when
-the token is created.
+The key pair belongs to an R2 API token with Object Read & Write on only the
+selected buckets, not the whole account. Bucket-scoped R2 tokens authenticate
+only through R2's S3 API, where the access key ID is the token's ID and the
+secret is the SHA-256 hex digest of the token value; the dashboard shows the
+same pair when the token is created.
+
+To use one token for the live snapshot and backup buckets, grant Object Read &
+Write only to `token-usage` and `token-usage-backups`, then run:
+
+```sh
+python3 ops/token-usage/setup/configure_r2.py --host receiver-alias
+```
+
+The command prompts for the displayed Access Key ID and Secret Access Key
+without echoing them. It installs both root-only configurations through the
+existing trusted SSH connection and proves each credential by running the
+publisher and backup jobs. If either job fails, it restores the old files.
 
 `publish_usage.py` validates and builds an allowlisted public schema. The only
 record fields are date, model ID, and USD value, plus source freshness, missing
