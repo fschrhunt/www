@@ -8,7 +8,7 @@ from unittest.mock import patch
 import subprocess
 
 from claude_ingest import device_id
-from configure_r2 import install as install_r2
+from configure_r2 import install as install_r2, sudo_needs_password
 from install_claude import load_inventory, remote
 
 
@@ -80,3 +80,28 @@ class SetupTests(unittest.TestCase):
                 'secretAccessKey': 'secret-key-private',
             },
         )
+
+    def test_r2_sudo_password_travels_only_over_stdin(self):
+        result = subprocess.CompletedProcess([], 0, '{"ok": true, "published": true, "backedUp": true}', '')
+        with patch('configure_r2.subprocess.run', return_value=result) as run:
+            self.assertTrue(
+                install_r2(
+                    'receiver-alias',
+                    'access-key-private',
+                    'secret-key-private',
+                    'sudo-password-private',
+                )['ok']
+            )
+        args, kwargs = run.call_args
+        self.assertNotIn('sudo-password-private', ' '.join(args[0]))
+        password, payload = kwargs['input'].split('\n', 1)
+        self.assertEqual(password, 'sudo-password-private')
+        self.assertEqual(json.loads(payload)['secretAccessKey'], 'secret-key-private')
+
+    def test_r2_checks_noninteractive_sudo_before_prompting(self):
+        with patch(
+            'configure_r2.subprocess.run',
+            return_value=subprocess.CompletedProcess([], 1, b'', b''),
+        ) as run:
+            self.assertTrue(sudo_needs_password('receiver-alias'))
+        self.assertEqual(run.call_args.args[0][-1], 'sudo -n true')

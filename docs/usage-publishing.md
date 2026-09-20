@@ -105,7 +105,8 @@ python3 ops/token-usage/setup/configure_r2.py --host receiver-alias
 The command prompts for the displayed Access Key ID and Secret Access Key
 without echoing them. It installs both root-only configurations through the
 existing trusted SSH connection and proves each credential by running the
-publisher and backup jobs. If either job fails, it restores the old files.
+publisher and backup jobs. If the server requires a sudo password, that prompt
+is hidden too. If either job fails, the command restores the old files.
 
 `publish_usage.py` validates and builds an allowlisted public schema. The only
 record fields are date, model ID, and USD value, plus source freshness, missing

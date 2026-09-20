@@ -47,7 +47,8 @@ services. See [collector operations](../../docs/token-usage.md).
 Access Key ID and Secret Access Key. It writes the live and backup bucket
 configurations root-only over SSH, then runs both jobs. A failed job restores
 the previous configuration. The credentials never enter command arguments or
-terminal history.
+terminal history. If the destination requires a sudo password, the helper asks
+for it through a third hidden prompt.
 
 `setup/install_claude.py --config /private/path/devices.json` installs the local
 device collector for Claude Code, Codex CLI, Pi, and `e`. Its retained name

@@ -100,17 +100,33 @@ def validate_host(host):
     return host
 
 
-def install(host, access_key_id, secret_access_key):
+def sudo_needs_password(host):
+    """Check whether the destination accepts noninteractive sudo."""
+    result = subprocess.run(
+        [*SSH, validate_host(host), "sudo -n true"],
+        capture_output=True,
+        timeout=30,
+    )
+    return result.returncode != 0
+
+
+def install(host, access_key_id, secret_access_key, sudo_password=None):
     """Send the credentials over SSH stdin and verify both R2 jobs remotely."""
-    command = "sudo -n python3 -c " + shlex.quote(REMOTE)
+    if sudo_password is None:
+        command = "sudo -n python3 -c " + shlex.quote(REMOTE)
+    else:
+        command = "sudo -kS -p '' python3 -c " + shlex.quote(REMOTE)
     payload = {
         "accountId": ACCOUNT_ID,
         "accessKeyId": access_key_id,
         "secretAccessKey": secret_access_key,
     }
+    input_data = json.dumps(payload)
+    if sudo_password is not None:
+        input_data = sudo_password + "\n" + input_data
     result = subprocess.run(
         [*SSH, validate_host(host), command],
-        input=json.dumps(payload),
+        input=input_data,
         text=True,
         capture_output=True,
         timeout=540,
@@ -119,6 +135,11 @@ def install(host, access_key_id, secret_access_key):
         outcome = json.loads(result.stdout)
     except json.JSONDecodeError:
         outcome = {}
+    if not outcome:
+        raise RuntimeError(
+            "Remote setup could not start. Check the SSH alias and sudo password; "
+            "no R2 configuration was confirmed."
+        )
     if result.returncode or outcome.get("ok") is not True:
         raise RuntimeError(
             "R2 setup failed; the previous server configuration was restored. "
@@ -148,11 +169,18 @@ def main():
 
     print("The credentials go directly to the publishing server over SSH.")
     print("They are stored root-only and are never printed or passed in command arguments.")
+    sudo_password = None
+    if sudo_needs_password(args.host):
+        sudo_password = getpass.getpass(
+            "Paste the server sudo password, then press Enter (hidden): "
+        )
+        if not sudo_password or "\n" in sudo_password or "\r" in sudo_password:
+            raise ValueError("Expected one sudo password.")
     access_key_id = credential("Paste the R2 Access Key ID, then press Enter (hidden): ")
     secret_access_key = credential(
         "Paste the R2 Secret Access Key, then press Enter (hidden): "
     )
-    install(args.host, access_key_id, secret_access_key)
+    install(args.host, access_key_id, secret_access_key, sudo_password)
     print("R2 credentials installed; a publication and backup both succeeded.")
     return 0
 
