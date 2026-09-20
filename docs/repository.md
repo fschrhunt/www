@@ -51,8 +51,9 @@ time. Check locally with `npm run site:check -- origin/main`.
 Production follows `main`. The site runs on Cloudflare Workers: `wrangler.jsonc`
 names the Worker, its custom domains, and the `token-usage` R2 binding, and the
 Astro build supplies the pages and server code. A push to `main` runs
-`.github/workflows/deploy.yml`, which is `npm run deploy` with the
-`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets.
+`.github/workflows/deploy.yml` in the `Production` environment, which is
+`npm run deploy` with that environment's `CLOUDFLARE_API_TOKEN` secret and
+`CLOUDFLARE_ACCOUNT_ID` variable.
 
 The one secret is a Worker secret, set with `npx wrangler secret put RESEND_API_KEY`;
 contact rate limits live in a Durable Object and need no configuration. `npm run preview` serves the built site on

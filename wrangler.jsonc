@@ -13,6 +13,8 @@
     { "pattern": "fschrhunt.com", "custom_domain": true },
     { "pattern": "www.fschrhunt.com", "custom_domain": true }
   ],
+  // Astro sessions use this namespace. Declare it so deploys never auto-provision a duplicate.
+  "kv_namespaces": [{ "binding": "SESSION", "id": "a2a5db11ec1c453483f45c586111f814" }],
   // The public usage snapshot the token-usage publisher writes; /token-usage/data.json serves it.
   "r2_buckets": [{ "binding": "TOKEN_USAGE", "bucket_name": "token-usage" }],
   // Contact attempts per IP, counted across every Worker instance (src/lib/rate-limiter.ts).
