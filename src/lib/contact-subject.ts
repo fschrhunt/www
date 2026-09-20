@@ -1,7 +1,6 @@
 /** Find product mentions without choosing arbitrarily when a sentence names several products. */
 function subjectProduct(text: string) {
   const products = [
-    /\bflip\b/i.test(text) ? "Flip" : "",
     /\bdiffuse\b/i.test(text) ? "Diffuse" : "",
     /(?:\b(?:about|using|with|for) e\b|𝑒)/iu.test(text) ? "𝑒" : "",
   ].filter(Boolean);

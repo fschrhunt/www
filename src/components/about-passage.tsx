@@ -1,5 +1,5 @@
 import { useState, useSyncExternalStore } from "react";
-import { ScrambleLink } from "./scramble-link";
+import { TextLink } from "./text-link";
 
 const invitationKey = "www:about-invitation-dismissed";
 let openedThisVisit = false;
@@ -62,10 +62,10 @@ export function AboutPassage() {
       <div className="about-clip">
         <div className="about-body">
           <p>My favorite color is blue, the one up there. I&apos;m 16. There, the small talk&apos;s out of the way.</p>
-          <p>My hobbies, let&apos;s see. I like to <ScrambleLink href="/token-usage" className="about-inline-link">spend tokens</ScrambleLink>, go on runs, swim (even though I&apos;m bad at it), and last but not least, cycle. Tech used to be my whole life, until I picked up those hobbies. Now I have Strava activities to post and tokens to spend tinkering with AI.</p>
+          <p>My hobbies, let&apos;s see. I like to <TextLink href="/token-usage" className="about-inline-link">spend tokens</TextLink>, go on runs, swim (even though I&apos;m bad at it), and last but not least, cycle. Tech used to be my whole life, until I picked up those hobbies. Now I have Strava activities to post and tokens to spend tinkering with AI.</p>
           <p>I started coding young, if Roblox scripts to cheat at games count. Then I shelved it, figuring the &quot;weird&quot; kid was first in line to get bullied, and spent a while trying to be likeable instead. Bad trade, in hindsight.</p>
-          <p><ScrambleLink href="https://openclaw.ai" className="about-inline-link">OpenClaw</ScrambleLink> got me back into it. What happened to them btw? The idea of AGI, and how different life might look in five years, made me want to build some part of it.</p>
-          <p>It&apos;s been hell ever since. Mostly reading a <ScrambleLink href="/writings/damn-you-agents" className="about-inline-link">400-line function</ScrambleLink> an agent wrote for something that needed five.</p>
+          <p><TextLink href="https://openclaw.ai" className="about-inline-link">OpenClaw</TextLink> got me back into it. What happened to them btw? The idea of AGI, and how different life might look in five years, made me want to build some part of it.</p>
+          <p>It&apos;s been hell ever since. Mostly reading a <TextLink href="/writings/damn-you-agents" className="about-inline-link">400-line function</TextLink> an agent wrote for something that needed five.</p>
           <p className="about-postscript">Anyway, that&apos;s the tour.</p>
         </div>
       </div>

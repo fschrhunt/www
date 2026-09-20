@@ -1,7 +1,6 @@
 /**
- * Draw text-only links in Markdown and MDX as the site's scramble link, the way
- * the MDX `a` component did: `<a class="text-link">` around a label and an empty
- * overlay the scramble script fills. Links with formatted labels stay plain.
+ * Draw text-only links in Markdown and MDX with the site's CSS-animated underline
+ * and arrow. Links with formatted labels stay plain.
  */
 export const contentLinks = {
   name: "content-links",
@@ -19,10 +18,7 @@ export const contentLinks = {
           type: "element",
           tagName: "span",
           properties: { className: ["link-label"] },
-          children: [
-            { type: "element", tagName: "span", properties: {}, children: [children[0]] },
-            { type: "element", tagName: "span", properties: { className: ["link-scramble"], ariaHidden: "true" }, children: [] },
-          ],
+          children,
         }],
       });
     },
