@@ -36,5 +36,5 @@ See the [icon README](../public/token-usage-assets/icons/README.md) for asset so
 
 The Xiaomi icon comes from Simple Icons under
 [CC0](../public/token-usage-assets/icons/LICENSE-simple-icons.md). Its trademark
-remains Xiaomi's. The token-usage portrait favicons are Fischer's personal artwork
+remains Xiaomi's. The portrait favicons are Fischer's personal artwork
 and remain subject to the repository's all-rights-reserved terms.
