@@ -14,8 +14,8 @@ collection and publisher cycle. Offline sources take longer.
 
 ## Public page
 
-`src/app/token-usage/route.ts` statically serves the accepted standalone chart at
-`/token-usage`. Its HTML, JavaScript, icons, and scoped favicon live in
+`src/pages/token-usage.html.ts` statically serves the accepted standalone chart at
+`/token-usage`. Its HTML, JavaScript, and icons live in
 `public/token-usage-assets/`. Keeping this full-screen route outside the site's
 React layout preserves its typography, blue background, horizontal gestures, and
 sound behavior. A small, non-underlined source link stays in the bottom-right
@@ -23,9 +23,10 @@ corner and opens the chart asset directory on GitHub. The only visible numbers r
 The chart tries to start its audio context on load. When browser autoplay policy
 blocks it, a click, tap, or keypress retries; hover alone cannot grant permission.
 The chart reads the snapshot from the same-origin `/token-usage/data.json`.
-`src/app/token-usage/data.json/route.ts` streams it from the Worker's
-`TOKEN_USAGE` R2 binding, so the bucket itself stays private. Other page
-favicons are unchanged.
+`src/pages/token-usage/data.json.ts` streams it from the Worker's
+`TOKEN_USAGE` R2 binding, so the bucket itself stays private.
+The page uses the site's light and dark favicons, with the same Safari swap
+script as `Site.astro`.
 
 The client validates a new snapshot before replacing the current chart. A failed
 refresh leaves the last loaded numbers visible. Freshness and missing-value details
